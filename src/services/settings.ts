@@ -18,7 +18,7 @@ export interface SettingGroup {
 
 export const settingGroups: SettingGroup[] = [
   {
-    name: "github_auth",
+    name: "google_auth",
     title: "Google Auth",
     description: "custom your google auth settings",
     tab: "auth",
