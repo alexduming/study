@@ -1,24 +1,55 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { envConfigs } from "@/config";
+
+// Global database connection instance (singleton pattern)
+let dbInstance: ReturnType<typeof drizzle> | null = null;
+let client: ReturnType<typeof postgres> | null = null;
 
 export function db() {
-  let databaseUrl = process.env.DATABASE_URL;
+  const databaseUrl = process.env.DATABASE_URL;
 
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is not set");
   }
 
-  // Database instance for Node.js environment
-  let dbInstance: ReturnType<typeof drizzle> | null = null;
+  // Singleton mode: reuse existing connection (good for traditional servers)
+  if (envConfigs.db_singleton_enabled) {
+    // Return existing instance if already initialized
+    if (dbInstance) {
+      return dbInstance;
+    }
 
-  // Node.js environment with connection pool configuration
-  const client = postgres(databaseUrl, {
+    // Create connection pool only once
+    client = postgres(databaseUrl, {
+      prepare: false,
+      max: 10, // Maximum connections in pool
+      idle_timeout: 30, // Idle connection timeout (seconds)
+      connect_timeout: 10, // Connection timeout (seconds)
+    });
+
+    dbInstance = drizzle({ client });
+    return dbInstance;
+  }
+
+  // Non-singleton mode: create new connection each time (good for serverless)
+  // In serverless, the connection will be cleaned up when the function instance is destroyed
+  const serverlessClient = postgres(databaseUrl, {
     prepare: false,
-    max: 10, // Maximum connections in pool
-    idle_timeout: 30, // Idle connection timeout (seconds)
-    connect_timeout: 10, // Connection timeout (seconds)
+    max: 1, // Use single connection in serverless
+    idle_timeout: 20,
+    connect_timeout: 10,
   });
-  dbInstance = drizzle({ client });
 
-  return dbInstance;
+  return drizzle({ client: serverlessClient });
+}
+
+// Optional: Function to close database connection (useful for testing or graceful shutdown)
+// Note: Only works in singleton mode
+export async function closeDb() {
+  if (envConfigs.db_singleton_enabled && client) {
+    await client.end();
+    client = null;
+    dbInstance = null;
+  }
 }

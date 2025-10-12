@@ -3,27 +3,29 @@
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { Checkbox } from "@/shared/components/ui/checkbox";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { signIn } from "@/core/auth/client";
 import { Link } from "@/core/i18n/navigation";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/core/i18n/navigation";
 import { SocialProviders } from "./social-providers";
 import { useAppContext } from "@/shared/contexts/app";
+import { useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { defaultLocale } from "@/config/locale";
 
 export function SignInForm({
-  callbackUrl,
+  callbackUrl = "/",
   className,
 }: {
-  callbackUrl?: string;
+  callbackUrl: string;
   className?: string;
 }) {
+  const t = useTranslations("common.sign");
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
 
   const { configs } = useAppContext();
 
@@ -33,37 +35,67 @@ export function SignInForm({
     configs.email_auth_enabled !== "false" ||
     (!isGoogleAuthEnabled && !isGithubAuthEnabled); // no social providers enabled, auto enable email auth
 
+  if (callbackUrl) {
+    const locale = useLocale();
+    if (
+      locale !== defaultLocale &&
+      callbackUrl.startsWith("/") &&
+      !callbackUrl.startsWith(`/${locale}`)
+    ) {
+      callbackUrl = `/${locale}${callbackUrl}`;
+    }
+  }
+
   const handleSignIn = async () => {
-    await signIn.email(
-      {
-        email,
-        password,
-      },
-      {
-        onRequest: (ctx) => {
-          setLoading(true);
+    if (loading) {
+      return;
+    }
+
+    if (!email || !password) {
+      toast.error("email and password are required");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await signIn.email(
+        {
+          email,
+          password,
+          callbackURL: callbackUrl,
         },
-        onResponse: (ctx) => {
-          setLoading(false);
-        },
-        onSuccess: (ctx) => {
-          router.push(callbackUrl || "/");
-        },
-      }
-    );
+        {
+          onRequest: (ctx) => {
+            setLoading(true);
+          },
+          onResponse: (ctx) => {
+            setLoading(false);
+          },
+          onSuccess: (ctx) => {},
+          onError: (e: any) => {
+            toast.error(e?.error?.message || "sign in failed");
+            setLoading(false);
+          },
+        }
+      );
+    } catch (e: any) {
+      toast.error(e.message || "sign in failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className={`w-full md:max-w-md ${className}`}>
+    <div className={`w-full md:max-w-md px-4 md:px-8 ${className}`}>
       <div className="grid gap-4">
         {isEmailAuthEnabled && (
           <>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("email_title")}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
+                placeholder={t("email_placeholder")}
                 required
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -74,7 +106,7 @@ export function SignInForm({
 
             <div className="grid gap-2">
               {/* <div className="flex items-center">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("password_title")}</Label>
               <Link href="#" className="ml-auto inline-block text-sm underline">
                 Forgot your password?
               </Link>
@@ -83,10 +115,11 @@ export function SignInForm({
               <Input
                 id="password"
                 type="password"
-                placeholder="password"
+                placeholder={t("password_placeholder")}
                 autoComplete="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
 
@@ -97,7 +130,7 @@ export function SignInForm({
                 setRememberMe(!rememberMe);
               }}
             />
-            <Label htmlFor="remember">Remember me</Label>
+            <Label htmlFor="remember">{t("remember_me_title")}</Label>
           </div> */}
 
             <Button
@@ -109,7 +142,7 @@ export function SignInForm({
               {loading ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
-                <p> Sign In </p>
+                <p> {t("sign_in_title")} </p>
               )}
             </Button>
           </>
@@ -117,7 +150,7 @@ export function SignInForm({
 
         <SocialProviders
           configs={configs}
-          callbackURL={callbackUrl || "/"}
+          callbackUrl={callbackUrl || "/"}
           loading={loading}
           setLoading={setLoading}
         />
@@ -125,9 +158,11 @@ export function SignInForm({
       {isEmailAuthEnabled && (
         <div className="flex justify-center w-full border-t py-4">
           <p className="text-center text-xs text-neutral-500">
-            Don't have an account?{" "}
+            {t("no_account")}
             <Link href="/sign-up" className="underline">
-              <span className="dark:text-white/70 cursor-pointer">Sign up</span>
+              <span className="dark:text-white/70 cursor-pointer">
+                {t("sign_up_title")}
+              </span>
             </Link>
           </p>
         </div>

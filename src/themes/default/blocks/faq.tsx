@@ -12,7 +12,7 @@ import { ScrollAnimation } from "@/shared/components/ui/scroll-animation";
 export function FAQ({ faq, className }: { faq: FAQType; className?: string }) {
   return (
     <section id={faq.id} className={`py-16 md:py-24 ${className}`}>
-      <div className={`max-w-full md:max-w-3xl mx-auto`}>
+      <div className={`max-w-full md:max-w-3xl mx-auto px-4 md:px-8`}>
         <ScrollAnimation>
           <div className="mx-auto max-w-2xl text-balance text-center">
             <h2 className="text-foreground mb-4 text-3xl font-semibold tracking-tight md:text-4xl">

@@ -1,3 +1,5 @@
+import { envConfigs } from "..";
+
 export const localeNames: any = {
   en: "English",
   zh: "中文",
@@ -5,7 +7,7 @@ export const localeNames: any = {
 
 export const locales = ["en", "zh"];
 
-export const defaultLocale = "en";
+export const defaultLocale = envConfigs.default_locale;
 
 export const localePrefix = "as-needed";
 

@@ -3,12 +3,9 @@
     "title": "Pricing",
     "description": "Start with a plan"
   },
-  "page": {
-    "title": "Pricing Table"
-  },
   "pricing": {
     "id": "pricing",
-    "label": "Pricing",
+    "sr_only_title": "ShipAny Pricing",
     "title": "Pricing",
     "description": "Get all features of ShipAny, Ship your AI SaaS startups fast.",
     "groups": [
@@ -337,5 +334,9 @@
         "plan_name": "Premium"
       }
     ]
+  },
+  "page": {
+    "current_plan": "Current Plan",
+    "processing": "Processing"
   }
 }

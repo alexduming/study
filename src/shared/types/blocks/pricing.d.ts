@@ -42,4 +42,5 @@ export interface Pricing {
   items?: PricingItem[];
   groups?: PricingGroup[];
   className?: string;
+  sr_only_title?: string;
 }

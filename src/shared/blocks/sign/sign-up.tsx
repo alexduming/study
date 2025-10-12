@@ -17,15 +17,19 @@ import { signUp } from "@/core/auth/client";
 import { Link } from "@/core/i18n/navigation";
 import { useRouter } from "next/navigation";
 import { SocialProviders } from "./social-providers";
+import { useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { defaultLocale } from "@/config/locale";
 
 export function SignUp({
   configs,
-  callbackUrl,
+  callbackUrl = "/",
 }: {
   configs: Record<string, string>;
-  callbackUrl?: string;
+  callbackUrl: string;
 }) {
   const router = useRouter();
+  const t = useTranslations("common.sign");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -38,7 +42,27 @@ export function SignUp({
     configs.email_auth_enabled !== "false" ||
     (!isGoogleAuthEnabled && !isGithubAuthEnabled); // no social providers enabled, auto enable email auth
 
+  if (callbackUrl) {
+    const locale = useLocale();
+    if (
+      locale !== defaultLocale &&
+      callbackUrl.startsWith("/") &&
+      !callbackUrl.startsWith(`/${locale}`)
+    ) {
+      callbackUrl = `/${locale}${callbackUrl}`;
+    }
+  }
+
   const handleSignUp = async () => {
+    if (loading) {
+      return;
+    }
+
+    if (!email || !password || !name) {
+      toast.error("email, password and name are required");
+      return;
+    }
+
     await signUp.email(
       {
         email,
@@ -53,18 +77,24 @@ export function SignUp({
           setLoading(false);
         },
         onSuccess: (ctx) => {
-          router.push("/sign-in");
+          router.push(callbackUrl);
+        },
+        onError: (e: any) => {
+          toast.error(e?.error?.message || "sign up failed");
+          setLoading(false);
         },
       }
     );
   };
 
   return (
-    <Card className="w-full md:max-w-md">
+    <Card className="w-full md:max-w-md mx-auto">
       <CardHeader>
-        <CardTitle className="text-lg md:text-xl">Sign Up</CardTitle>
+        <CardTitle className="text-lg md:text-xl">
+          <h1>{t("sign_up_title")}</h1>
+        </CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Create your account
+          <h2>{t("sign_up_description")}</h2>
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -72,11 +102,11 @@ export function SignUp({
           {isEmailAuthEnabled && (
             <>
               <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t("name_title")}</Label>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="John Doe"
+                  placeholder={t("name_placeholder")}
                   required
                   onChange={(e) => {
                     setName(e.target.value);
@@ -86,11 +116,11 @@ export function SignUp({
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("email_title")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder={t("email_placeholder")}
                   required
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -100,11 +130,11 @@ export function SignUp({
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("password_title")}</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="password"
+                  placeholder={t("password_placeholder")}
                   autoComplete="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -120,7 +150,7 @@ export function SignUp({
                 {loading ? (
                   <Loader2 size={16} className="animate-spin" />
                 ) : (
-                  <p> Sign Up </p>
+                  <p>{t("sign_up_title")}</p>
                 )}
               </Button>
             </>
@@ -128,7 +158,7 @@ export function SignUp({
 
           <SocialProviders
             configs={configs}
-            callbackURL={callbackUrl || "/"}
+            callbackUrl={callbackUrl || "/"}
             loading={loading}
             setLoading={setLoading}
           />
@@ -138,10 +168,10 @@ export function SignUp({
         <CardFooter>
           <div className="flex justify-center w-full border-t py-4">
             <p className="text-center text-xs text-neutral-500">
-              Already have an account?{" "}
+              {t("already_have_account")}
               <Link href="/sign-in" className="underline">
                 <span className="dark:text-white/70 cursor-pointer">
-                  Sign In
+                  {t("sign_in_title")}
                 </span>
               </Link>
             </p>

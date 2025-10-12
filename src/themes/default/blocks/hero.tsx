@@ -57,7 +57,7 @@ export function Hero({
             <Link
               href={hero.announcement.url || ""}
               target={hero.announcement.target || "_self"}
-              className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950"
+              className="mb-8 hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950"
             >
               <span className="text-foreground text-sm">
                 {hero.announcement.title}
@@ -78,7 +78,7 @@ export function Hero({
           </motion.div>
         )}
 
-        <div className="relative mx-auto max-w-4xl text-center">
+        <div className="relative mx-auto max-w-5xl text-center">
           {/* 标题 - 第2个元素 */}
           <motion.div {...createFadeInVariant(0.15)}>
             {texts && texts.length > 0 ? (

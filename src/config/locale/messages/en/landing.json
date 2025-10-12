@@ -71,10 +71,14 @@
     },
     "buttons": [],
     "user_nav": {
+      "show_name": true,
+      "show_credits": true,
+      "show_sign_out": true,
       "items": [
         {
-          "title": "Profile",
-          "url": "/settings/profile"
+          "title": "Billing",
+          "url": "/settings/billing",
+          "icon": "CreditCard"
         }
       ]
     },
@@ -112,11 +116,11 @@
     "show_avatars": false,
     "show_award": false,
     "image": {
-      "src": "/imgs/features/music.png",
+      "src": "/imgs/features/admin.png",
       "alt": "hero"
     },
     "image_invert": {
-      "src": "/imgs/features/music-dark.png",
+      "src": "/imgs/features/admin-dark.png",
       "alt": "hero"
     }
   },

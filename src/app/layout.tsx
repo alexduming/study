@@ -72,10 +72,9 @@ export default async function RootLayout({
                 key={loc}
                 rel="alternate"
                 hrefLang={loc}
-                href={`${appUrl}${loc === "en" ? "" : `/${loc}`}/`}
+                href={`${appUrl}${loc === "en" ? "" : `/${loc}`}`}
               />
             ))}
-            <link rel="alternate" hrefLang="x-default" href={appUrl} />
           </>
         ) : null}
 

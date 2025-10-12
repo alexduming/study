@@ -12,45 +12,45 @@
   },
   "main_navs": [
     {
-      "title": "RBAC",
+      "title": "权限控制",
       "items": [
         {
-          "title": "Users",
+          "title": "用户管理",
           "url": "/admin/users",
           "icon": "User"
         }
       ]
     },
     {
-      "title": "CMS",
+      "title": "内容管理",
       "items": [
         {
-          "title": "Categories",
+          "title": "分类管理",
           "icon": "Folder",
           "url": "/admin/categories"
         },
         {
-          "title": "Posts",
+          "title": "文章管理",
           "icon": "FileText",
           "url": "/admin/posts"
         }
       ]
     },
     {
-      "title": "Payments & Credits",
+      "title": "支付与积分",
       "items": [
         {
-          "title": "Payments",
+          "title": "支付管理",
           "url": "/admin/payments",
           "icon": "DollarSign"
         },
         {
-          "title": "Subscriptions",
+          "title": "订阅管理",
           "url": "/admin/subscriptions",
           "icon": "CreditCard"
         },
         {
-          "title": "Credits",
+          "title": "积分管理",
           "url": "/admin/credits",
           "icon": "Coins"
         }
@@ -60,12 +60,12 @@
   "bottom_nav": {
     "items": [
       {
-        "title": "Settings",
+        "title": "设置",
         "url": "/admin/settings/auth",
         "icon": "Settings"
       },
       {
-        "title": "API Keys",
+        "title": "API 密钥",
         "url": "/admin/api-keys",
         "icon": "Key"
       }
@@ -75,13 +75,13 @@
     "nav": {
       "items": [
         {
-          "title": "Profile",
+          "title": "个人资料",
           "url": "/settings/profile",
           "icon": "User",
           "target": "_blank"
         },
         {
-          "title": "Security",
+          "title": "安全设置",
           "url": "/settings/security",
           "icon": "Lock",
           "target": "_blank"
@@ -96,7 +96,7 @@
     "nav": {
       "items": [
         {
-          "title": "Home",
+          "title": "首页",
           "url": "/",
           "icon": "Home",
           "target": "_blank"
@@ -108,19 +108,19 @@
           "target": "_blank"
         },
         {
-          "title": "Twitter",
+          "title": "推特",
           "url": "https://twitter.com/shipanyai",
           "icon": "RiTwitterXFill",
           "target": "_blank"
         },
         {
-          "title": "Discord",
+          "title": "Discord 社区",
           "url": "https://discord.gg/x9usYqTaaj",
           "icon": "RiDiscordFill",
           "target": "_blank"
         },
         {
-          "title": "Email",
+          "title": "邮箱",
           "url": "mailto:support@shipany.ai",
           "icon": "Mail",
           "target": "_blank"

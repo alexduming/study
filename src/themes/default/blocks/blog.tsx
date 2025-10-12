@@ -6,6 +6,7 @@ import { cn } from "@/shared/lib/utils";
 import { Tab } from "@/shared/types/blocks/common";
 import { Tabs } from "@/shared/blocks/common/tabs";
 import { Link } from "@/core/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 export function Blog({
   blog,
@@ -14,6 +15,7 @@ export function Blog({
   blog: BlogType;
   className?: string;
 }) {
+  const t = useTranslations("blog.page");
   const tabs: Tab[] = [];
   blog.categories?.map((category: CategoryType) => {
     tabs.push({
@@ -30,7 +32,7 @@ export function Blog({
   return (
     <section
       id={blog.id}
-      className={cn("py-16 md:py-36", blog.className, className)}
+      className={cn("py-24 md:py-36", blog.className, className)}
     >
       <div className="mx-auto mb-12 text-center">
         {blog.sr_only_title && (
@@ -90,7 +92,9 @@ export function Blog({
             ))}
           </div>
         ) : (
-          <div className="text-muted-foreground text-md py-8">No Content</div>
+          <div className="text-muted-foreground text-md py-8">
+            {t("no_content")}
+          </div>
         )}
       </div>
     </section>

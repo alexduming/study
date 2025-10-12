@@ -43,7 +43,7 @@ export async function proxy(request: NextRequest) {
           request.url
         );
         // Add the current path (including search params) as callback - use relative path for multi-language support
-        const callbackPath = pathname + request.nextUrl.search;
+        const callbackPath = pathWithoutLocale + request.nextUrl.search;
         signInUrl.searchParams.set("callbackUrl", callbackPath);
         return NextResponse.redirect(signInUrl);
       }
@@ -54,7 +54,7 @@ export async function proxy(request: NextRequest) {
         request.url
       );
       // Add the current path (including search params) as callback - use relative path for multi-language support
-      const callbackPath = pathname + request.nextUrl.search;
+      const callbackPath = pathWithoutLocale + request.nextUrl.search;
       signInUrl.searchParams.set("callbackUrl", callbackPath);
       return NextResponse.redirect(signInUrl);
     }

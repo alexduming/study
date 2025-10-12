@@ -8,6 +8,12 @@ import {
   FAQ as FAQType,
   Testimonials as TestimonialsType,
 } from "@/shared/types/blocks/landing";
+import { getMetadata } from "@/shared/lib/seo";
+
+export const generateMetadata = getMetadata({
+  metadataKey: "pricing.metadata",
+  canonicalUrl: "/pricing",
+});
 
 export default async function PricingPage({
   params,

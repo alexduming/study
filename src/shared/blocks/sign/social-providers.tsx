@@ -3,31 +3,46 @@
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { signIn } from "@/core/auth/client";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/core/i18n/navigation";
 import { Button as ButtonType } from "@/shared/types/blocks/common";
 import { RiGithubFill, RiGoogleFill } from "react-icons/ri";
 import { useAppContext } from "@/shared/contexts/app";
+import { useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { defaultLocale } from "@/config/locale";
 
 export function SocialProviders({
   configs,
-  callbackURL,
+  callbackUrl,
   loading,
   setLoading,
 }: {
   configs: Record<string, string>;
-  callbackURL: string;
+  callbackUrl: string;
   loading: boolean;
   setLoading: (loading: boolean) => void;
 }) {
+  const t = useTranslations("common.sign");
   const router = useRouter();
 
   const { setIsShowSignModal } = useAppContext();
+
+  if (callbackUrl) {
+    const locale = useLocale();
+    if (
+      locale !== defaultLocale &&
+      callbackUrl.startsWith("/") &&
+      !callbackUrl.startsWith(`/${locale}`)
+    ) {
+      callbackUrl = `/${locale}${callbackUrl}`;
+    }
+  }
 
   const handleSignIn = async ({ provider }: { provider: string }) => {
     await signIn.social(
       {
         provider: provider,
-        callbackURL: callbackURL,
+        callbackURL: callbackUrl,
       },
       {
         onRequest: (ctx) => {
@@ -37,8 +52,10 @@ export function SocialProviders({
           setLoading(false);
           setIsShowSignModal(false);
         },
-        onSuccess: (ctx) => {
-          router.push(callbackURL || "/");
+        onSuccess: (ctx) => {},
+        onError: (e: any) => {
+          toast.error(e?.error?.message || "sign in failed");
+          setLoading(false);
         },
       }
     );
@@ -49,7 +66,7 @@ export function SocialProviders({
   if (configs.google_auth_enabled === "true") {
     providers.push({
       name: "google",
-      title: "Sign in with Google",
+      title: t("google_sign_in_title"),
       icon: <RiGoogleFill />,
       onClick: () => handleSignIn({ provider: "google" }),
     });
@@ -58,7 +75,7 @@ export function SocialProviders({
   if (configs.github_auth_enabled === "true") {
     providers.push({
       name: "github",
-      title: "Sign in with Github",
+      title: t("github_sign_in_title"),
       icon: <RiGithubFill />,
       onClick: () => handleSignIn({ provider: "github" }),
     });
@@ -80,7 +97,7 @@ export function SocialProviders({
           onClick={provider.onClick}
         >
           {provider.icon}
-          {provider.title}
+          <h3>{provider.title}</h3>
         </Button>
       ))}
     </div>

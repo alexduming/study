@@ -29,13 +29,19 @@ import { envConfigs } from "@/config";
 import { SignModal } from "./sign-modal";
 import { useAppContext } from "@/shared/contexts/app";
 import { Link } from "@/core/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { NavItem, UserNav } from "@/shared/types/blocks/common";
+import { SmartIcon } from "../common/smart-icon";
+import { Fragment } from "react/jsx-runtime";
 
 export function SignUser({
   isScrolled,
   signButtonSize = "sm",
+  userNav,
 }: {
   isScrolled?: boolean;
   signButtonSize?: "default" | "sm" | "lg" | "icon";
+  userNav?: UserNav;
 }) {
   if (
     typeof window === "undefined" &&
@@ -44,6 +50,7 @@ export function SignUser({
     return null;
   }
 
+  const t = useTranslations("common.sign");
   const { isCheckSign, user, setIsShowSignModal } = useAppContext();
   const router = useRouter();
 
@@ -65,44 +72,71 @@ export function SignUser({
           </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem asChild>
-            <Link href="/settings/profile">
-              <User />
-              {user.name}
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          {userNav?.show_name && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link
+                  className="cursor-pointer w-full"
+                  href="/settings/profile"
+                >
+                  <User />
+                  {user.name}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
 
-          <DropdownMenuItem asChild>
-            <Link href="/settings/credits">
-              <Coins />
-              {user.credits?.remainingCredits}
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          {userNav?.show_credits && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link
+                  className="cursor-pointer w-full"
+                  href="/settings/credits"
+                >
+                  <Coins />
+                  {user.credits?.remainingCredits || 0}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
 
-          <DropdownMenuItem asChild>
-            <Link href="/settings/billing">
-              <CreditCard />
-              Billing
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          {userNav?.items?.map((item: NavItem, idx: number) => (
+            <Fragment key={idx}>
+              <DropdownMenuItem asChild>
+                <Link
+                  className="cursor-pointer w-full"
+                  href={item.url || ""}
+                  target={item.target || "_self"}
+                >
+                  {item.icon && (
+                    <SmartIcon name={item.icon as string} className="w-4 h-4" />
+                  )}
+                  {item.title}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </Fragment>
+          ))}
 
-          <DropdownMenuItem
-            onClick={() =>
-              signOut({
-                fetchOptions: {
-                  onSuccess: () => {
-                    router.push("/");
+          {userNav?.show_sign_out && (
+            <DropdownMenuItem
+              className="cursor-pointer w-full"
+              onClick={() =>
+                signOut({
+                  fetchOptions: {
+                    onSuccess: () => {
+                      router.push("/");
+                    },
                   },
-                },
-              })
-            }
-          >
-            <LogOut />
-            <span>Sign Out</span>
-          </DropdownMenuItem>
+                })
+              }
+            >
+              <LogOut />
+              <span>{t("sign_out_title")}</span>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -119,7 +153,7 @@ export function SignUser({
         )}
         onClick={() => setIsShowSignModal(true)}
       >
-        <span>Sign In</span>
+        <span>{t("sign_in_title")}</span>
       </Button>
       <SignModal />
     </div>

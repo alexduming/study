@@ -13,7 +13,7 @@ import {
   Pricing as PricingType,
   PricingItem,
 } from "@/shared/types/blocks/pricing";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useAppContext } from "@/shared/contexts/app";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -25,17 +25,15 @@ import { Subscription } from "@/shared/services/subscription";
 
 export function Pricing({
   pricing,
-  srOnlyTitle,
   className,
   currentSubscription,
 }: {
   pricing: PricingType;
-  srOnlyTitle?: string;
   className?: string;
   currentSubscription?: Subscription;
 }) {
   const locale = useLocale();
-
+  const t = useTranslations("pricing.page");
   const { user, setIsShowSignModal } = useAppContext();
 
   const [group, setGroup] = useState(() => {
@@ -121,10 +119,12 @@ export function Pricing({
   return (
     <section
       id={pricing.id}
-      className={cn("py-16 md:py-36", pricing.className, className)}
+      className={cn("py-24 md:py-36", pricing.className, className)}
     >
-      <div className="mx-auto mb-12 text-center">
-        {srOnlyTitle && <h1 className="sr-only">{srOnlyTitle}</h1>}
+      <div className="mx-auto mb-12 text-center px-4 md:px-8">
+        {pricing.sr_only_title && (
+          <h1 className="sr-only">{pricing.sr_only_title}</h1>
+        )}
         <h2 className="mb-6 text-pretty text-3xl font-bold lg:text-4xl">
           {pricing.title}
         </h2>
@@ -181,7 +181,9 @@ export function Pricing({
                 )}
 
                 <CardHeader>
-                  <CardTitle className="font-medium">{item.title}</CardTitle>
+                  <CardTitle className="font-medium">
+                    <h3 className="text-sm font-medium">{item.title}</h3>
+                  </CardTitle>
 
                   <span className="my-3 block text-2xl font-semibold">
                     {item.price} {item.unit ? `${item.unit}` : ""}
@@ -202,7 +204,9 @@ export function Pricing({
                       className="mt-4 w-full h-9 px-4 py-2"
                       disabled
                     >
-                      <span className="hidden md:block text">Current Plan</span>
+                      <span className="hidden md:block text-sm">
+                        {t("current_plan")}
+                      </span>
                     </Button>
                   ) : (
                     <Button
@@ -217,7 +221,9 @@ export function Pricing({
                       {isLoading && item.product_id === productId ? (
                         <>
                           <Loader2 className="size-4 animate-spin" />
-                          <span className="hidden md:block">Processing...</span>
+                          <span className="hidden md:block">
+                            {t("processing")}
+                          </span>
                         </>
                       ) : (
                         <>
@@ -240,9 +246,7 @@ export function Pricing({
                   <hr className="border-dashed" />
 
                   {item.features_title && (
-                    <h3 className="text-sm font-medium">
-                      {item.features_title}
-                    </h3>
+                    <p className="text-sm font-medium">{item.features_title}</p>
                   )}
                   <ul className="list-outside space-y-3 text-sm">
                     {item.features?.map((item, index) => (

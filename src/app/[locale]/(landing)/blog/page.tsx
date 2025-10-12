@@ -58,7 +58,7 @@ export default async function BlogPage({
   const currentCategory: CategoryType = {
     id: "all",
     slug: "all",
-    title: "All",
+    title: t("page.all"),
     url: `/blog`,
   };
 

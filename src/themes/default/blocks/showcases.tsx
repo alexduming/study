@@ -15,7 +15,7 @@ export function Showcases({
   return (
     <section
       id={showcases.id}
-      className={cn("py-16 md:py-36", showcases.className, className)}
+      className={cn("py-24 md:py-36", showcases.className, className)}
     >
       <div className="mx-auto mb-12 text-center">
         {showcases.sr_only_title && (

@@ -23,16 +23,19 @@ import { getThemePage } from "@/core/theme";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  const t = await getTranslations("blog.metadata");
 
   return {
-    title: `${slug} | Blog`,
-    description:
-      "Read about our latest product features, solutions, and updates.",
+    title: `${slug} | ${t("title")}`,
+    description: t("description"),
     alternates: {
-      canonical: `${envConfigs.app_url}/blog/category/${slug}`,
+      canonical:
+        locale !== envConfigs.default_locale
+          ? `${envConfigs.app_url}/${locale}/blog/category/${slug}`
+          : `${envConfigs.app_url}/blog/category/${slug}`,
     },
   };
 }
@@ -96,7 +99,7 @@ export default async function CategoryBlogPage({
   categories.unshift({
     id: "all",
     slug: "all",
-    title: "All",
+    title: t("page.all"),
     url: `/blog`,
   });
 

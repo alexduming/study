@@ -12,76 +12,73 @@
     "nav": {
       "items": [
         {
-          "title": "Features",
+          "title": "功能亮点",
           "url": "/#features",
           "icon": "Sparkles"
         },
         {
-          "title": "Showcases",
+          "title": "案例展示",
           "url": "/showcases",
           "icon": "Box"
         },
         {
-          "title": "Pricing",
+          "title": "价格",
           "url": "/pricing",
           "icon": "DollarSign"
         },
         {
-          "title": "Demo",
+          "title": "AI",
           "icon": "Bot",
           "children": [
             {
-              "title": "AI Chatbot",
-              "url": "/demo/ai-chatbot",
+              "title": "AI 聊天机器人",
+              "url": "/ai-chatbot",
               "icon": "Bot"
             },
             {
-              "title": "AI Image Generator",
-              "url": "/demo/ai-image-generator",
+              "title": "AI 图片生成器",
+              "url": "/ai-image-generator",
               "icon": "Image"
             },
             {
-              "title": "AI Video Generator",
-              "url": "/demo/ai-video-generator",
+              "title": "AI 音乐生成器",
+              "url": "/ai-music-generator",
+              "icon": "Music"
+            },
+            {
+              "title": "AI 视频生成器",
+              "url": "/ai-video-generator",
               "icon": "Video"
             },
             {
-              "title": "AI Audio Generator",
-              "url": "/demo/ai-audio-generator",
+              "title": "AI 音频生成器",
+              "url": "/ai-audio-generator",
               "icon": "AudioLines"
             }
           ]
         },
         {
-          "title": "Blog",
+          "title": "博客",
           "url": "/blog",
           "icon": "Newspaper"
         },
         {
-          "title": "Docs",
+          "title": "文档",
           "url": "/docs",
           "icon": "BookOpenText"
         }
       ]
     },
-    "buttons": [
-      {
-        "title": "Get ShipAny",
-        "url": "https://shipany.ai",
-        "target": "_blank",
-        "variant": "outline",
-        "icon": "ArrowUpRight"
-      }
-    ],
+    "buttons": [],
     "user_nav": {
+      "show_name": true,
+      "show_credits": true,
+      "show_sign_out": true,
       "items": [
         {
-          "title": "Profile",
-          "url": "/settings/profile"
-        },
-        {
-          "title": "Admin",
-          "url": "/admin/"
+          "title": "账单",
+          "url": "/settings/billing",
+          "icon": "CreditCard"
         }
       ]
     },
@@ -90,36 +87,45 @@
     "show_locale": true
   },
   "hero": {
-    "title": "一小时快速上线 AI SaaS 项目",
-    "highlight_text": "Ship Any",
-    "description": "ShipAny 是一个基于 NextJS 的 AI SaaS 开发框架，内置丰富的组件和 AI SDK，帮助你快速完成 AI SaaS 项目开发。",
+    "id": "hero",
+    "title": "一小时快速上线你的 AI 创业项目",
+    "highlight_text": "一小时",
+    "description": "ShipAny 是用于构建 AI SaaS 创业项目的 NextJS 项目模板。<br/>集成常用功能，快速上线你的产品。",
     "announcement": {
-      "badge": "New",
-      "title": "🎉 ShipAny Template Two",
+      "badge": "全新",
+      "title": "🎉 ShipAny 模板二已发布",
       "url": "/pricing"
     },
-    "tip": "🎁 50% off before 2025",
+    "tip": "🎁 前 1000 名用户特价优惠",
     "buttons": [
       {
-        "title": "Get Started",
+        "title": "立即开始",
         "icon": "Zap",
         "url": "/pricing",
         "target": "_self",
         "variant": "default"
       },
       {
-        "title": "Read Document",
+        "title": "阅读文档",
         "icon": "BookOpenText",
         "url": "https://docs.shipany.ai",
         "target": "_blank",
         "variant": "outline"
       }
     ],
-    "show_avatars": true,
-    "show_award": false
+    "show_avatars": false,
+    "show_award": false,
+    "image": {
+      "src": "/imgs/features/admin.png",
+      "alt": "hero"
+    },
+    "image_invert": {
+      "src": "/imgs/features/admin-dark.png",
+      "alt": "hero"
+    }
   },
   "logos": {
-    "title": "ShipAny is built on the shoulders of giants",
+    "title": "ShipAny 使用以下技术栈构建",
     "items": [
       {
         "title": "Next.js",
@@ -160,17 +166,17 @@
   },
   "introduce": {
     "id": "introduce",
-    "title": "What is ShipAny",
-    "label": "Introduce",
-    "description": "ShipAny is a NextJS boilerplate for building AI SaaS startups.",
+    "title": "ShipAny 是什么？",
+    "label": "产品简介",
+    "description": "ShipAny 是专为 AI SaaS 创业项目打造的 NextJS 脚手架，包括丰富模板、组件及文档。",
     "image": {
       "src": "/imgs/features/1.png",
       "alt": "introduce"
     },
     "items": [
       {
-        "title": "Ready-to-use Templates",
-        "description": "Choose from dozens of production-ready AI SaaS templates to quickly start your project.",
+        "title": "开箱即用的模板",
+        "description": "从数十款生产级 AI SaaS 模板中选择，快速开启你的项目。",
         "icon": "RiNextjsFill",
         "image": {
           "src": "/imgs/features/1.png",
@@ -178,8 +184,8 @@
         }
       },
       {
-        "title": "Infrastructure Setup",
-        "description": "Get instant access to scalable infrastructure with best practices built-in.",
+        "title": "基础设施搭建",
+        "description": "内置最佳实践，即刻拥有可扩展的基础设施。",
         "icon": "RiDatabase2Line",
         "image": {
           "src": "/imgs/features/2.png",
@@ -187,11 +193,20 @@
         }
       },
       {
-        "title": "Quick Deployment",
-        "description": "Deploy your AI SaaS application to production in hours, not days.",
+        "title": "极速部署",
+        "description": "AI SaaS 产品快速上线，助力小时级交付。",
         "icon": "RiCloudyFill",
         "image": {
           "src": "/imgs/features/3.png",
+          "alt": "introduce"
+        }
+      },
+      {
+        "title": "AI 集成",
+        "description": "通过内置的 AI SDK，轻松为你的项目集成 AI 能力。",
+        "icon": "RiRobot2Line",
+        "image": {
+          "src": "/imgs/features/4.png",
           "alt": "introduce"
         }
       }
@@ -199,13 +214,13 @@
   },
   "benefits": {
     "id": "benefits",
-    "title": "Why Choose ShipAny",
-    "label": "Benefits",
-    "description": "Get everything you need to launch your AI startup - from ready-to-use templates to technical support.",
+    "title": "为何选择 ShipAny",
+    "label": "产品优势",
+    "description": "你获得一切 AI 创业所需——从开箱即用的模板到专业技术支持。",
     "items": [
       {
-        "title": "Complete Framework",
-        "description": "Built on Next.js with authentication, payments, and AI integration - everything works out of the box.",
+        "title": "全栈解决方案",
+        "description": "基于 Next.js，集成认证、支付、AI，一站式开箱即用。",
         "icon": "RiNextjsFill",
         "image": {
           "src": "/imgs/features/2.png",
@@ -213,8 +228,8 @@
         }
       },
       {
-        "title": "Rich Templates Library",
-        "description": "Choose from various AI SaaS templates to kickstart your project - chatbots, image generation, and more.",
+        "title": "丰富模板库",
+        "description": "多样的 AI SaaS 模板，点击即用，涵盖聊天、图像生成等多场景。",
         "icon": "RiClapperboardAiLine",
         "image": {
           "src": "/imgs/features/3.png",
@@ -222,8 +237,8 @@
         }
       },
       {
-        "title": "Technical Guidance",
-        "description": "Get dedicated support and join our developer community to ensure your successful launch.",
+        "title": "专属技术指导",
+        "description": "享受专属技术支持与开发者社区，为你的成功保驾护航。",
         "icon": "RiCodeFill",
         "image": {
           "src": "/imgs/features/4.png",
@@ -234,8 +249,8 @@
   },
   "usage": {
     "id": "usage",
-    "title": "How to Launch with ShipAny",
-    "description": "Get your AI SaaS startup running in three simple steps:",
+    "title": "三步使用 ShipAny 极速上线",
+    "description": "只需三步，快速开启你的 AI SaaS 创业之路：",
     "image": {
       "src": "/imgs/features/1.png",
       "alt": "usage"
@@ -244,32 +259,32 @@
     "text_align": "center",
     "items": [
       {
-        "title": "Get ShipAny",
-        "description": "Buy ShipAny with a one-time payment. Check your email for the code and documentation.",
+        "title": "获取 ShipAny",
+        "description": "一次性购买 ShipAny，查收邮件获取代码与文档。",
         "image": {
           "src": "/imgs/features/5.png",
           "alt": "usage"
         }
       },
       {
-        "title": "Start Your Project",
-        "description": "Read the documentation and clone the code of ShipAny. Start building your AI SaaS startup.",
+        "title": "启动你的项目",
+        "description": "阅读说明文档，克隆 ShipAny 代码，开始开发你的 AI SaaS 项目。",
         "image": {
           "src": "/imgs/features/6.png",
           "alt": "usage"
         }
       },
       {
-        "title": "Customize Your Project",
-        "description": "Modify the template with your data and contents. Specific AI functionality needs.",
+        "title": "个性化定制",
+        "description": "根据需求修改模板内容和数据，配置专属 AI 能力。",
         "image": {
           "src": "/imgs/features/7.png",
           "alt": "usage"
         }
       },
       {
-        "title": "Deploy to Production",
-        "description": "Deploy your project to production with a few steps and start serving customers immediately.",
+        "title": "部署上线",
+        "description": "简单几步将你的项目推向生产环境，立刻为客户提供服务。",
         "image": {
           "src": "/imgs/features/8.png",
           "alt": "usage"
@@ -279,166 +294,69 @@
   },
   "features": {
     "id": "features",
-    "title": "Key Features of ShipAny",
-    "description": "Everything you need to launch your AI SaaS startup quickly and efficiently.",
+    "title": "ShipAny 核心功能",
+    "description": "一切你需要的工具，助力 AI SaaS 项目高效上线。",
     "items": [
       {
-        "title": "Next.js Boilerplate",
-        "description": "Production-ready Next.js templates with SEO-friendly structure and i18n support.",
+        "title": "Next.js 项目模板",
+        "description": "生产就绪、支持 SEO 与多语言的 Next.js 脚手架。",
         "icon": "RiNextjsFill"
       },
       {
-        "title": "Authentication & Payments",
-        "description": "Integrated Google OAuth, one-tap login, and Stripe payment processing.",
+        "title": "身份认证与支付",
+        "description": "集成谷歌 OAuth、一键登录，以及 Stripe 支付。",
         "icon": "RiKey2Fill"
       },
       {
-        "title": "Data Infrastructure",
-        "description": "Built-in Supabase integration for reliable and scalable data storage.",
+        "title": "数据基础设施",
+        "description": "内置 Supabase，稳定可靠的数据存储。",
         "icon": "RiDatabase2Line"
       },
       {
-        "title": "One-Click Deployment",
-        "description": "Seamless deployment to Vercel or Cloudflare with automated setup.",
+        "title": "一键部署",
+        "description": "自动化部署到 Vercel 或 Cloudflare，极速上线。",
         "icon": "RiCloudy2Fill"
       },
       {
-        "title": "Business Analytics",
-        "description": "Integrated Google Analytics and Search Console for tracking growth.",
+        "title": "商业分析",
+        "description": "集成 Google Analytics、Search Console，助力业务增长。",
         "icon": "RiBarChart2Line"
       },
       {
-        "title": "AI-Ready Infrastructure",
-        "description": "Pre-configured AI integration with built-in credits system and API sales.",
+        "title": "AI 原生基础设施",
+        "description": "预置 AI 集成、积分系统和 API 售卖能力。",
         "icon": "RiRobot2Line"
-      }
-    ]
-  },
-  "showcases": {
-    "id": "showcase",
-    "title": "AI SaaS Startups built with ShipAny",
-    "description": "Easy to use and fast to ship.",
-    "items": [
-      {
-        "title": "ThinkAny",
-        "description": "AI Search Engine",
-        "url": "https://thinkany.ai",
-        "target": "_blank",
-        "image": {
-          "src": "/imgs/cases/7.png",
-          "alt": "showcases"
-        }
-      },
-      {
-        "title": "HeyBeauty",
-        "description": "AI Virtual Try On",
-        "url": "https://heybeauty.ai",
-        "target": "_blank",
-        "image": {
-          "src": "/imgs/cases/5.png",
-          "alt": "showcases"
-        }
-      },
-      {
-        "title": "AI Wallpaper",
-        "description": "AI Wallpaper Generator",
-        "url": "https://aiwallpaper.shop",
-        "target": "_blank",
-        "image": {
-          "src": "/imgs/cases/1.png",
-          "alt": "showcases"
-        }
-      },
-      {
-        "title": "AI Cover",
-        "description": "AI Cover Generator",
-        "url": "https://aicover.design",
-        "target": "_blank",
-        "image": {
-          "src": "/imgs/cases/2.png",
-          "alt": "showcases"
-        }
-      },
-      {
-        "title": "GPTs Works",
-        "description": "GPTs Directory",
-        "url": "https://gpts.works",
-        "target": "_blank",
-        "image": {
-          "src": "/imgs/cases/3.png",
-          "alt": "showcases"
-        }
-      },
-      {
-        "title": "Melodisco",
-        "description": "AI Music Player",
-        "url": "https://melodis.co",
-        "target": "_blank",
-        "image": {
-          "src": "/imgs/cases/4.png",
-          "alt": "showcases"
-        }
-      },
-      {
-        "title": "Pagen",
-        "description": "AI Landing Page Generator",
-        "url": "https://pagen.so",
-        "target": "_blank",
-        "image": {
-          "src": "/imgs/cases/6.png",
-          "alt": "showcases"
-        }
-      },
-      {
-        "title": "SoraFM",
-        "description": "AI Video Generator",
-        "url": "https://sorafm.trys.ai",
-        "target": "_blank",
-        "image": {
-          "src": "/imgs/cases/8.png",
-          "alt": "showcases"
-        }
-      },
-      {
-        "title": "PodLM",
-        "description": "AI Podcast Generator",
-        "url": "https://podlm.ai",
-        "target": "_blank",
-        "image": {
-          "src": "/imgs/cases/9.png",
-          "alt": "showcases"
-        }
       }
     ]
   },
   "stats": {
     "id": "stats",
-    "title": "People Love ShipAny",
-    "description": "for it's easy to use and fast to ship.",
+    "title": "用户喜爱 ShipAny",
+    "description": "因其易用且上线飞快。",
     "items": [
       {
         "title": "999+",
-        "description": "Customers"
+        "description": "位用户"
       },
       {
         "title": "200+",
-        "description": "Blocks"
+        "description": "组件块"
       },
       {
         "title": "50+",
-        "description": "Templates"
+        "description": "专业模板"
       }
     ]
   },
   "testimonials": {
     "id": "testimonials",
-    "title": "What Users Say About ShipAny",
-    "description": "Hear from developers and founders who launched their AI startups with ShipAny.",
+    "title": "用户对 ShipAny 的评价",
+    "description": "听听开发者与创始人用 ShipAny 快速上线 AI 创业项目的故事。",
     "items": [
       {
         "name": "David Chen",
-        "role": "Founder of AIWallpaper.shop",
-        "quote": "ShipAny saved us months of development time. We launched our AI wallpaper business in just 2 days and got our first paying customer within a week!",
+        "role": "AIWallpaper.shop 创始人",
+        "quote": "ShipAny 为我们节省了数月开发时间。2 天上线 AI 壁纸业务，一周内就收到了第一笔付费订单！",
         "image": {
           "src": "/imgs/avatars/1.png",
           "alt": "david"
@@ -446,8 +364,8 @@
       },
       {
         "name": "Rachel Kim",
-        "role": "CTO at HeyBeauty.ai",
-        "quote": "The pre-built AI infrastructure is a game-changer. We didn't have to worry about architecture - just focused on our AI beauty tech and went live fast.",
+        "role": "HeyBeauty.ai CTO",
+        "quote": "内置 AI 基础设施颠覆了开发体验，无需担心架构，只需专注核心功能，极快落地。",
         "image": {
           "src": "/imgs/avatars/2.png",
           "alt": "rachel"
@@ -455,8 +373,8 @@
       },
       {
         "name": "Marcus Thompson",
-        "role": "Solo Developer",
-        "quote": "As a solo developer, ShipAny gave me everything I needed - auth, payments, AI integration, and beautiful UI. Launched my SaaS in a weekend!",
+        "role": "独立开发者",
+        "quote": "作为独立开发者，ShipAny 满足了全部需求——认证、支付、AI 集成、美观界面，一个周末上线 SaaS！",
         "image": {
           "src": "/imgs/avatars/3.png",
           "alt": "marcus"
@@ -464,8 +382,8 @@
       },
       {
         "name": "Sofia Garcia",
-        "role": "CEO of Melodisco",
-        "quote": "The templates are production-ready and highly customizable. We built our AI music platform in hours instead of months. Incredible time-to-market!",
+        "role": "Melodisco CEO",
+        "quote": "模板高度可定制且生产级。我们几小时内搭建出了 AI 音乐平台，上市周期大大缩短！",
         "image": {
           "src": "/imgs/avatars/4.png",
           "alt": "sofia"
@@ -473,8 +391,8 @@
       },
       {
         "name": "James Wilson",
-        "role": "Tech Lead at GPTs.works",
-        "quote": "ShipAny's infrastructure is rock-solid. We scaled from 0 to 10k users without touching the backend. Best investment for our AI startup.",
+        "role": "GPTs.works 技术负责人",
+        "quote": "ShipAny 基础设施极其稳定。我们从 0 到 1 万用户，无需关心后端维护，是最棒的 AI 创业投资。",
         "image": {
           "src": "/imgs/avatars/5.png",
           "alt": "james"
@@ -482,8 +400,8 @@
       },
       {
         "name": "Anna Zhang",
-        "role": "Startup Founder",
-        "quote": "From idea to launch in 3 days! ShipAny's templates and deployment tools made it possible to test our AI business concept incredibly fast.",
+        "role": "创业者",
+        "quote": "从想法到上线，仅用 3 天！ShipAny 模板和部署工具让我们极快验证 AI 商业创意。",
         "image": {
           "src": "/imgs/avatars/6.png",
           "alt": "anna"
@@ -493,49 +411,49 @@
   },
   "faq": {
     "id": "faq",
-    "title": "Frequently Asked Questions About ShipAny",
-    "description": "Have another question? Contact us on Discord or by email.",
-    "tip": "Can't find what you're looking for? Contact our <a href='https://discord.gg/HQNnrzjZQS' target='_blank' class='text-primary font-medium hover:underline'>customer support team</a>",
+    "title": "关于 ShipAny 的常见问题",
+    "description": "还有其他问题？欢迎加入 Discord 或发邮件联系我们。",
+    "tip": "没有找到想要的答案？请联系 <a href='https://discord.gg/HQNnrzjZQS' target='_blank' class='text-primary font-medium hover:underline'>我们的客服团队</a>",
     "items": [
       {
-        "question": "What exactly is ShipAny and how does it work?",
-        "answer": "ShipAny is a comprehensive NextJS boilerplate designed specifically for building AI SaaS startups. It provides ready-to-use templates, infrastructure setup, and deployment tools that help you launch your AI business in hours instead of days."
+        "question": "ShipAny 是什么？怎么帮到我？",
+        "answer": "ShipAny 是专为 AI SaaS 创业设计的 NextJS 全套脚手架，内含开箱即用的模板、基础设施搭建和部署工具，让你数小时内上线 AI 产品。"
       },
       {
-        "question": "Do I need advanced technical skills to use ShipAny?",
-        "answer": "While basic programming knowledge is helpful, ShipAny is designed to be developer-friendly. Our templates and documentation make it easy to get started, even if you're not an expert in AI or cloud infrastructure."
+        "question": "使用 ShipAny 需要很高的技术水平吗？",
+        "answer": "有基础编程知识即可上手。ShipAny 面向开发者友好，详细文档和模板让初学者也能轻松起步，不需深厚 AI 或云计算背景。"
       },
       {
-        "question": "What types of AI SaaS can I build with ShipAny?",
-        "answer": "ShipAny supports a wide range of AI applications, from content generation to data analysis tools. Our templates cover popular use cases like AI chatbots, content generators, image processing apps, and more."
+        "question": "ShipAny 支持哪些类型的 AI SaaS 项目？",
+        "answer": "ShipAny 支持内容生成、数据分析、AI 聊天机器人、图片/内容生成器等多种主流 AI 应用场景。"
       },
       {
-        "question": "How long does it typically take to launch with ShipAny?",
-        "answer": "With ShipAny, you can have a working prototype in hours and a production-ready application in hours. Our one-click deployment and pre-configured infrastructure significantly reduce the traditional months-long development cycle."
+        "question": "用 ShipAny 一般多久能上线？",
+        "answer": "借助 ShipAny，可在数小时内拿到产品原型并上线生产环境，预配置的一键部署大幅缩短开发周期。"
       },
       {
-        "question": "What's included in the ShipAny infrastructure?",
-        "answer": "ShipAny provides a complete infrastructure stack including authentication, database setup, API integration, payment processing, and scalable cloud deployment. Everything is pre-configured following industry best practices."
+        "question": "ShipAny 的基础设施包括哪些内容？",
+        "answer": "包含认证、数据库、API 集成、支付、云端部署等全栈解决方案，全部遵循业界最佳实践预配置。"
       },
       {
-        "question": "Can I customize the templates to match my brand?",
-        "answer": "Absolutely! All ShipAny templates are fully customizable. You can modify the design, features, and functionality to match your brand identity and specific business requirements while maintaining the robust underlying infrastructure."
+        "question": "模板是否支持定制自己的品牌？",
+        "answer": "当然支持！所有模板均可自定义设计、功能和品牌，既保持基础架构稳定，又能满足个性扩展需求。"
       }
     ]
   },
   "cta": {
     "id": "cta",
-    "title": "Ship your first AI SaaS Startup",
-    "description": "Start from here, ship with ShipAny.",
+    "title": "发布你的第一个 AI SaaS 项目",
+    "description": "从这里出发，用 ShipAny 极速交付。",
     "buttons": [
       {
-        "title": "Get ShipAny",
+        "title": "获取 ShipAny",
         "url": "https://shipany.ai",
         "target": "_blank",
         "icon": "Zap"
       },
       {
-        "title": "Read Document",
+        "title": "阅读文档",
         "url": "https://docs.shipany.ai",
         "target": "_blank",
         "variant": "outline",
@@ -543,11 +461,22 @@
       }
     ]
   },
+  "subscribe": {
+    "id": "subscribe",
+    "title": "订阅我们的邮件通知",
+    "description": "获取 ShipAny 最新资讯与产品动态。",
+    "submit": {
+      "button": {
+        "title": "订阅"
+      },
+      "action": "/api/subscribe"
+    }
+  },
   "footer": {
     "id": "footer",
     "brand": {
       "title": "ShipAny",
-      "description": "ShipAny is a NextJS boilerplate for building AI SaaS startups. Ship Fast with a variety of templates and components.",
+      "description": "ShipAny 是专为 AI SaaS 创业项目打造的 NextJS 模板。丰富模板与组件，极速交付你的产品。",
       "image": {
         "src": "/logo.png",
         "alt": "ShipAny"
@@ -557,47 +486,47 @@
     "nav": {
       "items": [
         {
-          "title": "About",
+          "title": "关于我们",
           "children": [
             {
-              "title": "Features",
+              "title": "功能亮点",
               "url": "/#features",
               "target": "_self"
             },
             {
-              "title": "Showcases",
+              "title": "案例展示",
               "url": "/showcases",
               "target": "_self"
             },
             {
-              "title": "Pricing",
+              "title": "价格",
               "url": "/pricing",
               "target": "_self"
             }
           ]
         },
         {
-          "title": "Resources",
+          "title": "资源",
           "children": [
             {
-              "title": "Documents",
+              "title": "文档",
               "url": "https://docs.shipany.ai",
               "target": "_blank"
             },
             {
-              "title": "Blocks",
+              "title": "组件库",
               "url": "https://shipany.ai/blocks",
               "target": "_blank"
             },
             {
-              "title": "Templates",
+              "title": "模板",
               "url": "https://shipany.ai/templates",
               "target": "_blank"
             }
           ]
         },
         {
-          "title": "Friends",
+          "title": "合作伙伴",
           "children": [
             {
               "title": "ThinkAny",
@@ -639,7 +568,7 @@
           "target": "_blank"
         },
         {
-          "title": "Email",
+          "title": "邮箱",
           "icon": "Mail",
           "url": "mailto:support@shipany.codes",
           "target": "_self"
@@ -649,11 +578,11 @@
     "agreement": {
       "items": [
         {
-          "title": "Privacy Policy",
+          "title": "隐私政策",
           "url": "/privacy-policy"
         },
         {
-          "title": "Terms of Service",
+          "title": "服务条款",
           "url": "/terms-of-service"
         }
       ]

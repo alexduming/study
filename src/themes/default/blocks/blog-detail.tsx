@@ -9,20 +9,17 @@ import {
   MarkdownPreview,
 } from "@/shared/blocks/common";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
-export function BlogDetail({
-  post,
-  crumbTitle = "Blog",
-}: {
-  post: PostType;
-  crumbTitle?: string;
-}) {
+export function BlogDetail({ post }: { post: PostType }) {
+  const t = useTranslations("blog.page");
+
   const [tocItems, setTocItems] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string>("");
 
   const crumbItems: NavItem[] = [
     {
-      title: crumbTitle,
+      title: t("crumb"),
       url: "/blog",
       is_active: false,
     },
@@ -82,13 +79,13 @@ export function BlogDetail({
 
   return (
     <section id={post.id}>
-      <div className="py-16 md:py-32">
+      <div className="py-24 md:py-32">
         <div className="w-full max-w-7xl mx-auto px-6 md:px-8">
           <Crumb items={crumbItems} />
 
           {/* Header Section */}
           <div className="mt-16 text-center">
-            <h1 className="text-4xl md:text-5xl w-full md:max-w-4xl mx-auto font-bold mb-4 text-foreground">
+            <h1 className="text-3xl md:text-4xl w-full md:max-w-4xl mx-auto font-bold mb-4 text-foreground">
               {post.title}
             </h1>
             <div className="flex items-center justify-center gap-4 text-muted-foreground text-sm mb-8">
@@ -104,7 +101,7 @@ export function BlogDetail({
               <div className="sticky top-24 hidden md:block">
                 <div className="bg-muted/30 rounded-lg">
                   <h2 className="font-semibold text-foreground px-6 pt-4">
-                    Table of Contents
+                    {t("toc")}
                   </h2>
                   {tocItems.length > 0 ? (
                     <nav className="space-y-2 p-4">
@@ -124,8 +121,8 @@ export function BlogDetail({
                       ))}
                     </nav>
                   ) : (
-                    <p className="text-muted-foreground text-sm">
-                      No headings found
+                    <p className="text-muted-foreground text-sm p-6">
+                      {t("no_content")}
                     </p>
                   )}
                 </div>

@@ -17,33 +17,38 @@ export function FeaturesList({
   className?: string;
 }) {
   return (
-    <section className={`py-16 md:py-24 ${className}`}>
-      <div className="container">
-        <div className="flex md:gap-24 pb-12 flex-wrap items-center">
+    // 防止水平滚动
+    <section className={`py-16 md:py-24 overflow-x-hidden ${className}`}>
+      <div className="container overflow-x-hidden">
+        <div className="flex flex-wrap items-center pb-12 md:gap-24 gap-8">
           <ScrollAnimation direction="left">
-            <Image
-              src={features.image?.src ?? ""}
-              alt={features.image?.alt ?? ""}
-              width={500}
-              height={300}
-              className="rounded-lg object-cover"
-            />
+            <div className="w-full max-w-[500px] flex-shrink-0 mx-auto md:mx-0">
+              <Image
+                src={features.image?.src ?? ""}
+                alt={features.image?.alt ?? ""}
+                width={500}
+                height={300}
+                className="rounded-lg object-cover w-full h-auto"
+                // 限制图片最大宽度&自适应宽度
+                style={{ maxWidth: "100%", height: "auto", display: "block" }}
+              />
+            </div>
           </ScrollAnimation>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0 w-full">
             <ScrollAnimation delay={0.1}>
-              <h2 className="text-foreground text-balance text-4xl font-semibold">
+              <h2 className="text-foreground text-balance text-4xl font-semibold break-words">
                 {features.title}
               </h2>
             </ScrollAnimation>
             <ScrollAnimation delay={0.2}>
-              <p className="my-6 text-balance text-md text-muted-foreground">
+              <p className="my-6 text-balance text-md text-muted-foreground break-words">
                 {features.description}
               </p>
             </ScrollAnimation>
 
             {features.buttons && features.buttons.length > 0 && (
               <ScrollAnimation delay={0.3}>
-                <div className="flex items-center gap-2 justify-start">
+                <div className="flex flex-wrap items-center gap-2 justify-start">
                   {features.buttons?.map((button, idx) => (
                     <Button
                       asChild
@@ -75,16 +80,19 @@ export function FeaturesList({
         </div>
 
         <ScrollAnimation delay={0.1}>
-          <div className="relative grid grid-cols-2 gap-x-3 gap-y-6 border-t pt-12 sm:gap-6 lg:grid-cols-4">
+          {/* 防止水平滚动, min-w-0 和 break-words */}
+          <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-3 gap-y-6 sm:gap-6 border-t pt-12 min-w-0 break-words">
             {features.items?.map((item, idx) => (
-              <div className="space-y-3" key={idx}>
-                <div className="flex items-center gap-2">
+              <div className="space-y-3 min-w-0 break-words" key={idx}>
+                <div className="flex items-center gap-2 min-w-0">
                   {item.icon && (
                     <SmartIcon name={item.icon as string} size={16} />
                   )}
-                  <h3 className="text-sm font-medium">{item.title}</h3>
+                  <h3 className="text-sm font-medium min-w-0 break-words">
+                    {item.title}
+                  </h3>
                 </div>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-sm min-w-0 break-words">
                   {item.description ?? ""}
                 </p>
               </div>

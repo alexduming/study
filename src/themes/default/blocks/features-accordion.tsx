@@ -32,9 +32,11 @@ export function FeaturesAccordion({
   });
 
   return (
-    <section className={`py-16 md:py-24 ${className}`}>
+    // overflow-x-hidden to prevent horizontal scroll
+    <section className={`py-16 md:py-24 overflow-x-hidden ${className}`}>
       <div className="bg-linear-to-b absolute inset-0 -z-10 sm:inset-6 sm:rounded-b-3xl dark:block dark:to-[color-mix(in_oklab,var(--color-zinc-900)_75%,var(--color-background))]"></div>
-      <div className="container space-y-8 px-6 md:space-y-16 lg:space-y-20 dark:[--color-border:color-mix(in_oklab,var(--color-white)_10%,transparent)]">
+      {/* add overflow-x-hidden to container */}
+      <div className="container space-y-8 px-2 sm:px-6 md:space-y-16 lg:space-y-20 dark:[--color-border:color-mix(in_oklab,var(--color-white)_10%,transparent)] overflow-x-hidden">
         <ScrollAnimation>
           <div className="mx-auto max-w-4xl text-balance text-center">
             <h2 className="text-foreground mb-4 text-3xl font-semibold tracking-tight md:text-4xl">
@@ -46,7 +48,8 @@ export function FeaturesAccordion({
           </div>
         </ScrollAnimation>
 
-        <div className="grid gap-12 sm:px-12 md:grid-cols-2 lg:gap-20 lg:px-0">
+        {/* grid: clamp min-w-0 and fix px padding/breakpoints */}
+        <div className="grid gap-12 min-w-0 sm:px-6 md:grid-cols-2 lg:gap-20 lg:px-0">
           <ScrollAnimation delay={0.1} direction="left">
             <Accordion
               type="single"
@@ -71,9 +74,10 @@ export function FeaturesAccordion({
           </ScrollAnimation>
 
           <ScrollAnimation delay={0.2} direction="right">
-            <div className="bg-background relative flex overflow-hidden rounded-3xl border p-2">
+            {/* min-w-0/flex-shrink to prevent overflow */}
+            <div className="bg-background relative flex overflow-hidden rounded-3xl border p-2 min-w-0 flex-shrink">
               <div className="w-15 absolute inset-0 right-0 ml-auto border-l bg-[repeating-linear-gradient(-45deg,var(--color-border),var(--color-border)_1px,transparent_1px,transparent_8px)]"></div>
-              <div className="aspect-76/59 bg-background relative w-[calc(3/4*100%+3rem)] rounded-2xl">
+              <div className="aspect-76/59 bg-background relative w-full sm:w-[calc(3/4*100%+3rem)] rounded-2xl min-w-0">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={`${activeItem}-id`}
@@ -89,6 +93,8 @@ export function FeaturesAccordion({
                       alt={images[activeItem].alt}
                       width={1207}
                       height={929}
+                      // prevent img from exceeding parent
+                      style={{ maxWidth: "100%", height: "auto" }}
                     />
                   </motion.div>
                 </AnimatePresence>

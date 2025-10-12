@@ -8,7 +8,7 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
+  NavigationMenuTrigger as RawNavigationMenuTrigger,
 } from "@/shared/components/ui/navigation-menu";
 import { Menu, X } from "lucide-react";
 import { useMedia } from "@/shared/hooks/use-media";
@@ -29,6 +29,19 @@ import {
 import { Header as HeaderType } from "@/shared/types/blocks/landing";
 import { NavItem } from "@/shared/types/blocks/common";
 
+// For Next.js hydration mismatch warning, conditionally render NavigationMenuTrigger only after mount to avoid inconsistency between server/client render
+function NavigationMenuTrigger(
+  props: React.ComponentProps<typeof RawNavigationMenuTrigger>
+) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  // Only render after client has mounted, to avoid SSR/client render id mismatch
+  if (!mounted) return null;
+  return <RawNavigationMenuTrigger {...props} />;
+}
+
 export function Header({ header }: { header: HeaderType }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,6 +50,7 @@ export function Header({ header }: { header: HeaderType }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Listen to scroll event to enable header styles on scroll
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -44,9 +58,11 @@ export function Header({ header }: { header: HeaderType }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Navigation menu for large screens
   const NavMenu = () => {
     const menuRef = useRef<React.ElementRef<typeof NavigationMenu>>(null);
 
+    // Calculate dynamic viewport height for animated menu
     const handleViewportHeight = () => {
       requestAnimationFrame(() => {
         const menuNode = menuRef.current;
@@ -137,6 +153,7 @@ export function Header({ header }: { header: HeaderType }) {
     );
   };
 
+  // Mobile menu using Accordion, shown on small screens
   const MobileMenu = ({ closeMenu }: { closeMenu: () => void }) => {
     return (
       <nav
@@ -201,6 +218,7 @@ export function Header({ header }: { header: HeaderType }) {
     );
   };
 
+  // List item for submenus in NavigationMenu
   function ListItem({
     title,
     description,
@@ -249,9 +267,12 @@ export function Header({ header }: { header: HeaderType }) {
           <div className="container">
             <div className="relative flex flex-wrap items-center justify-between lg:py-5">
               <div className="flex justify-between gap-8 max-lg:h-14 max-lg:w-full max-lg:border-b">
+                {/* Brand Logo */}
                 {header.brand && <BrandLogo brand={header.brand} />}
 
+                {/* Desktop Navigation Menu */}
                 {isLarge && <NavMenu />}
+                {/* Hamburger menu button for mobile navigation */}
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   aria-label={
@@ -264,15 +285,20 @@ export function Header({ header }: { header: HeaderType }) {
                 </button>
               </div>
 
+              {/* Show mobile menu if needed */}
               {!isLarge && isMobileMenuOpen && (
                 <MobileMenu closeMenu={() => setIsMobileMenuOpen(false)} />
               )}
 
+              {/* Header right section: theme toggler, locale selector, sign, buttons */}
               <div className="max-lg:in-data-[state=active]:mt-6 in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
-                <div className="flex items-center w-full flex-col space-y-3 sm:flex-row sm:gap-6 sm:space-y-0 md:w-fit">
+                <div className="flex items-center w-full gap-4 flex-row sm:flex-row sm:gap-6 sm:space-y-0 md:w-fit">
                   {header.show_theme ? <ThemeToggler /> : null}
                   {header.show_locale ? <LocaleSelector /> : null}
-                  {header.show_sign ? <SignUser /> : null}
+                  <div className="flex-1 md:hidden"></div>
+                  {header.show_sign ? (
+                    <SignUser userNav={header.user_nav} />
+                  ) : null}
 
                   {header.buttons &&
                     header.buttons.map((button, idx) => (

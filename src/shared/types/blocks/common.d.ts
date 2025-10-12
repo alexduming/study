@@ -62,7 +62,11 @@ export interface SocialNav extends Nav {}
 export interface AgreementNav extends Nav {}
 
 // user props for user menu component
-export interface UserNav extends Nav {}
+export interface UserNav extends Nav {
+  show_name?: boolean;
+  show_credits?: boolean;
+  show_sign_out?: boolean;
+}
 
 // pagination props for pagination component, used to list data
 export interface Pagination {

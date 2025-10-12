@@ -2,7 +2,7 @@
 
 import { useSidebar } from "@/shared/components/ui/sidebar";
 
-import Link from "next/link";
+import { Link } from "@/core/i18n/navigation";
 import { SidebarFooter as SidebarFooterType } from "@/shared/types/blocks/dashboard";
 import { NavItem } from "@/shared/types/blocks/common";
 import { SmartIcon } from "@/shared/blocks/common/smart-icon";

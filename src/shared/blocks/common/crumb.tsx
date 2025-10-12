@@ -4,14 +4,14 @@ import { NavItem } from "@/shared/types/blocks/common";
 
 export function Crumb({ items }: { items: NavItem[] }) {
   return (
-    <nav className="flex items-center text-sm text-muted-foreground">
+    <nav className="md:px-3 flex items-center text-sm text-muted-foreground">
       {items.map((item, index) => {
         const isActive = item.is_active;
         return (
           <div key={index} className="flex items-center">
             <Link
               href={item.url || ""}
-              className={`hover:text-foreground transition-colors ${
+              className={`min-w-8 line-clamp-1 hover:text-foreground transition-colors ${
                 isActive ? "text-primary font-medium hover:text-primary" : ""
               }`}
             >
