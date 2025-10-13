@@ -9,6 +9,7 @@ import {
 } from "@/shared/services/apikey";
 import { ApikeyStatus } from "@/shared/services/apikey";
 import { Crumb } from "@/shared/types/blocks/common";
+import { getTranslations } from "next-intl/server";
 
 export default async function DeleteApiKeyPage({
   params,
@@ -30,12 +31,14 @@ export default async function DeleteApiKeyPage({
     return <Empty message="no permission" />;
   }
 
+  const t = await getTranslations("settings.api-keys.delete");
+
   const form: FormType = {
-    title: "Edit API Key",
+    title: t("title"),
     fields: [
       {
         name: "title",
-        title: "Title",
+        title: t("form.title"),
         type: "text",
         placeholder: "",
         validation: { required: true },
@@ -45,7 +48,7 @@ export default async function DeleteApiKeyPage({
       },
       {
         name: "key",
-        title: "API Key",
+        title: t("form.key"),
         type: "text",
         placeholder: "",
         validation: { required: true },
@@ -96,7 +99,7 @@ export default async function DeleteApiKeyPage({
         };
       },
       button: {
-        title: "Confirm to Delete",
+        title: t("button_title"),
         variant: "destructive",
         icon: "RiDeleteBinLine",
       },
@@ -105,18 +108,18 @@ export default async function DeleteApiKeyPage({
 
   const crumbs: Crumb[] = [
     {
-      title: "API Keys",
+      title: t("crumb.api-keys"),
       url: "/settings/api-keys",
     },
     {
-      title: "Delete",
+      title: t("crumb.delete"),
       is_active: true,
     },
   ];
 
   return (
     <div className="space-y-8">
-      <FormCard title="Delete API Key" crumbs={crumbs} form={form} />
+      <FormCard title={t("title")} crumbs={crumbs} form={form} />
     </div>
   );
 }

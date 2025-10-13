@@ -4,6 +4,7 @@ import { ReactNode, useState } from "react";
 import { SmartIcon } from "@/shared/blocks/common/smart-icon";
 import { Nav } from "@/shared/types/blocks/common";
 import { Link } from "@/core/i18n/navigation";
+import { usePathname } from "@/core/i18n/navigation";
 
 export function ConsoleLayout({
   title,
@@ -20,6 +21,7 @@ export function ConsoleLayout({
   className?: string;
   children: ReactNode;
 }) {
+  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
   const filteredItems = nav?.items.filter((item) =>
     item.title?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -37,7 +39,7 @@ export function ConsoleLayout({
                   key={idx}
                   href={item.url || ""}
                   className={`text-muted-foreground hover:bg-foreground/10 flex items-center gap-2 px-3 py-2 ${
-                    item.is_active
+                    item.is_active || pathname === item.url
                       ? "border-b-2 border-primary text-muted-foreground"
                       : ""
                   } duration-200 ease-linear hover:text-foreground`}
@@ -90,7 +92,9 @@ export function ConsoleLayout({
                   key={idx}
                   href={item.url || ""}
                   className={`flex items-center space-x-3 px-3 py-2 text-sm rounded-md transition-colors ${
-                    item.is_active
+                    item.is_active ||
+                    pathname.endsWith(item.url as string) ||
+                    item.url?.endsWith(pathname)
                       ? "bg-secondary text-secondary-foreground font-medium"
                       : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                   }`}

@@ -10,6 +10,7 @@ import {
 } from "@/shared/services/order";
 import { PaymentType } from "@/extensions/payment";
 import { Tab } from "@/shared/types/blocks/common";
+import { getTranslations } from "next-intl/server";
 
 export default async function PaymentsPage({
   searchParams,
@@ -24,6 +25,8 @@ export default async function PaymentsPage({
   if (!user) {
     return <Empty message="no auth" />;
   }
+
+  const t = await getTranslations("settings.payments");
 
   const total = await getOrdersCount({
     paymentType: type as PaymentType,
@@ -40,30 +43,30 @@ export default async function PaymentsPage({
   });
 
   const table: Table = {
-    title: "Payments",
+    title: t("title"),
     columns: [
-      { name: "orderNo", title: "Order Number", type: "copy" },
-      { name: "productName", title: "Product Name" },
+      { name: "orderNo", title: t("table.order_no"), type: "copy" },
+      { name: "productName", title: t("table.product_name") },
       {
         name: "status",
-        title: "Status",
+        title: t("table.status"),
         type: "label",
         metadata: { variant: "outline" },
       },
       {
         name: "paymentProvider",
-        title: "Provider",
+        title: t("table.provider"),
         type: "label",
         metadata: { variant: "outline" },
       },
       {
         name: "paymentType",
-        title: "Type",
+        title: t("table.type"),
         type: "label",
         metadata: { variant: "outline" },
       },
       {
-        title: "Paid Amount",
+        title: t("table.paid_amount"),
         callback: function (item) {
           return (
             <div className="text-primary">{`${item.paymentAmount / 100} ${
@@ -75,16 +78,8 @@ export default async function PaymentsPage({
       },
       {
         name: "createdAt",
-        title: "Created At",
+        title: t("table.created_at"),
         type: "time",
-      },
-      {
-        name: "action",
-        title: "",
-        type: "dropdown",
-        callback: (item: Order) => {
-          return [];
-        },
       },
     ],
     data: orders,
@@ -97,25 +92,25 @@ export default async function PaymentsPage({
 
   const tabs: Tab[] = [
     {
-      title: "All",
+      title: t("tabs.all"),
       name: "all",
       url: "/settings/payments",
       is_active: !type || type === "all",
     },
     {
-      title: "One-Time",
+      title: t("tabs.one-time"),
       name: "one-time",
       url: "/settings/payments?type=one-time",
       is_active: type === "one-time",
     },
     {
-      title: "Subscription",
+      title: t("tabs.subscription"),
       name: "subscription",
       url: "/settings/payments?type=subscription",
       is_active: type === "subscription",
     },
     {
-      title: "Renew",
+      title: t("tabs.renew"),
       name: "renew",
       url: "/settings/payments?type=renew",
       is_active: type === "renew",
@@ -125,8 +120,8 @@ export default async function PaymentsPage({
   return (
     <div className="space-y-8">
       <TableCard
-        title="Payments"
-        description="View your payments"
+        title={t("history")}
+        description={t("description")}
         tabs={tabs}
         table={table}
       />

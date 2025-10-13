@@ -3,6 +3,7 @@ import { Empty } from "@/shared/blocks/common";
 import { Form as FormType } from "@/shared/types/blocks/form";
 import { FormCard } from "@/shared/blocks/form";
 import { UpdateUser, updateUser } from "@/shared/services/user";
+import { getTranslations } from "next-intl/server";
 
 export default async function ProfilePage() {
   const user = await getUserInfo();
@@ -10,18 +11,20 @@ export default async function ProfilePage() {
     return <Empty message="no auth" />;
   }
 
+  const t = await getTranslations("settings.profile");
+
   const form: FormType = {
     fields: [
       {
         name: "email",
-        title: "Email",
+        title: t("form.email"),
         type: "email",
         attributes: { disabled: true },
       },
-      { name: "name", title: "Name", type: "text" },
+      { name: "name", title: t("form.name"), type: "text" },
       {
         name: "image",
-        title: "Avatar",
+        title: t("form.avatar"),
         type: "upload_image",
         metadata: {
           max: 1,
@@ -63,14 +66,14 @@ export default async function ProfilePage() {
         };
       },
       button: {
-        title: "Save",
+        title: t("form.button_title"),
       },
     },
   };
 
   return (
     <div className="space-y-8">
-      <FormCard title="Profile" description="Update your profile" form={form} />
+      <FormCard title={t("title")} description={t("description")} form={form} />
     </div>
   );
 }

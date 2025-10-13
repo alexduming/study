@@ -4,6 +4,7 @@ import { Form as FormType } from "@/shared/types/blocks/form";
 import { UpdateUser, updateUser } from "@/shared/services/user";
 import { PanelCard } from "@/shared/blocks/panel";
 import { Button as ButtonType } from "@/shared/types/blocks/common";
+import { getTranslations } from "next-intl/server";
 
 export default async function SecurityPage() {
   const user = await getUserInfo();
@@ -11,30 +12,32 @@ export default async function SecurityPage() {
     return <Empty message="no auth" />;
   }
 
+  const t = await getTranslations("settings.security");
+
   const form: FormType = {
     fields: [
       {
         name: "email",
-        title: "Email",
+        title: t("reset_password.form.email"),
         type: "email",
         attributes: { disabled: true },
       },
       {
         name: "password",
-        title: "Current Password",
+        title: t("reset_password.form.password"),
         type: "password",
         attributes: { type: "password" },
         validation: { required: true },
       },
       {
         name: "new_password",
-        title: "New Password",
+        title: t("reset_password.form.new_password"),
         type: "password",
         validation: { required: true },
       },
       {
         name: "confirm_password",
-        title: "Confirm Password",
+        title: t("reset_password.form.confirm_password"),
         type: "password",
         validation: { required: true },
       },
@@ -72,7 +75,7 @@ export default async function SecurityPage() {
         };
       },
       button: {
-        title: "Save",
+        title: t("reset_password.button_title"),
       },
     },
   };
@@ -80,12 +83,12 @@ export default async function SecurityPage() {
   return (
     <div className="space-y-8">
       <PanelCard
-        title="Reset Password"
-        description="Reset your sign-in password"
-        content="We will send you an email to reset your password."
+        title={t("reset_password.button_title")}
+        description={t("reset_password.description")}
+        content={t("reset_password.tip")}
         buttons={[
           {
-            title: "Reset Password",
+            title: t("reset_password.button_title"),
             url: "/settings/security",
             target: "_self",
             variant: "default",
@@ -96,12 +99,12 @@ export default async function SecurityPage() {
         className="max-w-md"
       />
       <PanelCard
-        title="Delete Account"
-        description="Permantly delete your account"
-        content="Are you sure you want to delete your account? This action cannot be undone."
+        title={t("delete_account.button_title")}
+        description={t("delete_account.description")}
+        content={t("delete_account.content")}
         buttons={[
           {
-            title: "Delete Account",
+            title: t("delete_account.button_title"),
             url: "/settings/security",
             target: "_self",
             variant: "destructive",

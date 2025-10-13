@@ -9,7 +9,7 @@ import {
 
 import { Button } from "@/shared/components/ui/button";
 import { SmartIcon } from "@/shared/blocks/common/smart-icon";
-import Link from "next/link";
+import { Link } from "@/core/i18n/navigation";
 import { MoreHorizontal } from "lucide-react";
 import { NavItem } from "@/shared/types/blocks/common";
 

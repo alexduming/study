@@ -2,56 +2,53 @@ import { ConsoleLayout } from "@/shared/blocks/console/layout";
 import { Nav } from "@/shared/types/blocks/common";
 import { ReactNode } from "react";
 import { getPathname } from "@/shared/lib/browser";
+import { getTranslations } from "next-intl/server";
 
 export default async function SettingsLayout({
   children,
 }: {
   children: ReactNode;
 }) {
+  const t = await getTranslations("settings");
+
   // settings title
-  const title = "Settings";
+  const title = t("title");
 
   const pathname = await getPathname();
 
   // settings nav
   const nav: Nav = {
-    title: "Settings",
+    title: t("title"),
     items: [
       {
-        title: "Profile",
+        title: t("nav.profile"),
         url: "/settings/profile",
         icon: "User",
-        is_active: pathname === "/settings/profile",
       },
       {
-        title: "Security",
+        title: t("nav.security"),
         url: "/settings/security",
         icon: "Lock",
-        is_active: pathname === "/settings/security",
       },
       {
-        title: "Billing",
+        title: t("nav.billing"),
         url: "/settings/billing",
         icon: "CreditCard",
-        is_active: pathname === "/settings/billing",
       },
       {
-        title: "Payments",
+        title: t("nav.payments"),
         url: "/settings/payments",
         icon: "DollarSign",
-        is_active: pathname === "/settings/payments",
       },
       {
-        title: "Credits",
+        title: t("nav.credits"),
         url: "/settings/credits",
         icon: "Coins",
-        is_active: pathname === "/settings/credits",
       },
       {
-        title: "API Keys",
+        title: t("nav.api-keys"),
         url: "/settings/api-keys",
         icon: "RiKeyLine",
-        is_active: pathname === "/settings/api-keys",
       },
     ],
   };

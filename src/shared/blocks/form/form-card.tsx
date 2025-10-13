@@ -17,6 +17,7 @@ import { BreadcrumbItem } from "@/shared/components/ui/breadcrumb";
 import { BreadcrumbLink } from "@/shared/components/ui/breadcrumb";
 import { BreadcrumbSeparator } from "@/shared/components/ui/breadcrumb";
 import { BreadcrumbPage } from "@/shared/components/ui/breadcrumb";
+import { Link } from "@/core/i18n/navigation";
 
 export function FormCard({
   title,
@@ -42,9 +43,7 @@ export function FormCard({
                   {crumb.is_active ? (
                     <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
                   ) : (
-                    <BreadcrumbLink href={crumb.url || ""}>
-                      {crumb.title}
-                    </BreadcrumbLink>
+                    <Link href={crumb.url || ""}>{crumb.title}</Link>
                   )}
                 </BreadcrumbItem>
                 {index < crumbs.length - 1 && (

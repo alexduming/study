@@ -12,6 +12,7 @@ import {
   getRemainingCredits,
 } from "@/shared/services/credit";
 import { Tab } from "@/shared/types/blocks/common";
+import { getTranslations } from "next-intl/server";
 
 export default async function CreditsPage({
   searchParams,
@@ -26,6 +27,8 @@ export default async function CreditsPage({
   if (!user) {
     return <Empty message="no auth" />;
   }
+
+  const t = await getTranslations("settings.credits");
 
   const total = await getCreditsCount({
     transactionType: type as CreditTransactionType,
@@ -42,48 +45,40 @@ export default async function CreditsPage({
   });
 
   const table: Table = {
-    title: "Credits History",
+    title: t("title"),
     columns: [
-      { name: "transactionNo", title: "Transaction No", type: "copy" },
-      { name: "description", title: "Description" },
+      { name: "transactionNo", title: t("table.transaction_no"), type: "copy" },
+      { name: "description", title: t("table.description") },
       {
         name: "transactionType",
-        title: "Type",
+        title: t("table.type"),
         type: "label",
         metadata: { variant: "outline" },
       },
       {
         name: "transactionScene",
-        title: "Scene",
+        title: t("table.scene"),
         type: "label",
         placeholder: "-",
         metadata: { variant: "outline" },
       },
       {
         name: "credits",
-        title: "Credits",
+        title: t("table.credits"),
         type: "label",
         metadata: { variant: "outline" },
       },
       {
         name: "expiresAt",
-        title: "Expires At",
+        title: t("table.expires_at"),
         type: "time",
         placeholder: "-",
         metadata: { format: "YYYY-MM-DD HH:mm:ss" },
       },
       {
         name: "createdAt",
-        title: "Created At",
+        title: t("table.created_at"),
         type: "time",
-      },
-      {
-        name: "action",
-        title: "",
-        type: "dropdown",
-        callback: (item: Credit) => {
-          return [];
-        },
       },
     ],
     data: credits,
@@ -98,19 +93,19 @@ export default async function CreditsPage({
 
   const tabs: Tab[] = [
     {
-      title: "All",
+      title: t("tabs.all"),
       name: "all",
       url: "/settings/credits",
       is_active: !type || type === "all",
     },
     {
-      title: "Grant",
+      title: t("tabs.grant"),
       name: "grant",
       url: "/settings/credits?type=grant",
       is_active: type === "grant",
     },
     {
-      title: "Consume",
+      title: t("tabs.consume"),
       name: "consume",
       url: "/settings/credits?type=consume",
       is_active: type === "consume",
@@ -120,10 +115,10 @@ export default async function CreditsPage({
   return (
     <div className="space-y-8">
       <PanelCard
-        title="Credits Balance"
+        title={t("remaining_credits")}
         buttons={[
           {
-            title: "Buy Credits",
+            title: t("button_title"),
             url: "/pricing",
             target: "_blank",
             icon: "Coins",
@@ -135,7 +130,7 @@ export default async function CreditsPage({
           {remainingCredits}
         </div>
       </PanelCard>
-      <TableCard title="Credits History" tabs={tabs} table={table} />
+      <TableCard title={t("history")} tabs={tabs} table={table} />
     </div>
   );
 }

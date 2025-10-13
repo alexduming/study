@@ -11,6 +11,7 @@ import {
 import moment from "moment";
 import { PanelCard } from "@/shared/blocks/panel";
 import { Tab } from "@/shared/types/blocks/common";
+import { getTranslations } from "next-intl/server";
 
 export default async function BillingPage({
   searchParams,
@@ -25,6 +26,8 @@ export default async function BillingPage({
   if (!user) {
     return <Empty message="no auth" />;
   }
+
+  const t = await getTranslations("settings.billing");
 
   const currentSubscription = await getCurrentSubscription(user.id);
 
@@ -41,24 +44,32 @@ export default async function BillingPage({
   });
 
   const table: Table = {
-    title: "Subscriptions",
+    title: t("subscriptions.title"),
     columns: [
-      { name: "subscriptionNo", title: "Subscription Number", type: "copy" },
-      { name: "interval", title: "Interval", type: "label" },
+      {
+        name: "subscriptionNo",
+        title: t("subscriptions.table.subscription_no"),
+        type: "copy",
+      },
+      {
+        name: "interval",
+        title: t("subscriptions.table.interval"),
+        type: "label",
+      },
       {
         name: "status",
-        title: "Status",
+        title: t("subscriptions.table.status"),
         type: "label",
         metadata: { variant: "outline" },
       },
       {
         name: "paymentProvider",
-        title: "Provider",
+        title: t("subscriptions.table.provider"),
         type: "label",
         metadata: { variant: "outline" },
       },
       {
-        title: "Amount",
+        title: t("subscriptions.table.amount"),
         callback: function (item) {
           return (
             <div className="text-primary">{`${item.amount / 100} ${
@@ -70,11 +81,11 @@ export default async function BillingPage({
       },
       {
         name: "createdAt",
-        title: "Created At",
+        title: t("subscriptions.table.created_at"),
         type: "time",
       },
       {
-        title: "Current Period",
+        title: t("subscriptions.table.current_period"),
         callback: function (item) {
           return (
             <div>
@@ -83,14 +94,6 @@ export default async function BillingPage({
               {`${moment(item.currentPeriodEnd).format("YYYY-MM-DD")}`}
             </div>
           );
-        },
-      },
-      {
-        name: "action",
-        title: "",
-        type: "dropdown",
-        callback: (item: Subscription) => {
-          return [];
         },
       },
     ],
@@ -104,19 +107,19 @@ export default async function BillingPage({
 
   const tabs: Tab[] = [
     {
-      title: "All",
+      title: t("subscriptions.tabs.all"),
       name: "all",
       url: "/settings/billing",
       is_active: !status || status === "all",
     },
     {
-      title: "Active",
+      title: t("subscriptions.tabs.active"),
       name: "active",
       url: "/settings/billing?status=active",
       is_active: status === "active",
     },
     {
-      title: "Canceled",
+      title: t("subscriptions.tabs.canceled"),
       name: "canceled",
       url: "/settings/billing?status=canceled",
       is_active: status === "canceled",
@@ -126,10 +129,10 @@ export default async function BillingPage({
   return (
     <div className="space-y-8">
       <PanelCard
-        title="Current Plan"
+        title={t("plan.title")}
         buttons={[
           {
-            title: "Adjust Plan",
+            title: t("plan.button_title"),
             url: "/pricing",
             target: "_blank",
             icon: "Pencil",
@@ -142,13 +145,14 @@ export default async function BillingPage({
           {currentSubscription?.planName}
         </div>
         <div className="text-sm font-normal text-muted-foreground mt-4">
-          {`Your subscription will auto renew on `}{" "}
-          <span className="font-bold text-primary">
-            {moment(currentSubscription?.currentPeriodEnd).format("YYYY-MM-DD")}
-          </span>
+          {t("plan.renew_tip", {
+            date: moment(currentSubscription?.currentPeriodEnd).format(
+              "YYYY-MM-DD"
+            ),
+          })}
         </div>
       </PanelCard>
-      <TableCard title="Subscriptions History" tabs={tabs} table={table} />
+      <TableCard title={t("subscriptions.title")} tabs={tabs} table={table} />
     </div>
   );
 }

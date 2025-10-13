@@ -9,6 +9,7 @@ import {
   ApikeyStatus,
 } from "@/shared/services/apikey";
 import { Button } from "@/shared/types/blocks/common";
+import { getTranslations } from "next-intl/server";
 
 export default async function ApiKeysPage({
   searchParams,
@@ -24,6 +25,8 @@ export default async function ApiKeysPage({
     return <Empty message="no auth" />;
   }
 
+  const t = await getTranslations("settings.api-keys");
+
   const total = await getApikeysCount({
     userId: user.id,
     status: ApikeyStatus.ACTIVE,
@@ -37,30 +40,31 @@ export default async function ApiKeysPage({
   });
 
   const table: Table = {
+    title: t("title"),
     columns: [
       {
         name: "title",
-        title: "Title",
+        title: t("table.title"),
       },
-      { name: "key", title: "API Key", type: "copy" },
+      { name: "key", title: t("table.key"), type: "copy" },
       {
         name: "createdAt",
-        title: "Created At",
+        title: t("table.created_at"),
         type: "time",
       },
       {
         name: "action",
-        title: "",
+        title: t("table.action"),
         type: "dropdown",
         callback: (item: Apikey) => {
           return [
             {
-              title: "Edit",
+              title: t("table.action_items.edit"),
               url: `/settings/api-keys/${item.id}/edit`,
               icon: "RiEditLine",
             },
             {
-              title: "Delete",
+              title: t("table.action_items.delete"),
               url: `/settings/api-keys/${item.id}/delete`,
               icon: "RiDeleteBinLine",
             },
@@ -69,7 +73,7 @@ export default async function ApiKeysPage({
       },
     ],
     data: apikeys,
-    emptyMessage: "No API Keys",
+    emptyMessage: t("empty_message"),
     pagination: {
       total,
       page,
@@ -79,7 +83,7 @@ export default async function ApiKeysPage({
 
   const buttons: Button[] = [
     {
-      title: "Create API Key",
+      title: t("button_title"),
       url: "/settings/api-keys/create",
       icon: "Plus",
     },
@@ -87,7 +91,7 @@ export default async function ApiKeysPage({
 
   return (
     <div className="space-y-8">
-      <TableCard title="API Keys" buttons={buttons} table={table} />
+      <TableCard title={t("title")} buttons={buttons} table={table} />
     </div>
   );
 }

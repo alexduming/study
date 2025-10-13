@@ -24,4 +24,5 @@ export const localeMessagesPaths = [
   "pricing",
   "admin/sidebar",
   "admin/user",
+  "settings",
 ];

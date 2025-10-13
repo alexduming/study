@@ -9,6 +9,7 @@ import {
 } from "@/shared/services/apikey";
 import { getNonceStr } from "@/shared/lib/hash";
 import { Crumb } from "@/shared/types/blocks/common";
+import { getTranslations } from "next-intl/server";
 
 export default async function EditApiKeyPage({
   params,
@@ -30,12 +31,14 @@ export default async function EditApiKeyPage({
     return <Empty message="no permission" />;
   }
 
+  const t = await getTranslations("settings.api-keys.edit");
+
   const form: FormType = {
-    title: "Edit API Key",
+    title: t("title"),
     fields: [
       {
         name: "title",
-        title: "Title",
+        title: t("form.title"),
         type: "text",
         placeholder: "",
         validation: { required: true },
@@ -84,25 +87,25 @@ export default async function EditApiKeyPage({
         };
       },
       button: {
-        title: "Update",
+        title: t("button_title"),
       },
     },
   };
 
   const crumbs: Crumb[] = [
     {
-      title: "API Keys",
+      title: t("crumb.api-keys"),
       url: "/settings/api-keys",
     },
     {
-      title: "Edit",
+      title: t("crumb.edit"),
       is_active: true,
     },
   ];
 
   return (
     <div className="space-y-8">
-      <FormCard title="Edit API Key" crumbs={crumbs} form={form} />
+      <FormCard title={t("title")} crumbs={crumbs} form={form} />
     </div>
   );
 }

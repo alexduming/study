@@ -6,6 +6,7 @@ import { createApikey, NewApikey } from "@/shared/services/apikey";
 import { getUuid, getNonceStr } from "@/shared/lib/hash";
 import { ApikeyStatus } from "@/shared/services/apikey";
 import { Crumb } from "@/shared/types/blocks/common";
+import { getTranslations } from "next-intl/server";
 
 export default async function CreateApiKeyPage() {
   const user = await getUserInfo();
@@ -13,12 +14,14 @@ export default async function CreateApiKeyPage() {
     return <Empty message="no auth" />;
   }
 
+  const t = await getTranslations("settings.api-keys.create");
+
   const form: FormType = {
-    title: "Create API Key",
+    title: t("title"),
     fields: [
       {
         name: "title",
-        title: "Title",
+        title: t("form.title"),
         type: "text",
         placeholder: "",
         validation: { required: true },
@@ -60,25 +63,25 @@ export default async function CreateApiKeyPage() {
         };
       },
       button: {
-        title: "Create",
+        title: t("button_title"),
       },
     },
   };
 
   const crumbs: Crumb[] = [
     {
-      title: "API Keys",
+      title: t("crumb.api-keys"),
       url: "/settings/api-keys",
     },
     {
-      title: "Create",
+      title: t("crumb.create"),
       is_active: true,
     },
   ];
 
   return (
     <div className="space-y-8">
-      <FormCard title="Create API Key" crumbs={crumbs} form={form} />
+      <FormCard title={t("title")} crumbs={crumbs} form={form} />
     </div>
   );
 }
