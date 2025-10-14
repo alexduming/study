@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { routing } from "@/core/i18n/config";
 import { betterFetch } from "@better-fetch/fetch";
 import { Session } from "better-auth";
+import { envConfigs } from "@/config";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -26,15 +27,22 @@ export async function proxy(request: NextRequest) {
     pathWithoutLocale.startsWith("/activity")
   ) {
     try {
+      // Use configured auth_url instead of request.nextUrl.origin
+      // This fixes the issue when deployed behind reverse proxy (like in Dokploy)
+      // where request.nextUrl.origin returns internal address (e.g. http://localhost:3000)
+      const baseURL = envConfigs.auth_url;
+
       const { data: session } = await betterFetch<Session>(
         "/api/auth/get-session",
         {
-          baseURL: request.nextUrl.origin,
+          baseURL: baseURL,
           headers: {
             cookie: request.headers.get("cookie") || "", // Forward the cookies from the request
           },
         }
       );
+
+      console.log("session in proxy", session, baseURL);
 
       if (!session) {
         // Redirect to sign-in page with locale and callback URL

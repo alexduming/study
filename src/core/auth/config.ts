@@ -10,6 +10,7 @@ export const authOptions = {
   appName: envConfigs.app_name,
   baseURL: envConfigs.auth_url,
   secret: envConfigs.auth_secret,
+  trustedOrigins: envConfigs.app_url ? [envConfigs.app_url] : [],
 };
 
 // get dynamic auth options
