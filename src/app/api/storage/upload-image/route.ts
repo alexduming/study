@@ -1,5 +1,5 @@
 import { respData, respErr } from "@/shared/lib/resp";
-import { storageService } from "@/shared/services/storage";
+import { getStorageService } from "@/shared/services/storage";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
@@ -35,6 +35,8 @@ export async function POST(req: Request) {
       // Convert file to buffer
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
+
+      const storageService = await getStorageService();
 
       // Upload to storage
       const result = await storageService.uploadFile({

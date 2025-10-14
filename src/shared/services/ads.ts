@@ -1,12 +1,10 @@
 import { Configs, getAllConfigs } from "@/shared/services/config";
 import { AdsManager, AdsenseProvider } from "@/extensions/ads";
-import { ReactNode } from "react";
 
-export function getAdsComponents(configs: Configs): {
-  adsMetaTags: ReactNode;
-  adsHeadScripts: ReactNode;
-  adsBodyScripts: ReactNode;
-} {
+/**
+ * get ads manager with configs
+ */
+export function getAdsManagerWithConfigs(configs: Configs) {
   const ads = new AdsManager();
 
   // adsense
@@ -14,11 +12,21 @@ export function getAdsComponents(configs: Configs): {
     ads.addProvider(new AdsenseProvider({ adId: configs.adsense_code }));
   }
 
-  return {
-    adsMetaTags: ads.getMetaTags(),
-    adsHeadScripts: ads.getHeadScripts(),
-    adsBodyScripts: ads.getBodyScripts(),
-  };
+  return ads;
 }
 
-export const adsService = getAdsComponents(await getAllConfigs());
+/**
+ * global ads service
+ */
+let adsService: AdsManager | null = null;
+
+/**
+ * get ads service instance
+ */
+export async function getAdsService(): Promise<AdsManager> {
+  if (!adsService) {
+    const configs = await getAllConfigs();
+    adsService = getAdsManagerWithConfigs(configs);
+  }
+  return adsService;
+}

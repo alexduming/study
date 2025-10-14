@@ -3,9 +3,8 @@ import "@/config/style/global.css";
 import { getLocale, setRequestLocale } from "next-intl/server";
 import { locales } from "@/config/locale";
 import { envConfigs } from "@/config";
-import { getAllConfigs } from "@/shared/services/config";
-import { getAdsComponents } from "@/shared/services/ads";
-import { getAnalyticsComponents } from "@/shared/services/analytics";
+import { getAdsService } from "@/shared/services/ads";
+import { getAnalyticsService } from "@/shared/services/analytics";
 import { Noto_Sans_Mono, Merriweather, JetBrains_Mono } from "next/font/google";
 
 const notoSansMono = Noto_Sans_Mono({
@@ -37,17 +36,29 @@ export default async function RootLayout({
   // app url
   const appUrl = envConfigs.app_url || "";
 
-  // get configs from db
-  const configs = await getAllConfigs();
+  // ads components
+  let adsMetaTags = null;
+  let adsHeadScripts = null;
+  let adsBodyScripts = null;
 
-  // get analytics components in production
-  const { analyticsMetaTags, analyticsHeadScripts, analyticsBodyScripts } =
-    getAnalyticsComponents(isProduction ? configs : {});
+  // analytics components
+  let analyticsMetaTags = null;
+  let analyticsHeadScripts = null;
+  let analyticsBodyScripts = null;
 
-  // get ads components in production
-  const { adsMetaTags, adsHeadScripts, adsBodyScripts } = getAdsComponents(
-    isProduction ? configs : {}
-  );
+  if (isProduction) {
+    // get ads components
+    const adsService = await getAdsService();
+    adsMetaTags = adsService.getMetaTags();
+    adsHeadScripts = adsService.getHeadScripts();
+    adsBodyScripts = adsService.getBodyScripts();
+
+    // get analytics components
+    const analyticsService = await getAnalyticsService();
+    analyticsMetaTags = analyticsService.getMetaTags();
+    analyticsHeadScripts = analyticsService.getHeadScripts();
+    analyticsBodyScripts = analyticsService.getBodyScripts();
+  }
 
   return (
     <html

@@ -9,7 +9,7 @@ import {
 } from "@/shared/services/order";
 import { getUserInfo } from "@/shared/services/user";
 import { getTranslations } from "next-intl/server";
-import { paymentService } from "@/shared/services/payment";
+import { getPaymentService } from "@/shared/services/payment";
 import {
   PaymentRequest,
   PaymentInterval,
@@ -51,6 +51,8 @@ export async function POST(req: Request) {
     const defaultPaymentProvider = configs.payment_provider;
 
     // get default payment provider
+    const paymentService = await getPaymentService();
+
     const paymentProvider = paymentService.getProvider(defaultPaymentProvider);
     if (!paymentProvider || !paymentProvider.name) {
       return respErr("no payment provider configured");

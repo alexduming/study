@@ -15,7 +15,7 @@ import {
   updateOrderByOrderNo,
   updateOrderInTransaction,
 } from "@/shared/services/order";
-import { paymentService } from "@/shared/services/payment";
+import { getPaymentService } from "@/shared/services/payment";
 import {
   NewSubscription,
   SubscriptionStatus,
@@ -56,6 +56,8 @@ export async function GET(req: Request) {
     }
 
     // check order status
+    const paymentService = await getPaymentService();
+
     const paymentProvider = paymentService.getProvider(order.paymentProvider);
     if (!paymentProvider) {
       throw new Error("payment provider not found");

@@ -7,9 +7,9 @@ import {
 import { Configs, getAllConfigs } from "@/shared/services/config";
 
 /**
- * get payment service for sending payment
+ * get payment service with configs
  */
-export function getPaymentService(configs: Configs) {
+export function getPaymentServiceWithConfigs(configs: Configs) {
   const paymentManager = new PaymentManager();
 
   const defaultProvider = configs.payment_provider;
@@ -51,6 +51,17 @@ export function getPaymentService(configs: Configs) {
 }
 
 /**
- * default payment service
+ * global payment service
  */
-export const paymentService = getPaymentService(await getAllConfigs());
+let paymentService: PaymentManager | null = null;
+
+/**
+ * get payment service instance
+ */
+export async function getPaymentService(): Promise<PaymentManager> {
+  if (!paymentService) {
+    const configs = await getAllConfigs();
+    paymentService = getPaymentServiceWithConfigs(configs);
+  }
+  return paymentService;
+}

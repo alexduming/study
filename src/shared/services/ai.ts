@@ -2,15 +2,15 @@ import { AIManager, KieProvider } from "@/extensions/ai";
 import { Configs, getAllConfigs } from "@/shared/services/config";
 
 /**
- * get payment service for sending payment
+ * get ai manager with configs
  */
-export function getAIService(configs: Configs) {
+export function getAIManagerWithConfigs(configs: Configs) {
   const aiManager = new AIManager();
 
-  if (process.env.KIE_API_KEY) {
+  if (configs.kie_api_key) {
     aiManager.addProvider(
       new KieProvider({
-        apiKey: process.env.KIE_API_KEY,
+        apiKey: configs.kie_api_key,
       })
     );
   }
@@ -19,6 +19,17 @@ export function getAIService(configs: Configs) {
 }
 
 /**
- * default ai service
+ * global ai service
  */
-export const aiService = getAIService(await getAllConfigs());
+let aiService: AIManager | null = null;
+
+/**
+ * get ai service manager
+ */
+export async function getAIService(): Promise<AIManager> {
+  if (!aiService) {
+    const configs = await getAllConfigs();
+    aiService = getAIManagerWithConfigs(configs);
+  }
+  return aiService;
+}

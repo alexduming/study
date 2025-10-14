@@ -1,6 +1,6 @@
 import { envConfigs } from "@/config";
 import { respData, respErr } from "@/shared/lib/resp";
-import { aiService } from "@/shared/services/ai";
+import { getAIService } from "@/shared/services/ai";
 import { consumeCredits, getRemainingCredits } from "@/shared/services/credit";
 import { getUserInfo } from "@/shared/services/user";
 
@@ -11,6 +11,8 @@ export async function POST(request: Request) {
     if (!provider || !mediaType || !model || !prompt) {
       throw new Error("invalid params");
     }
+
+    const aiService = await getAIService();
 
     // check generate type
     if (!aiService.getGenerateTypes().includes(mediaType)) {

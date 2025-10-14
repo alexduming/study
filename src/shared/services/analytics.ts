@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { Configs, getAllConfigs } from "@/shared/services/config";
 import {
   AnalyticsManager,
@@ -8,11 +7,10 @@ import {
   VercelAnalyticsProvider,
 } from "@/extensions/analytics";
 
-export function getAnalyticsComponents(configs: Configs): {
-  analyticsMetaTags: ReactNode;
-  analyticsHeadScripts: ReactNode;
-  analyticsBodyScripts: ReactNode;
-} {
+/**
+ * get analytics manager with configs
+ */
+export function getAnalyticsManagerWithConfigs(configs: Configs) {
   const analytics = new AnalyticsManager();
 
   // google analytics
@@ -47,11 +45,21 @@ export function getAnalyticsComponents(configs: Configs): {
     analytics.addProvider(new VercelAnalyticsProvider({ mode: "auto" }));
   }
 
-  return {
-    analyticsMetaTags: analytics.getMetaTags(),
-    analyticsHeadScripts: analytics.getHeadScripts(),
-    analyticsBodyScripts: analytics.getBodyScripts(),
-  };
+  return analytics;
 }
 
-export const analyticsService = getAnalyticsComponents(await getAllConfigs());
+/**
+ * global analytics service
+ */
+let analyticsService: AnalyticsManager | null = null;
+
+/**
+ * get analytics service instance
+ */
+export async function getAnalyticsService(): Promise<AnalyticsManager> {
+  if (!analyticsService) {
+    const configs = await getAllConfigs();
+    analyticsService = getAnalyticsManagerWithConfigs(configs);
+  }
+  return analyticsService;
+}

@@ -1,5 +1,5 @@
 import { respData, respErr } from "@/shared/lib/resp";
-import { aiService } from "@/shared/services/ai";
+import { getAIService } from "@/shared/services/ai";
 
 export async function POST(req: Request) {
   try {
@@ -9,6 +9,8 @@ export async function POST(req: Request) {
     }
 
     const provider = "kie";
+
+    const aiService = await getAIService();
 
     const result = await aiService.query({
       provider,

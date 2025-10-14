@@ -2,9 +2,9 @@ import { StorageManager, R2Provider, S3Provider } from "@/extensions/storage";
 import { Configs, getAllConfigs } from "@/shared/services/config";
 
 /**
- * get storage service for uploading files
+ * get storage service with configs
  */
-export function getStorageService(configs: Configs) {
+export function getStorageServiceWithConfigs(configs: Configs) {
   const storageManager = new StorageManager();
 
   // Add R2 provider if configured
@@ -32,23 +32,34 @@ export function getStorageService(configs: Configs) {
   }
 
   // Add S3 provider if configured (future support)
-  // if (configs.s3_access_key && configs.s3_secret_key && configs.s3_bucket) {
-  //   storageManager.addProvider(
-  //     new S3Provider({
-  //       endpoint: configs.s3_endpoint,
-  //       region: configs.s3_region,
-  //       accessKeyId: configs.s3_access_key,
-  //       secretAccessKey: configs.s3_secret_key,
-  //       bucket: configs.s3_bucket,
-  //       publicDomain: configs.s3_domain,
-  //     })
-  //   );
-  // }
+  if (configs.s3_access_key && configs.s3_secret_key && configs.s3_bucket) {
+    storageManager.addProvider(
+      new S3Provider({
+        endpoint: configs.s3_endpoint,
+        region: configs.s3_region,
+        accessKeyId: configs.s3_access_key,
+        secretAccessKey: configs.s3_secret_key,
+        bucket: configs.s3_bucket,
+        publicDomain: configs.s3_domain,
+      })
+    );
+  }
 
   return storageManager;
 }
 
 /**
- * default storage service
+ * global storage service
  */
-export const storageService = getStorageService(await getAllConfigs());
+let storageService: StorageManager | null = null;
+
+/**
+ * get storage service instance
+ */
+export async function getStorageService(): Promise<StorageManager> {
+  if (!storageService) {
+    const configs = await getAllConfigs();
+    storageService = getStorageServiceWithConfigs(configs);
+  }
+  return storageService;
+}
