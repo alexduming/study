@@ -1,3 +1,6 @@
+import { LazyImage } from '@/shared/blocks/common';
+import { cn } from '@/shared/lib/utils';
+
 export function Image({
   value,
   metadata,
@@ -17,11 +20,16 @@ export function Image({
     return null;
   }
 
+  const width = metadata?.width || 40;
+  const height = metadata?.height || 40;
+
   return (
-    <img
+    <LazyImage
       src={value}
       alt={value}
-      className={`h-10 w-10 shrink-0 rounded-full object-cover ${className}`}
+      width={width}
+      height={height}
+      className={cn('shrink-0 rounded-full object-cover', className)}
     />
   );
 }

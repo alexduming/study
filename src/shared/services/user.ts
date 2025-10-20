@@ -1,12 +1,12 @@
 import { headers } from 'next/headers';
-import { desc, eq, inArray } from 'drizzle-orm';
+import { count, desc, eq, inArray } from 'drizzle-orm';
 
 import { getAuth } from '@/core/auth';
 import { db } from '@/core/db';
 import { user } from '@/config/db/schema';
 
 import { getRemainingCredits } from './credit';
-import { getUserPermissions, getUserRoles, Permission, Role } from './rbac';
+import { Permission, Role } from './rbac';
 
 export interface UserCredits {
   remainingCredits: number;
@@ -52,6 +52,11 @@ export async function getUsers({
     .offset((page - 1) * limit);
 
   return result;
+}
+
+export async function getUsersCount() {
+  const [result] = await db().select({ count: count() }).from(user);
+  return result?.count || 0;
 }
 
 export async function getUserByUserIds(userIds: string[]) {

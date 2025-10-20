@@ -5,14 +5,19 @@ import { Header, Main, MainHeader } from '@/shared/blocks/dashboard';
 import { TableCard } from '@/shared/blocks/table';
 import { Badge } from '@/shared/components/ui/badge';
 import { getUserRoles } from '@/shared/services/rbac';
-import { getUsers, User } from '@/shared/services/user';
+import { getUsers, getUsersCount, User } from '@/shared/services/user';
 import { Crumb } from '@/shared/types/blocks/common';
 import { type Table } from '@/shared/types/blocks/table';
 
 export default async function AdminUsersPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{
+    page?: number;
+    pageSize?: number;
+  }>;
 }) {
   const { locale } = await params;
 
@@ -25,7 +30,15 @@ export default async function AdminUsersPage({
 
   const t = await getTranslations('admin.users');
 
-  const users = await getUsers();
+  const { page: pageNum, pageSize } = await searchParams;
+  const page = pageNum || 1;
+  const limit = pageSize || 30;
+
+  const total = await getUsersCount();
+  const users = await getUsers({
+    page,
+    limit,
+  });
 
   const crumbs: Crumb[] = [
     { title: t('list.crumbs.admin'), url: '/admin' },
@@ -88,6 +101,11 @@ export default async function AdminUsersPage({
       },
     ],
     data: users,
+    pagination: {
+      total,
+      page,
+      limit,
+    },
   };
 
   return (
