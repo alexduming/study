@@ -17,7 +17,7 @@ export function FollowUp({
   chatInstance: UseChatHelpers<UIMessage>;
 }) {
   const params = useParams();
-
+  const { chat } = useChatContext();
   const {
     messages,
     sendMessage,
@@ -25,11 +25,6 @@ export function FollowUp({
     error: chatError,
     setMessages,
   } = chatInstance;
-  const { chat } = useChatContext();
-  if (!chat) {
-    return null;
-  }
-
   const lastErrorRef = useRef<string | null>(null);
 
   const appendErrorMessage = useCallback(
@@ -145,6 +140,10 @@ export function FollowUp({
       submitMessage(chat.content, chat.metadata ?? {});
     }
   }, [params.id, chat, submitMessage, messages.length]);
+
+  if (!chat) {
+    return null;
+  }
 
   return <ChatInput handleSubmit={submitMessage} status={status} />;
 }

@@ -19,6 +19,7 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
   // current chat
   const [chat, setChat] = useState<Chat | null>(null);
 
+  // user chats
   const [chats, setChats] = useState<Chat[]>([]);
 
   return (

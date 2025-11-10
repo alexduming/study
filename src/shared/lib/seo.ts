@@ -153,5 +153,3 @@ async function getCanonicalUrl(canonicalUrl: string, locale: string) {
 
   return canonicalUrl;
 }
-
-export const defaultMetadata = getMetadata();
