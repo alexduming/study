@@ -1,0 +1,103 @@
+{
+  "title": "学习播客 - 智能学习",
+  "subtitle": "将您的笔记转换为引人入胜的音频播客，随时随地学习",
+  "upload": {
+    "title": "将笔记转换为音频",
+    "subtitle": "适合在通勤、锻炼或休息时学习",
+    "drag_text": "拖拽学习文件到此处或浏览",
+    "supported_formats": "支持所有格式：TXT, PDF, DOC, MD，或直接粘贴文本",
+    "file_selected": "已选择：",
+    "processing": "AI正在创建您的学习播客...",
+    "upload_button": "选择学习文件"
+  },
+  "settings": {
+    "title": "播客设置",
+    "voice_style": {
+      "label": "语音风格",
+      "professional": "专业播音",
+      "friendly": "友好对话",
+      "academic": "学术讲解"
+    },
+    "duration": {
+      "label": "播客时长",
+      "short": "简短 (3-5分钟)",
+      "medium": "中等 (5-10分钟)",
+      "long": "详细 (10-15分钟)"
+    },
+    "language": {
+      "label": "播客语言",
+      "chinese": "中文",
+      "english": "英文"
+    },
+    "speed": {
+      "label": "语速",
+      "slow": "缓慢",
+      "normal": "正常",
+      "fast": "快速"
+    }
+  },
+  "generate": {
+    "title": "生成播客",
+    "button": "开始生成播客",
+    "generating": "AI 正在生成播客...",
+    "error": "生成播客时出错，请重试",
+    "success": "播客生成成功！"
+  },
+  "player": {
+    "title": "播客播放器",
+    "play": "播放",
+    "pause": "暂停",
+    "stop": "停止",
+    "download": "下载音频",
+    "share": "分享播客",
+    "current_time": "当前时间",
+    "total_time": "总时长",
+    "no_audio": "暂无音频，请先生成播客"
+  },
+  "history": {
+    "title": "历史记录",
+    "subtitle": "您之前生成的所有播客",
+    "no_history": "暂无历史记录",
+    "play": "播放",
+    "download": "下载",
+    "delete": "删除",
+    "regenerate": "重新生成"
+  },
+  "features": {
+    "ai_script": {
+      "title": "AI 脚本生成",
+      "description": "智能生成适合播客的对话脚本"
+    },
+    "multiple_voices": {
+      "title": "多种语音风格",
+      "description": "专业、友好、学术等多种风格可选"
+    },
+    "background_music": {
+      "title": "背景音乐",
+      "description": "自动添加适合的背景音乐"
+    },
+    "export_options": {
+      "title": "多种导出格式",
+      "description": "支持 MP3、WAV 等常见音频格式"
+    }
+  },
+  "tips": {
+    "quality": "提示：上传的笔记质量越高，生成的播客质量越好",
+    "length": "建议：每次上传内容不超过 2000 字以获得最佳效果",
+    "format": "格式：结构化的笔记比纯文本效果更好"
+  },
+  "buttons": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "reset": "重置",
+    "save": "保存",
+    "close": "关闭"
+  },
+  "errors": {
+    "upload_failed": "文件上传失败",
+    "generation_failed": "播客生成失败",
+    "invalid_format": "不支持的文件格式",
+    "file_too_large": "文件太大，请选择小于 10MB 的文件",
+    "network_error": "网络错误，请检查连接"
+  }
+}

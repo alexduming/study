@@ -1,127 +1,127 @@
 {
   "metadata": {
-    "title": "Pricing",
-    "description": "Start with a plan"
+    "title": "Study Hacks Pricing - Study Smarter",
+    "description": "Choose your plan and start studying smarter with AI"
   },
   "pricing": {
     "id": "pricing",
-    "sr_only_title": "ShipAny Pricing",
-    "title": "Pricing",
-    "description": "Get all features of ShipAny, Ship your AI SaaS startups fast.",
+    "sr_only_title": "Study Hacks Pricing Plans",
+    "title": "Pricing Plans",
+    "description": "Study smarter, not harder. Choose the plan that fits your learning goals.",
     "groups": [
-      {
-        "name": "one-time",
-        "title": "Pay as you go"
-      },
       {
         "name": "monthly",
         "title": "Monthly",
         "is_featured": true,
-        "label": "save 15%"
+        "label": "Most Popular"
       },
       {
         "name": "yearly",
-        "title": "Annually"
+        "title": "Annually",
+        "label": "Save 20%"
       }
     ],
     "items": [
       {
-        "title": "Starter",
-        "description": "Get started with your first SaaS startup.",
+        "title": "Free",
+        "description": "Perfect for trying out Study Hacks.",
         "features_title": "Includes",
         "features": [
-          "100 credits, valid for 1 month",
-          "NextJS boilerplate",
-          "SEO-friendly structure",
-          "Payment with Stripe",
-          "Data storage with Supabase",
-          "Google Oauth & One-Tap Login",
-          "i18n support"
+          "10 AI credits per month",
+          "Basic note generation",
+          "Limited flashcard creation",
+          "Simple quiz generation",
+          "5MB file upload limit",
+          "Community support"
         ],
-        "interval": "one-time",
-        "amount": 9900,
+        "interval": "month",
+        "amount": 0,
         "currency": "USD",
-        "price": "$99",
-        "original_price": "$199",
+        "price": "Free",
+        "original_price": "",
         "unit": "",
         "is_featured": false,
-        "tip": "Pay once. Build unlimited projects!",
+        "tip": "Great for getting started with AI-powered studying",
         "button": {
-          "title": "Get ShipAny",
+          "title": "Start Free",
           "url": "/#pricing",
           "icon": "RiFlashlightFill"
         },
-        "product_id": "starter",
-        "product_name": "ShipAny Boilerplate Starter",
-        "credits": 100,
+        "product_id": "free",
+        "product_name": "Study Hacks Free Plan",
+        "credits": 10,
         "valid_days": 30,
-        "group": "one-time"
+        "group": "monthly",
+        "plan_name": "Free"
       },
       {
-        "title": "Standard",
-        "description": "Ship Fast with your SaaS Startups.",
-        "label": "Popular",
-        "features_title": "Everything in Starter, plus",
+        "title": "Student",
+        "description": "Perfect for serious students who want to excel.",
+        "label": "Most Popular",
+        "features_title": "Everything in Free, plus",
         "features": [
-          "200 credits, valid for 3 month",
-          "Deploy with Vercel or Cloudflare",
-          "Generation of Privacy & Terms",
-          "Google Analytics Integration",
-          "Google Search Console Integration",
-          "Discord community",
-          "Technical support for your first ship",
-          "Lifetime updates"
+          "500 AI credits per month",
+          "Advanced AI note generation",
+          "Unlimited flashcards & quizzes",
+          "Spaced repetition algorithm",
+          "100MB file upload limit",
+          "Study podcast generation",
+          "Progress tracking & analytics",
+          "Priority email support"
         ],
-        "interval": "one-time",
-        "amount": 19900,
+        "interval": "month",
+        "amount": 999,
         "currency": "USD",
-        "price": "$199",
-        "original_price": "$299",
-        "unit": "",
+        "price": "$9.99",
+        "original_price": "",
+        "unit": "/ month",
         "is_featured": true,
-        "tip": "Pay once. Build unlimited projects!",
+        "tip": "Study smarter with unlimited AI tools",
         "button": {
-          "title": "Get ShipAny",
+          "title": "Start Free Trial",
           "url": "/#pricing",
           "icon": "RiFlashlightFill"
         },
-        "product_id": "standard",
-        "product_name": "ShipAny Boilerplate Standard",
-        "credits": 200,
-        "valid_days": 90,
-        "group": "one-time"
+        "product_id": "student",
+        "product_name": "Study Hacks Student Plan",
+        "credits": 500,
+        "valid_days": 30,
+        "group": "monthly",
+        "plan_name": "Student"
       },
       {
-        "title": "Premium",
-        "description": "Ship Any AI SaaS Startups.",
-        "features_title": "Everything in Standard, plus",
+        "title": "Pro",
+        "description": "Maximum power for students who want the best results.",
+        "features_title": "Everything in Student, plus",
         "features": [
-          "300 credits, valid for 1 year",
-          "Business Functions with AI",
-          "User Center",
-          "Credits System",
-          "API Sales for your SaaS",
-          "Admin System",
-          "Priority Technical Support"
+          "Unlimited AI credits",
+          "Advanced study analytics",
+          "Custom learning paths",
+          "AI study assistant",
+          "500MB file upload limit",
+          "Collaborative study groups",
+          "Offline study mode",
+          "Priority 24/7 support"
         ],
-        "interval": "one-time",
-        "amount": 29900,
+        "interval": "month",
+        "amount": 1999,
         "currency": "USD",
-        "price": "$299",
-        "original_price": "$399",
-        "unit": "",
+        "price": "$19.99",
+        "original_price": "",
+        "unit": "/ month",
         "is_featured": false,
-        "tip": "Pay once. Build unlimited projects!",
+        "tip": "Ultimate study experience with unlimited everything",
         "button": {
-          "title": "Get ShipAny",
+          "title": "Go Pro",
           "url": "/#pricing",
           "icon": "RiFlashlightFill"
         },
-        "product_id": "premium",
-        "product_name": "ShipAny Boilerplate Premium",
-        "credits": 300,
-        "valid_days": 365,
-        "group": "one-time"
+        "product_id": "pro",
+        "product_name": "Study Hacks Pro Plan",
+        "credits": 9999,
+        "valid_days": 30,
+        "group": "monthly",
+        "plan_name": "Pro"
       },
       {
         "title": "Starter",

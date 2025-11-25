@@ -1,3 +1,3 @@
-export const themeNames = ['default'];
+export const themeNames = ['default', 'turbo'];
 
-export const defaultTheme = 'default';
+export const defaultTheme = 'turbo';

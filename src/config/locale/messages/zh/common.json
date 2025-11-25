@@ -1,14 +1,14 @@
 {
   "metadata": {
-    "title": "ShipAny 模板二",
-    "description": "ShipAny 是用于构建 AI SaaS 创业项目的 NextJS 脚手架。提供丰富模板和组件，助您快速上线产品。",
-    "keywords": "shipany, shipany-boilerplate, shipany-template-two-demo"
+    "title": "Study Hacks - AI智能学习助手",
+    "description": "Study Hacks 是一款AI驱动的学习平台，将PDF、视频、讲义转换为智能笔记、闪卡和测验。用AI让学习更高效。",
+    "keywords": "study hacks, AI学习, 智能学习, 学习助手, 闪卡, 测题生成, AI笔记"
   },
   "sign": {
-    "sign_in_title": "登录",
-    "sign_in_description": "登录到您的账户",
-    "sign_up_title": "注册",
-    "sign_up_description": "创建一个新账户",
+    "sign_in_title": "登录开始智能学习",
+    "sign_in_description": "欢迎回来！继续您的学习之旅",
+    "sign_up_title": "开启智能学习",
+    "sign_up_description": "加入50,000+学生，用AI改变学习方式",
     "email_title": "邮箱",
     "email_placeholder": "请输入您的邮箱",
     "password_title": "密码",
@@ -27,8 +27,8 @@
     "billing_title": "账单",
     "name_title": "姓名",
     "name_placeholder": "请输入您的姓名",
-    "admin_title": "管理后台",
-    "credits_title": "积分: {credits}"
+    "admin_title": "学习中心",
+    "credits_title": "AI积分: {credits}"
   },
   "payment": {
     "choose_payment_method": "选择支付方式",

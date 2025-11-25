@@ -8,17 +8,17 @@
         "icon": "User"
       },
       {
-        "title": "账单",
+        "title": "订阅管理",
         "url": "/settings/billing",
         "icon": "CreditCard"
       },
       {
-        "title": "支付",
+        "title": "支付方式",
         "url": "/settings/payments",
         "icon": "DollarSign"
       },
       {
-        "title": "积分",
+        "title": "AI积分",
         "url": "/settings/credits",
         "icon": "Coins"
       },

@@ -1,0 +1,59 @@
+{
+  "title": "AI Flashcards - Study Smarter",
+  "subtitle": "Scientifically-proven spaced repetition flashcards powered by AI to boost your memory and learning speed",
+  "stats": {
+    "total_cards": "Total Cards",
+    "due_cards": "Due for Review",
+    "mastered_cards": "Mastered",
+    "learning_cards": "Learning"
+  },
+  "modes": {
+    "review": "Review Mode",
+    "new_cards": "New Cards",
+    "all_cards": "All Cards"
+  },
+  "card": {
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "review_count": "Review #",
+    "click_to_flip": "Click to see answer",
+    "click_to_return": "Click to return to question"
+  },
+  "rating": {
+    "again": "Again",
+    "hard": "Hard",
+    "good": "Good",
+    "easy": "Easy"
+  },
+  "empty_state": {
+    "no_due_cards": "No cards due for review",
+    "no_due_cards_desc": "Congratulations! You've reviewed all due cards",
+    "no_cards": "No cards available",
+    "no_cards_desc": "Start creating your first flashcard",
+    "create_cards": "Create New Cards"
+  },
+  "create": {
+    "title": "Create Smart Flashcards",
+    "placeholder": "Paste your study notes, chapter content, or any learning material to convert into intelligent flashcards...",
+    "error": "Please add content to create flashcards",
+    "generation_error": "Having trouble creating flashcards. Please try again.",
+    "ai_generating": "AI is building your flashcards...",
+    "generate": "Create Flashcards"
+  },
+  "quick_actions": {
+    "ai_generate": "AI Generate Flashcards",
+    "reset_progress": "Reset Progress",
+    "view_stats": "View Stats"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "close": "Close"
+  },
+  "errors": {
+    "generation_failed": "Error generating flashcards",
+    "invalid_content": "Invalid content, please re-enter"
+  }
+}

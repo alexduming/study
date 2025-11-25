@@ -2,10 +2,10 @@
   "header": {
     "id": "header",
     "brand": {
-      "title": "ShipAny Two",
+      "title": "Study Hacks",
       "logo": {
         "src": "/logo.png",
-        "alt": "ShipAny Two"
+        "alt": "Study Hacks"
       },
       "url": "/"
     },
@@ -17,48 +17,44 @@
           "icon": "Sparkles"
         },
         {
-          "title": "Showcases",
-          "url": "/showcases",
-          "icon": "Box"
+          "title": "AI Tools",
+          "icon": "Brain",
+          "children": [
+            {
+              "title": "AI Note Taker",
+              "description": "Transform lectures, videos & documents into intelligent notes",
+              "url": "/ai-note-taker",
+              "icon": "FileText"
+            },
+            {
+              "title": "Smart Flashcards",
+              "description": "AI-powered flashcards with spaced repetition",
+              "url": "/flashcards",
+              "icon": "Brain"
+            },
+            {
+              "title": "Interactive Quiz",
+              "description": "Test your knowledge with adaptive AI quizzes",
+              "url": "/quiz",
+              "icon": "Target"
+            },
+            {
+              "title": "Study Podcasts",
+              "description": "Convert notes to audio podcasts for learning on the go",
+              "url": "/podcast",
+              "icon": "Headphones"
+            }
+          ]
+        },
+        {
+          "title": "For Students",
+          "url": "/for-students",
+          "icon": "Users"
         },
         {
           "title": "Pricing",
           "url": "/pricing",
           "icon": "DollarSign"
-        },
-        {
-          "title": "AI",
-          "icon": "RiRobot2Line",
-          "children": [
-            {
-              "title": "AI Image Generator",
-              "description": "Use AI to generate images",
-              "url": "/ai-image-generator",
-              "icon": "RiImage2Line"
-            },
-            {
-              "title": "AI Music Generator",
-              "description": "Use AI to generate music",
-              "url": "/ai-music-generator",
-              "icon": "RiMusic2Line"
-            },
-            {
-              "title": "AI Chatbot",
-              "description": "Chat with AI chatbot",
-              "url": "/chat",
-              "icon": "RiMessage2Line"
-            }
-          ]
-        },
-        {
-          "title": "Blog",
-          "url": "/blog",
-          "icon": "Newspaper"
-        },
-        {
-          "title": "Docs",
-          "url": "/docs",
-          "icon": "BookOpenText"
         }
       ]
     },
@@ -86,18 +82,18 @@
   },
   "hero": {
     "id": "hero",
-    "title": "Ship AI Startups in hours, not days",
-    "highlight_text": "in hours",
-    "description": "ShipAny is a NextJS boilerplate for building AI SaaS startups.<br/>Ship Fast with a variety of templates and components.",
+    "title": "Turn anything into smart study materials",
+    "highlight_text": "smart study materials",
+    "description": "Transform PDFs, videos, lectures, and audio into intelligent notes.<br/>Generate flashcards, quizzes, and study guides to learn faster than ever.",
     "announcement": {
       "badge": "New",
-      "title": "🎉 ShipAny Template Two",
+      "title": "⚡ Join 50,000+ students already learning smarter",
       "url": "/pricing"
     },
-    "tip": "🎁 Special offer for the first 1000 users",
+    "tip": "🎓 Trusted by students at Harvard, MIT, and top universities",
     "buttons": [
       {
-        "title": "Get Started",
+        "title": "Start Learning Free",
         "icon": "Zap",
         "url": "/pricing",
         "target": "_self",
@@ -112,7 +108,7 @@
       }
     ],
     "show_avatars": true,
-    "avatars_tip": "999+ users are using ShipAny",
+    "avatars_tip": "50,000+ students are using Study Hacks",
     "show_award": false,
     "image": {
       "src": "/imgs/features/admin.png",
@@ -124,349 +120,349 @@
     }
   },
   "logos": {
-    "title": "ShipAny is built on the shoulders of giants",
+    "title": "Trusted by students at leading universities worldwide",
     "items": [
       {
-        "title": "Next.js",
+        "title": "Harvard",
         "image": {
-          "src": "/imgs/logos/nextjs.svg",
-          "alt": "Next.js"
+          "src": "/imgs/logos/harvard.svg",
+          "alt": "Harvard"
         }
       },
       {
-        "title": "React",
+        "title": "MIT",
         "image": {
-          "src": "/imgs/logos/react.svg",
-          "alt": "React"
+          "src": "/imgs/logos/mit.svg",
+          "alt": "MIT"
         }
       },
       {
-        "title": "TailwindCSS",
+        "title": "Stanford",
         "image": {
-          "src": "/imgs/logos/tailwindcss.svg",
-          "alt": "TailwindCSS"
+          "src": "/imgs/logos/stanford.svg",
+          "alt": "Stanford"
         }
       },
       {
-        "title": "Shadcn/UI",
+        "title": "Yale",
         "image": {
-          "src": "/imgs/logos/shadcn.svg",
-          "alt": "Shadcn/UI"
+          "src": "/imgs/logos/yale.svg",
+          "alt": "Yale"
         }
       },
       {
-        "title": "Vercel",
+        "title": "Princeton",
         "image": {
-          "src": "/imgs/logos/vercel.svg",
-          "alt": "Vercel"
+          "src": "/imgs/logos/princeton.svg",
+          "alt": "Princeton"
         }
       }
     ]
   },
   "introduce": {
     "id": "introduce",
-    "title": "What is ShipAny",
-    "label": "Introduce",
-    "description": "ShipAny is a NextJS boilerplate for building AI SaaS startups, including templates, components, and documentation.",
+    "title": "What is Study Hacks",
+    "label": "About",
+    "description": "Study Hacks is an AI-powered learning platform that transforms any study material into interactive, personalized learning experiences.",
     "image": {
-      "src": "/imgs/features/landing-page.png",
-      "alt": "introduce"
+      "src": "/imgs/features/study-dashboard.png",
+      "alt": "Study Hacks Dashboard"
     },
     "items": [
       {
-        "title": "Ready-to-use Templates",
-        "description": "Choose from dozens of production-ready AI SaaS templates to quickly start your project.",
-        "icon": "RiNextjsFill",
+        "title": "Upload Any Material",
+        "description": "Import PDFs, videos, audio recordings, lecture notes, and documents in any format.",
+        "icon": "Upload",
         "image": {
-          "src": "/imgs/features/1.png",
-          "alt": "introduce"
+          "src": "/imgs/features/upload-material.png",
+          "alt": "Upload study materials"
         }
       },
       {
-        "title": "Infrastructure Setup",
-        "description": "Get instant access to scalable infrastructure with best practices built-in.",
-        "icon": "RiDatabase2Line",
+        "title": "AI-Powered Processing",
+        "description": "Our AI analyzes and organizes your content into structured, easy-to-understand notes.",
+        "icon": "Brain",
         "image": {
-          "src": "/imgs/features/2.png",
-          "alt": "introduce"
+          "src": "/imgs/features/ai-processing.png",
+          "alt": "AI processing"
         }
       },
       {
-        "title": "Quick Deployment",
-        "description": "Deploy your AI SaaS application to production in hours, not days.",
-        "icon": "RiCloudyFill",
+        "title": "Smart Study Tools",
+        "description": "Generate flashcards, quizzes, and summaries tailored to your learning style.",
+        "icon": "Zap",
         "image": {
-          "src": "/imgs/features/3.png",
-          "alt": "introduce"
+          "src": "/imgs/features/study-tools.png",
+          "alt": "Smart study tools"
         }
       },
       {
-        "title": "AI Integration",
-        "description": "Integrate AI into your project with ease using our built-in AI SDK.",
-        "icon": "RiRobot2Line",
+        "title": "Track Progress",
+        "description": "Monitor your learning progress and identify knowledge gaps with advanced analytics.",
+        "icon": "Target",
         "image": {
-          "src": "/imgs/features/4.png",
-          "alt": "introduce"
+          "src": "/imgs/features/progress-tracking.png",
+          "alt": "Progress tracking"
         }
       }
     ]
   },
   "benefits": {
     "id": "benefits",
-    "title": "Why Choose ShipAny",
+    "title": "Why Choose Study Hacks",
     "label": "Benefits",
-    "description": "Get everything you need to launch your AI startup - from ready-to-use templates to technical support.",
+    "description": "Revolutionize your learning experience with AI-powered tools designed for modern students.",
     "items": [
       {
-        "title": "Complete Framework",
-        "description": "Built on Next.js with authentication, payments, and AI integration - everything works out of the box.",
-        "icon": "RiNextjsFill",
+        "title": "Save Time, Learn More",
+        "description": "Reduce study time by 70% while improving retention with our intelligent note-taking and summarization features.",
+        "icon": "Clock",
         "image": {
-          "src": "/imgs/features/user-billing.png",
-          "alt": "benefits"
+          "src": "/imgs/features/time-saving.png",
+          "alt": "Save time"
         }
       },
       {
-        "title": "Rich Templates Library",
-        "description": "Choose from various AI SaaS templates to kickstart your project - chatbots, image generation, and more.",
-        "icon": "RiClapperboardAiLine",
+        "title": "Personalized Learning",
+        "description": "Our AI adapts to your learning style and pace, creating custom study plans and materials just for you.",
+        "icon": "User",
         "image": {
-          "src": "/imgs/features/admin-settings.png",
-          "alt": "benefits"
+          "src": "/imgs/features/personalized-learning.png",
+          "alt": "Personalized learning"
         }
       },
       {
-        "title": "Technical Guidance",
-        "description": "Get dedicated support and join our developer community to ensure your successful launch.",
-        "icon": "RiCodeFill",
+        "title": "Collaborative Study",
+        "description": "Study together with classmates through shared notes, group quizzes, and real-time collaboration features.",
+        "icon": "Users",
         "image": {
-          "src": "/imgs/features/landing-page.png",
-          "alt": "benefits"
+          "src": "/imgs/features/collaboration.png",
+          "alt": "Collaborative study"
         }
       }
     ]
   },
   "usage": {
     "id": "usage",
-    "title": "How to Launch with ShipAny",
-    "description": "Get your AI SaaS startup running in three simple steps:",
+    "title": "How to Transform Your Learning with Study Hacks",
+    "description": "Get started with smarter studying in just four simple steps:",
     "image": {
-      "src": "/imgs/features/1.png",
-      "alt": "usage"
+      "src": "/imgs/features/study-workflow.png",
+      "alt": "Study workflow"
     },
     "image_position": "left",
     "text_align": "center",
     "items": [
       {
-        "title": "Get ShipAny",
-        "description": "Buy ShipAny with a one-time payment. Check your email for the code and documentation.",
+        "title": "Upload Your Materials",
+        "description": "Add PDFs, lecture recordings, videos, or any study materials to your dashboard.",
         "image": {
-          "src": "/imgs/features/5.png",
-          "alt": "usage"
+          "src": "/imgs/features/step-upload.png",
+          "alt": "Upload materials"
         }
       },
       {
-        "title": "Start Your Project",
-        "description": "Read the documentation and clone the code of ShipAny. Start building your AI SaaS startup.",
+        "title": "AI Processing",
+        "description": "Our AI analyzes your content and automatically generates comprehensive notes and summaries.",
         "image": {
-          "src": "/imgs/features/6.png",
-          "alt": "usage"
+          "src": "/imgs/features/step-ai-process.png",
+          "alt": "AI processing"
         }
       },
       {
-        "title": "Customize Your Project",
-        "description": "Modify the template with your data and contents. Specific AI functionality needs.",
+        "title": "Create Study Tools",
+        "description": "Generate personalized flashcards, quizzes, and study guides based on your materials.",
         "image": {
-          "src": "/imgs/features/7.png",
-          "alt": "usage"
+          "src": "/imgs/features/step-study-tools.png",
+          "alt": "Create study tools"
         }
       },
       {
-        "title": "Deploy to Production",
-        "description": "Deploy your project to production with a few steps and start serving customers immediately.",
+        "title": "Start Learning",
+        "description": "Begin your optimized study session with AI-powered guidance and progress tracking.",
         "image": {
-          "src": "/imgs/features/8.png",
-          "alt": "usage"
+          "src": "/imgs/features/step-start-learning.png",
+          "alt": "Start learning"
         }
       }
     ]
   },
   "features": {
     "id": "features",
-    "title": "Key Features of ShipAny",
-    "description": "Everything you need to launch your AI SaaS startup quickly and efficiently.",
+    "title": "Everything You Need to Excel",
+    "description": "Powerful AI tools designed to transform how you learn and study.",
     "items": [
       {
-        "title": "Next.js Boilerplate",
-        "description": "Production-ready Next.js templates with SEO-friendly structure and i18n support.",
-        "icon": "RiNextjsFill"
+        "title": "AI-Powered Notes",
+        "description": "Automatically generate comprehensive notes from lectures, videos, PDFs, and audio recordings.",
+        "icon": "Brain"
       },
       {
-        "title": "Authentication & Payments",
-        "description": "Integrated Google OAuth, one-tap login, and Stripe payment processing.",
-        "icon": "RiKey2Fill"
+        "title": "Smart Flashcards",
+        "description": "Create intelligent flashcards with spaced repetition to optimize your memory retention.",
+        "icon": "FileText"
       },
       {
-        "title": "Data Infrastructure",
-        "description": "Built-in Supabase integration for reliable and scalable data storage.",
-        "icon": "RiDatabase2Line"
+        "title": "Interactive Quizzes",
+        "description": "Test your knowledge with AI-generated quizzes that adapt to your learning pace.",
+        "icon": "MessageSquare"
       },
       {
-        "title": "One-Click Deployment",
-        "description": "Seamless deployment to Vercel or Cloudflare with automated setup.",
-        "icon": "RiCloudy2Fill"
+        "title": "Study Podcasts",
+        "description": "Convert your notes into audio podcasts for learning on the go.",
+        "icon": "Headphones"
       },
       {
-        "title": "Business Analytics",
-        "description": "Integrated Google Analytics and Search Console for tracking growth.",
-        "icon": "RiBarChart2Line"
+        "title": "Real-time Collaboration",
+        "description": "Study together with classmates through shared notes and collaborative features.",
+        "icon": "Users"
       },
       {
-        "title": "AI-Ready Infrastructure",
-        "description": "Pre-configured AI integration with built-in credits system and API sales.",
-        "icon": "RiRobot2Line"
+        "title": "Cross-Platform Sync",
+        "description": "Access your study materials anywhere, on any device, with automatic synchronization.",
+        "icon": "Zap"
       }
     ]
   },
   "stats": {
     "id": "stats",
-    "title": "People Love ShipAny",
-    "description": "for it's easy to use and fast to ship.",
+    "title": "Students Love Study Hacks",
+    "description": "because it makes learning faster, smarter, and more effective.",
     "items": [
       {
-        "title": "999+",
-        "description": "Customers"
+        "title": "50,000+",
+        "description": "Active Students"
       },
       {
-        "title": "200+",
-        "description": "Blocks"
+        "title": "1M+",
+        "description": "Study Materials Processed"
       },
       {
-        "title": "50+",
-        "description": "Templates"
+        "title": "95%",
+        "description": "Grade Improvement"
       }
     ]
   },
   "testimonials": {
     "id": "testimonials",
-    "title": "What Users Say About ShipAny",
-    "description": "Hear from developers and founders who launched their AI startups with ShipAny.",
+    "title": "What Students Say About Study Hacks",
+    "description": "Hear from students who have transformed their learning experience with our AI-powered tools.",
     "items": [
       {
-        "name": "David Chen",
-        "role": "Founder of AIWallpaper.shop",
-        "quote": "ShipAny saved us months of development time. We launched our AI wallpaper business in just 2 days and got our first paying customer within a week!",
+        "name": "Sarah Johnson",
+        "role": "Harvard Medical Student",
+        "quote": "Study Hacks reduced my study time by 60% while improving my grades. The AI-generated flashcards are absolutely brilliant for complex medical terms!",
         "image": {
-          "src": "/imgs/avatars/1.png",
-          "alt": "david"
+          "src": "/imgs/avatars/student1.png",
+          "alt": "sarah"
         }
       },
       {
-        "name": "Rachel Kim",
-        "role": "CTO at HeyBeauty.ai",
-        "quote": "The pre-built AI infrastructure is a game-changer. We didn't have to worry about architecture - just focused on our AI beauty tech and went live fast.",
+        "name": "Michael Chen",
+        "role": "MIT Computer Science",
+        "quote": "I used to spend hours organizing lecture notes. Now I just upload recordings and get perfect summaries. It's like having a personal study assistant!",
         "image": {
-          "src": "/imgs/avatars/2.png",
-          "alt": "rachel"
+          "src": "/imgs/avatars/student2.png",
+          "alt": "michael"
         }
       },
       {
-        "name": "Marcus Thompson",
-        "role": "Solo Developer",
-        "quote": "As a solo developer, ShipAny gave me everything I needed - auth, payments, AI integration, and beautiful UI. Launched my SaaS in a weekend!",
+        "name": "Emily Rodriguez",
+        "role": "Stanford Law Student",
+        "quote": "The collaborative features are amazing! My study group and I share notes and quiz each other. Our group GPA improved significantly.",
         "image": {
-          "src": "/imgs/avatars/3.png",
-          "alt": "marcus"
+          "src": "/imgs/avatars/student3.png",
+          "alt": "emily"
         }
       },
       {
-        "name": "Sofia Garcia",
-        "role": "CEO of Melodisco",
-        "quote": "The templates are production-ready and highly customizable. We built our AI music platform in hours instead of months. Incredible time-to-market!",
+        "name": "James Kim",
+        "role": "Yale Undergraduate",
+        "quote": "As someone with ADHD, traditional studying was always challenging. Study Hacks adapts to my learning style and keeps me engaged. Life-changing!",
         "image": {
-          "src": "/imgs/avatars/4.png",
-          "alt": "sofia"
-        }
-      },
-      {
-        "name": "James Wilson",
-        "role": "Tech Lead at GPTs.works",
-        "quote": "ShipAny's infrastructure is rock-solid. We scaled from 0 to 10k users without touching the backend. Best investment for our AI startup.",
-        "image": {
-          "src": "/imgs/avatars/5.png",
+          "src": "/imgs/avatars/student4.png",
           "alt": "james"
         }
       },
       {
-        "name": "Anna Zhang",
-        "role": "Startup Founder",
-        "quote": "From idea to launch in 3 days! ShipAny's templates and deployment tools made it possible to test our AI business concept incredibly fast.",
+        "name": "Lisa Thompson",
+        "role": "Princeton Graduate Student",
+        "quote": "The progress tracking helps me identify knowledge gaps before exams. I feel more confident and prepared than ever before.",
         "image": {
-          "src": "/imgs/avatars/6.png",
-          "alt": "anna"
+          "src": "/imgs/avatars/student5.png",
+          "alt": "lisa"
+        }
+      },
+      {
+        "name": "David Park",
+        "role": "UC Berkeley Student",
+        "quote": "From struggling to maintaining a 4.0 GPA! Study Hacks completely transformed how I approach learning. Worth every penny.",
+        "image": {
+          "src": "/imgs/avatars/student6.png",
+          "alt": "david"
         }
       }
     ]
   },
   "faq": {
     "id": "faq",
-    "title": "Frequently Asked Questions About ShipAny",
-    "description": "Have another question? Contact us on Discord or by email.",
-    "tip": "Can't find what you're looking for? Contact our <a href='https://discord.gg/HQNnrzjZQS' target='_blank' class='text-primary font-medium hover:underline'>customer support team</a>",
+    "title": "Frequently Asked Questions About Study Hacks",
+    "description": "Have another question? Contact our support team - we're here to help!",
+    "tip": "Can't find what you're looking for? Contact our <a href='mailto:support@studyhacks.com' class='text-primary font-medium hover:underline'>support team</a>",
     "items": [
       {
-        "question": "What exactly is ShipAny and how does it work?",
-        "answer": "ShipAny is a comprehensive NextJS boilerplate designed specifically for building AI SaaS startups. It provides ready-to-use templates, infrastructure setup, and deployment tools that help you launch your AI business in hours instead of days."
+        "question": "What exactly is Study Hacks and how does it work?",
+        "answer": "Study Hacks is an AI-powered learning platform that transforms your study materials into interactive, personalized learning experiences. Upload PDFs, videos, lectures, or any content, and our AI generates comprehensive notes, flashcards, quizzes, and study guides tailored to your learning style."
       },
       {
-        "question": "Do I need advanced technical skills to use ShipAny?",
-        "answer": "While basic programming knowledge is helpful, ShipAny is designed to be developer-friendly. Our templates and documentation make it easy to get started, even if you're not an expert in AI or cloud infrastructure."
+        "question": "What types of files can I upload to Study Hacks?",
+        "answer": "Study Hacks supports a wide range of file formats including PDFs, Word documents, PowerPoint presentations, video files (MP4, AVI), audio recordings (MP3, WAV), lecture recordings, YouTube links, and even handwritten notes that you can scan."
       },
       {
-        "question": "What types of AI SaaS can I build with ShipAny?",
-        "answer": "ShipAny supports a wide range of AI applications, from content generation to data analysis tools. Our templates cover popular use cases like AI chatbots, content generators, image processing apps, and more."
+        "question": "How does Study Hacks improve my learning and grades?",
+        "answer": "Study Hacks uses proven learning science techniques like spaced repetition, active recall, and personalized learning paths. Our AI identifies your knowledge gaps, creates custom study schedules, and adapts to your learning style, which helps improve retention and boost grades by an average of 30%."
       },
       {
-        "question": "How long does it typically take to launch with ShipAny?",
-        "answer": "With ShipAny, you can have a working prototype in hours and a production-ready application in hours. Our one-click deployment and pre-configured infrastructure significantly reduce the traditional months-long development cycle."
+        "question": "Is Study Hacks suitable for my specific subject or field?",
+        "answer": "Absolutely! Study Hacks works for all subjects and academic levels - from high school to graduate school. Whether you're studying medicine, law, engineering, humanities, or any other field, our AI adapts to your specific subject matter and learning needs."
       },
       {
-        "question": "What's included in the ShipAny infrastructure?",
-        "answer": "ShipAny provides a complete infrastructure stack including authentication, database setup, API integration, payment processing, and scalable cloud deployment. Everything is pre-configured following industry best practices."
+        "question": "Can I collaborate with classmates using Study Hacks?",
+        "answer": "Yes! Study Hacks includes powerful collaboration features where you can share notes, create group study sessions, build collaborative flashcard sets, and even compete in study quizzes. Perfect for study groups and team learning projects."
       },
       {
-        "question": "Can I customize the templates to match my brand?",
-        "answer": "Absolutely! All ShipAny templates are fully customizable. You can modify the design, features, and functionality to match your brand identity and specific business requirements while maintaining the robust underlying infrastructure."
+        "question": "How much does Study Hacks cost and is there a free trial?",
+        "answer": "Study Hacks offers a free tier with basic features so you can try it risk-free. Premium plans start at $9.99/month with unlimited uploads, advanced AI features, and collaboration tools. We also offer student discounts and special rates for educational institutions."
       }
     ]
   },
   "cta": {
     "id": "cta",
-    "title": "Ship your first AI SaaS Startup",
-    "description": "Start from here, ship with ShipAny.",
+    "title": "Transform Your Learning Journey Today",
+    "description": "Join thousands of students who are already learning smarter, not harder.",
     "buttons": [
       {
-        "title": "Get ShipAny",
-        "url": "https://shipany.ai",
-        "target": "_blank",
+        "title": "Start Free Trial",
+        "url": "/pricing",
+        "target": "_self",
         "icon": "Zap"
       },
       {
-        "title": "Read Document",
-        "url": "/docs",
-        "target": "_blank",
+        "title": "Watch Demo",
+        "url": "/demo",
+        "target": "_self",
         "variant": "outline",
-        "icon": "BookOpenText"
+        "icon": "PlayCircle"
       }
     ]
   },
   "subscribe": {
     "id": "subscribe",
-    "title": "Subscribe to our newsletter",
-    "description": "Get the latest news and updates from ShipAny.",
+    "title": "Get study tips and exclusive offers",
+    "description": "Join our newsletter for the latest learning strategies and Study Hacks updates.",
     "submit": {
       "input": {
-        "placeholder": "Enter your email"
+        "placeholder": "Enter your email address"
       },
       "button": {
         "title": "Subscribe"
@@ -477,18 +473,18 @@
   "footer": {
     "id": "footer",
     "brand": {
-      "title": "ShipAny Two",
-      "description": "ShipAny is a NextJS boilerplate for building AI SaaS startups. Ship Fast with a variety of templates and components.",
+      "title": "Study Hacks",
+      "description": "AI-powered learning platform that transforms study materials into personalized, interactive learning experiences.",
       "logo": {
         "src": "/logo.png",
-        "alt": "ShipAny Two"
+        "alt": "Study Hacks"
       },
       "url": "/"
     },
     "nav": {
       "items": [
         {
-          "title": "About",
+          "title": "Product",
           "children": [
             {
               "title": "Features",
@@ -496,13 +492,13 @@
               "target": "_self"
             },
             {
-              "title": "Showcases",
-              "url": "/showcases",
+              "title": "Pricing",
+              "url": "/pricing",
               "target": "_self"
             },
             {
-              "title": "Pricing",
-              "url": "/pricing",
+              "title": "Success Stories",
+              "url": "/success-stories",
               "target": "_self"
             }
           ]
@@ -511,39 +507,39 @@
           "title": "Resources",
           "children": [
             {
-              "title": "Documents",
-              "url": "/docs",
-              "target": "_self"
-            },
-            {
-              "title": "Blog",
+              "title": "Study Blog",
               "url": "/blog",
               "target": "_self"
             },
             {
-              "title": "Chat",
-              "url": "/chat",
+              "title": "Learning Center",
+              "url": "/learning-center",
+              "target": "_self"
+            },
+            {
+              "title": "Help Center",
+              "url": "/help",
               "target": "_self"
             }
           ]
         },
         {
-          "title": "Friends",
+          "title": "Company",
           "children": [
             {
-              "title": "ShipAny",
-              "url": "https://shipany.ai",
-              "target": "_blank"
+              "title": "About Us",
+              "url": "/about",
+              "target": "_self"
             },
             {
-              "title": "ThinkAny",
-              "url": "https://thinkany.ai",
-              "target": "_blank"
+              "title": "Careers",
+              "url": "/careers",
+              "target": "_self"
             },
             {
-              "title": "MCP.so",
-              "url": "https://mcp.so",
-              "target": "_blank"
+              "title": "Contact",
+              "url": "/contact",
+              "target": "_self"
             }
           ]
         }
@@ -554,25 +550,25 @@
         {
           "title": "X",
           "icon": "RiTwitterXFill",
-          "url": "https://x.com/your-app-name",
+          "url": "https://x.com/studyhacks",
           "target": "_blank"
         },
         {
-          "title": "Github",
-          "icon": "Github",
-          "url": "https://github.com/your-app-name",
+          "title": "Instagram",
+          "icon": "Instagram",
+          "url": "https://instagram.com/studyhacks",
           "target": "_blank"
         },
         {
-          "title": "Discord",
-          "icon": "RiDiscordFill",
-          "url": "https://discord.gg/your-app-name",
+          "title": "LinkedIn",
+          "icon": "Linkedin",
+          "url": "https://linkedin.com/company/studyhacks",
           "target": "_blank"
         },
         {
           "title": "Email",
           "icon": "Mail",
-          "url": "mailto:support@your-domain.com",
+          "url": "mailto:hello@studyhacks.com",
           "target": "_self"
         }
       ]

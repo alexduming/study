@@ -2,63 +2,71 @@
   "header": {
     "id": "header",
     "brand": {
-      "title": "ShipAny Two",
+      "title": "Study Hacks",
       "logo": {
         "src": "/logo.png",
-        "alt": "ShipAny Two"
+        "alt": "Study Hacks"
       },
       "url": "/"
     },
     "nav": {
       "items": [
         {
-          "title": "功能亮点",
+          "title": "Features",
           "url": "/#features",
           "icon": "Sparkles"
         },
         {
-          "title": "案例展示",
-          "url": "/showcases",
-          "icon": "Box"
-        },
-        {
-          "title": "价格",
-          "url": "/pricing",
-          "icon": "DollarSign"
-        },
-        {
-          "title": "AI",
-          "icon": "RiRobot2Line",
+          "title": "AI Tools",
+          "icon": "Brain",
           "children": [
             {
-              "title": "AI 图片生成器",
-              "description": "使用 AI 生成图片",
-              "url": "/ai-image-generator",
-              "icon": "RiImage2Line"
+              "title": "AI Note Taker",
+              "description": "Transform lectures, videos & documents into intelligent notes",
+              "url": "/ai-note-taker",
+              "icon": "FileText"
             },
             {
-              "title": "AI 音乐生成器",
-              "description": "使用 AI 生成美妙的音乐",
-              "url": "/ai-music-generator",
-              "icon": "RiMusic2Line"
+              "title": "Smart Flashcards",
+              "description": "AI-powered flashcards with spaced repetition",
+              "url": "/flashcards",
+              "icon": "Brain"
             },
             {
-              "title": "AI 聊天机器人",
-              "description": "与 AI 聊天机器人对话",
-              "url": "/chat",
-              "icon": "RiMessage2Line"
+              "title": "Interactive Quiz",
+              "description": "Test your knowledge with adaptive AI quizzes",
+              "url": "/quiz",
+              "icon": "Target"
+            },
+            {
+              "title": "Study Podcasts",
+              "description": "Convert notes to audio podcasts for learning on the go",
+              "url": "/podcast",
+              "icon": "Headphones"
+            },
+            {
+              "title": "Real-time Collaboration",
+              "description": "Study together with classmates through shared notes and collaborative features",
+              "url": "/collaboration",
+              "icon": "Users"
+            },
+            {
+              "title": "Cross-Platform Sync",
+              "description": "Access your study materials anywhere, on any device, with automatic synchronization",
+              "url": "/sync",
+              "icon": "Cloud"
             }
           ]
         },
         {
-          "title": "博客",
-          "url": "/blog",
-          "icon": "Newspaper"
+          "title": "For Students",
+          "url": "/for-students",
+          "icon": "Users"
         },
         {
-          "title": "文档",
-          "url": "/docs",
-          "icon": "BookOpenText"
+          "title": "Pricing",
+          "url": "/pricing",
+          "icon": "DollarSign"
         }
       ]
     },
@@ -69,12 +77,12 @@
       "show_sign_out": true,
       "items": [
         {
-          "title": "账单",
+          "title": "Billing",
           "url": "/settings/billing",
           "icon": "CreditCard"
         },
         {
-          "title": "活动",
+          "title": "Activity",
           "url": "/activity",
           "icon": "Activity"
         }
@@ -86,18 +94,18 @@
   },
   "hero": {
     "id": "hero",
-    "title": "一小时快速上线你的 AI 创业项目",
-    "highlight_text": "一小时",
-    "description": "ShipAny 是用于构建 AI SaaS 创业项目的 NextJS 项目模板。<br/>集成常用功能，快速上线你的产品。",
+    "title": "你唯一需要的AI笔记助手",
+    "highlight_text": "AI笔记",
+    "description": "将您的讲座、视频和文档转换为智能学习笔记。<br/>生成闪卡、测验和播客，加速您的学习进程。",
     "announcement": {
-      "badge": "全新",
-      "title": "🎉 ShipAny 模板二已发布",
+      "badge": "新功能",
+      "title": "⚡ 已有 500,000+ 学生在学习中提速",
       "url": "/pricing"
     },
-    "tip": "🎁 前 1000 名用户特价优惠",
+    "tip": "🎓 受到全球顶尖大学学生的信赖",
     "buttons": [
       {
-        "title": "立即开始",
+        "title": "免费开始学习",
         "icon": "Zap",
         "url": "/pricing",
         "target": "_self",
@@ -112,7 +120,7 @@
       }
     ],
     "show_avatars": true,
-    "avatars_tip": "999+ 用户在使用 ShipAny 上站",
+    "avatars_tip": "999+ users are using ShipAny",
     "show_award": false,
     "image": {
       "src": "/imgs/features/admin.png",
@@ -124,7 +132,7 @@
     }
   },
   "logos": {
-    "title": "ShipAny 使用以下技术栈构建",
+    "title": "ShipAny is built on the shoulders of giants",
     "items": [
       {
         "title": "Next.js",
@@ -165,17 +173,17 @@
   },
   "introduce": {
     "id": "introduce",
-    "title": "ShipAny 是什么？",
-    "label": "产品简介",
-    "description": "ShipAny 是专为 AI SaaS 创业项目打造的 NextJS 脚手架，包括丰富模板、组件及文档。",
+    "title": "What is ShipAny",
+    "label": "Introduce",
+    "description": "ShipAny is a NextJS boilerplate for building AI SaaS startups, including templates, components, and documentation.",
     "image": {
       "src": "/imgs/features/landing-page.png",
       "alt": "introduce"
     },
     "items": [
       {
-        "title": "开箱即用的模板",
-        "description": "从数十款生产级 AI SaaS 模板中选择，快速开启你的项目。",
+        "title": "Ready-to-use Templates",
+        "description": "Choose from dozens of production-ready AI SaaS templates to quickly start your project.",
         "icon": "RiNextjsFill",
         "image": {
           "src": "/imgs/features/1.png",
@@ -183,8 +191,8 @@
         }
       },
       {
-        "title": "基础设施搭建",
-        "description": "内置最佳实践，即刻拥有可扩展的基础设施。",
+        "title": "Infrastructure Setup",
+        "description": "Get instant access to scalable infrastructure with best practices built-in.",
         "icon": "RiDatabase2Line",
         "image": {
           "src": "/imgs/features/2.png",
@@ -192,8 +200,8 @@
         }
       },
       {
-        "title": "极速部署",
-        "description": "AI SaaS 产品快速上线，助力小时级交付。",
+        "title": "Quick Deployment",
+        "description": "Deploy your AI SaaS application to production in hours, not days.",
         "icon": "RiCloudyFill",
         "image": {
           "src": "/imgs/features/3.png",
@@ -201,8 +209,8 @@
         }
       },
       {
-        "title": "AI 集成",
-        "description": "通过内置的 AI SDK，轻松为你的项目集成 AI 能力。",
+        "title": "AI Integration",
+        "description": "Integrate AI into your project with ease using our built-in AI SDK.",
         "icon": "RiRobot2Line",
         "image": {
           "src": "/imgs/features/4.png",
@@ -213,13 +221,13 @@
   },
   "benefits": {
     "id": "benefits",
-    "title": "为何选择 ShipAny",
-    "label": "产品优势",
-    "description": "你获得一切 AI 创业所需——从开箱即用的模板到专业技术支持。",
+    "title": "Why Choose ShipAny",
+    "label": "Benefits",
+    "description": "Get everything you need to launch your AI startup - from ready-to-use templates to technical support.",
     "items": [
       {
-        "title": "全栈解决方案",
-        "description": "基于 Next.js，集成认证、支付、AI，一站式开箱即用。",
+        "title": "Complete Framework",
+        "description": "Built on Next.js with authentication, payments, and AI integration - everything works out of the box.",
         "icon": "RiNextjsFill",
         "image": {
           "src": "/imgs/features/user-billing.png",
@@ -227,8 +235,8 @@
         }
       },
       {
-        "title": "丰富模板库",
-        "description": "多样的 AI SaaS 模板，点击即用，涵盖聊天、图像生成等多场景。",
+        "title": "Rich Templates Library",
+        "description": "Choose from various AI SaaS templates to kickstart your project - chatbots, image generation, and more.",
         "icon": "RiClapperboardAiLine",
         "image": {
           "src": "/imgs/features/admin-settings.png",
@@ -236,8 +244,8 @@
         }
       },
       {
-        "title": "专属技术指导",
-        "description": "享受专属技术支持与开发者社区，为你的成功保驾护航。",
+        "title": "Technical Guidance",
+        "description": "Get dedicated support and join our developer community to ensure your successful launch.",
         "icon": "RiCodeFill",
         "image": {
           "src": "/imgs/features/landing-page.png",
@@ -248,8 +256,8 @@
   },
   "usage": {
     "id": "usage",
-    "title": "三步使用 ShipAny 极速上线",
-    "description": "只需三步，快速开启你的 AI SaaS 创业之路：",
+    "title": "How to Launch with ShipAny",
+    "description": "Get your AI SaaS startup running in three simple steps:",
     "image": {
       "src": "/imgs/features/1.png",
       "alt": "usage"
@@ -258,32 +266,32 @@
     "text_align": "center",
     "items": [
       {
-        "title": "获取 ShipAny",
-        "description": "一次性购买 ShipAny，查收邮件获取代码与文档。",
+        "title": "Get ShipAny",
+        "description": "Buy ShipAny with a one-time payment. Check your email for the code and documentation.",
         "image": {
           "src": "/imgs/features/5.png",
           "alt": "usage"
         }
       },
       {
-        "title": "启动你的项目",
-        "description": "阅读说明文档，克隆 ShipAny 代码，开始开发你的 AI SaaS 项目。",
+        "title": "Start Your Project",
+        "description": "Read the documentation and clone the code of ShipAny. Start building your AI SaaS startup.",
         "image": {
           "src": "/imgs/features/6.png",
           "alt": "usage"
         }
       },
       {
-        "title": "个性化定制",
-        "description": "根据需求修改模板内容和数据，配置专属 AI 能力。",
+        "title": "Customize Your Project",
+        "description": "Modify the template with your data and contents. Specific AI functionality needs.",
         "image": {
           "src": "/imgs/features/7.png",
           "alt": "usage"
         }
       },
       {
-        "title": "部署上线",
-        "description": "简单几步将你的项目推向生产环境，立刻为客户提供服务。",
+        "title": "Deploy to Production",
+        "description": "Deploy your project to production with a few steps and start serving customers immediately.",
         "image": {
           "src": "/imgs/features/8.png",
           "alt": "usage"
@@ -293,166 +301,166 @@
   },
   "features": {
     "id": "features",
-    "title": "ShipAny 核心功能",
-    "description": "一切你需要的工具，助力 AI SaaS 项目高效上线。",
+    "title": "让您学业有成的一切工具",
+    "description": "强大的 AI 工具，专为改变您的学习和备考方式而设计。",
     "items": [
       {
-        "title": "Next.js 项目模板",
-        "description": "生产就绪、支持 SEO 与多语言的 Next.js 脚手架。",
-        "icon": "RiNextjsFill"
+        "title": "AI 驱动的笔记",
+        "description": "从讲座、视频、PDF 和录音中自动生成全面的笔记。",
+        "icon": "Brain"
       },
       {
-        "title": "身份认证与支付",
-        "description": "集成谷歌 OAuth、一键登录，以及 Stripe 支付。",
-        "icon": "RiKey2Fill"
+        "title": "智能闪卡",
+        "description": "创建具有间隔重复功能的智能闪卡，优化您的记忆保持。",
+        "icon": "FileText"
       },
       {
-        "title": "数据基础设施",
-        "description": "内置 Supabase，稳定可靠的数据存储。",
-        "icon": "RiDatabase2Line"
+        "title": "互动测验",
+        "description": "通过 AI 生成的测验测试您的知识，适应您的学习节奏。",
+        "icon": "MessageSquare"
       },
       {
-        "title": "一键部署",
-        "description": "自动化部署到 Vercel 或 Cloudflare，极速上线。",
-        "icon": "RiCloudy2Fill"
+        "title": "学习播客",
+        "description": "将您的笔记转换为音频播客，随时随地学习。",
+        "icon": "Headphones"
       },
       {
-        "title": "商业分析",
-        "description": "集成 Google Analytics、Search Console，助力业务增长。",
-        "icon": "RiBarChart2Line"
+        "title": "实时协作",
+        "description": "通过共享笔记和协作功能与同学一起学习。",
+        "icon": "Users"
       },
       {
-        "title": "AI 原生基础设施",
-        "description": "预置 AI 集成、积分系统和 API 售卖能力。",
-        "icon": "RiRobot2Line"
+        "title": "跨平台同步",
+        "description": "在任何设备上随时随地访问您的学习材料，自动同步。",
+        "icon": "Zap"
       }
     ]
   },
   "stats": {
     "id": "stats",
-    "title": "用户喜爱 ShipAny",
-    "description": "因其易用且上线飞快。",
+    "title": "学生们都喜欢 Turbo AI",
+    "description": "因为它易于使用且学习效果显著。",
     "items": [
       {
-        "title": "999+",
-        "description": "位用户"
+        "title": "500,000+",
+        "description": "活跃学生"
       },
       {
-        "title": "200+",
-        "description": "组件块"
+        "title": "1,000+",
+        "description": "合作院校"
       },
       {
-        "title": "50+",
-        "description": "专业模板"
+        "title": "10M+",
+        "description": "生成笔记"
       }
     ]
   },
   "testimonials": {
     "id": "testimonials",
-    "title": "用户对 ShipAny 的评价",
-    "description": "听听开发者与创始人用 ShipAny 快速上线 AI 创业项目的故事。",
+    "title": "学生用户对 Turbo AI 的评价",
+    "description": "听听来自世界各地学生使用 Turbo AI 提升学习效果的真实体验。",
     "items": [
       {
-        "name": "David Chen",
-        "role": "AIWallpaper.shop 创始人",
-        "quote": "ShipAny 为我们节省了数月开发时间。2 天上线 AI 壁纸业务，一周内就收到了第一笔付费订单！",
+        "name": "李明",
+        "role": "北京大学计算机系学生",
+        "quote": "Turbo AI 完全改变了我的学习方式。我现在可以在讲座结束后几分钟内就得到完整的笔记，这让我有更多时间专注于理解概念而不是匆忙记录。",
         "image": {
           "src": "/imgs/avatars/1.png",
-          "alt": "david"
+          "alt": "liming"
         }
       },
       {
-        "name": "Rachel Kim",
-        "role": "HeyBeauty.ai CTO",
-        "quote": "内置 AI 基础设施颠覆了开发体验，无需担心架构，只需专注核心功能，极快落地。",
+        "name": "王芳",
+        "role": "复旦大学医学院学生",
+        "quote": "闪卡功能太棒了！间隔重复算法帮助我记住了大量复杂的医学术语。相比传统学习方法，我的记忆效率提升了至少 50%。",
         "image": {
           "src": "/imgs/avatars/2.png",
-          "alt": "rachel"
+          "alt": "wangfang"
         }
       },
       {
-        "name": "Marcus Thompson",
-        "role": "独立开发者",
-        "quote": "作为独立开发者，ShipAny 满足了全部需求——认证、支付、AI 集成、美观界面，一个周末上线 SaaS！",
+        "name": "张伟",
+        "role": "清华大学工程学系研究生",
+        "quote": "AI 生成的测验非常精准，总能找到我知识薄弱的地方。通过反复练习，我的成绩从班级中游提升到了前 10%。",
         "image": {
           "src": "/imgs/avatars/3.png",
-          "alt": "marcus"
+          "alt": "zhangwei"
         }
       },
       {
-        "name": "Sofia Garcia",
-        "role": "Melodisco CEO",
-        "quote": "模板高度可定制且生产级。我们几小时内搭建出了 AI 音乐平台，上市周期大大缩短！",
+        "name": "刘静",
+        "role": "上海外国语大学学生",
+        "quote": "学习播客功能是我的最爱！我把课堂笔记转换为音频，在通勤和运动时都能学习。时间利用率大大提高了。",
         "image": {
           "src": "/imgs/avatars/4.png",
-          "alt": "sofia"
+          "alt": "liujing"
         }
       },
       {
-        "name": "James Wilson",
-        "role": "GPTs.works 技术负责人",
-        "quote": "ShipAny 基础设施极其稳定。我们从 0 到 1 万用户，无需关心后端维护，是最棒的 AI 创业投资。",
+        "name": "陈浩",
+        "role": "浙江大学商科学生",
+        "quote": "实时协作功能让小组作业变得如此简单。我们可以共享笔记和想法，每个人都能贡献自己的优势。团队效率提升了好几个档次。",
         "image": {
           "src": "/imgs/avatars/5.png",
-          "alt": "james"
+          "alt": "chenhao"
         }
       },
       {
-        "name": "Anna Zhang",
-        "role": "创业者",
-        "quote": "从想法到上线，仅用 3 天！ShipAny 模板和部署工具让我们极快验证 AI 商业创意。",
+        "name": "赵雪",
+        "role": "南京大学文科生",
+        "quote": "跨平台同步让我可以在手机、平板和电脑间无缝切换学习。不管在哪里，我的学习材料都随时可用。这太方便了！",
         "image": {
           "src": "/imgs/avatars/6.png",
-          "alt": "anna"
+          "alt": "zhaoxue"
         }
       }
     ]
   },
   "faq": {
     "id": "faq",
-    "title": "关于 ShipAny 的常见问题",
-    "description": "还有其他问题？欢迎加入 Discord 或发邮件联系我们。",
-    "tip": "没有找到想要的答案？请联系 <a href='https://discord.gg/HQNnrzjZQS' target='_blank' class='text-primary font-medium hover:underline'>我们的客服团队</a>",
+    "title": "关于 Turbo AI 的常见问题",
+    "description": "还有其他问题？通过 Discord 或邮件联系我们。",
+    "tip": "找不到您要的答案？联系我们的 <a href='https://discord.gg/HQNnrzjZQS' target='_blank' class='text-primary font-medium hover:underline'>客服团队</a>",
     "items": [
       {
-        "question": "ShipAny 是什么？怎么帮到我？",
-        "answer": "ShipAny 是专为 AI SaaS 创业设计的 NextJS 全套脚手架，内含开箱即用的模板、基础设施搭建和部署工具，让你数小时内上线 AI 产品。"
+        "question": "Turbo AI 是什么，它如何工作？",
+        "answer": "Turbo AI 是一个专为学习设计的智能笔记平台。它使用先进的 AI 技术，可以将您的讲座录音、视频、PDF 和文档转换为结构化的学习笔记，并生成闪卡、测验和播客来帮助您更有效地学习。"
       },
       {
-        "question": "使用 ShipAny 需要很高的技术水平吗？",
-        "answer": "有基础编程知识即可上手。ShipAny 面向开发者友好，详细文档和模板让初学者也能轻松起步，不需深厚 AI 或云计算背景。"
+        "question": "Turbo AI 支持哪些文件格式？",
+        "answer": "Turbo AI 支持多种文件格式，包括音频文件（MP3、WAV、M4A）、视频文件（MP4、MOV、AVI）、PDF 文档、以及文本文档（DOC、TXT、MD）。我们的 AI 可以处理各种类型的学习材料。"
       },
       {
-        "question": "ShipAny 支持哪些类型的 AI SaaS 项目？",
-        "answer": "ShipAny 支持内容生成、数据分析、AI 聊天机器人、图片/内容生成器等多种主流 AI 应用场景。"
+        "question": "AI 生成的笔记质量如何？",
+        "answer": "我们使用最先进的 AI 模型来确保高质量的笔记生成。AI 能够识别关键概念、提取重要信息、组织内容结构，并提供准确的总结。大多数用户反馈 AI 生成的笔记质量甚至超过手动记录。"
       },
       {
-        "question": "用 ShipAny 一般多久能上线？",
-        "answer": "借助 ShipAny，可在数小时内拿到产品原型并上线生产环境，预配置的一键部署大幅缩短开发周期。"
+        "question": "我的数据是否安全？",
+        "answer": "绝对安全！我们使用银行级的加密技术保护您的数据，所有文件都通过安全的连接传输。我们严格遵守隐私保护法规，绝不会分享您的个人学习材料。"
       },
       {
-        "question": "ShipAny 的基础设施包括哪些内容？",
-        "answer": "包含认证、数据库、API 集成、支付、云端部署等全栈解决方案，全部遵循业界最佳实践预配置。"
+        "question": "可以和同学一起使用吗？",
+        "answer": "当然可以！Turbo AI 提供强大的协作功能，您可以与同学共享笔记、创建集体闪卡集、一起进行测验。我们还提供实时协作编辑功能，让小组学习更加高效。"
       },
       {
-        "question": "模板是否支持定制自己的品牌？",
-        "answer": "当然支持！所有模板均可自定义设计、功能和品牌，既保持基础架构稳定，又能满足个性扩展需求。"
+        "question": "是否支持移动设备？",
+        "answer": "是的！Turbo AI 完全支持跨平台使用。您可以在手机、平板和电脑上访问您的所有学习材料，所有内容都会自动同步，让您随时随地都能学习。"
       }
     ]
   },
   "cta": {
     "id": "cta",
-    "title": "发布你的第一个 AI SaaS 项目",
-    "description": "从这里出发，用 ShipAny 极速交付。",
+    "title": "开始您的智能学习之旅",
+    "description": "从这里开始，用 Turbo AI 改变您的学习方式。",
     "buttons": [
       {
-        "title": "获取 ShipAny",
-        "url": "https://shipany.ai",
-        "target": "_blank",
+        "title": "免费开始学习",
+        "url": "/pricing",
+        "target": "_self",
         "icon": "Zap"
       },
       {
-        "title": "阅读文档",
+        "title": "了解更多",
         "url": "/docs",
         "target": "_blank",
         "variant": "outline",
@@ -462,11 +470,11 @@
   },
   "subscribe": {
     "id": "subscribe",
-    "title": "订阅我们的邮件通知",
-    "description": "获取 ShipAny 最新资讯与产品动态。",
+    "title": "订阅我们的新闻通讯",
+    "description": "获取 Turbo AI 的最新消息和更新。",
     "submit": {
       "input": {
-        "placeholder": "输入邮箱"
+        "placeholder": "输入您的邮箱"
       },
       "button": {
         "title": "订阅"
@@ -477,31 +485,31 @@
   "footer": {
     "id": "footer",
     "brand": {
-      "title": "ShipAny Two",
-      "description": "ShipAny 是专为 AI SaaS 创业项目打造的 NextJS 模板。丰富模板与组件，极速交付你的产品。",
+      "title": "Turbo AI",
+      "description": "Turbo AI 是专为学习设计的智能笔记平台，通过 AI 技术帮助学生更高效地学习和记忆。",
       "logo": {
         "src": "/logo.png",
-        "alt": "ShipAny Two"
+        "alt": "Turbo AI"
       },
       "url": "/"
     },
     "nav": {
       "items": [
         {
-          "title": "关于我们",
+          "title": "关于",
           "children": [
             {
-              "title": "功能亮点",
+              "title": "功能特色",
               "url": "/#features",
               "target": "_self"
             },
             {
-              "title": "案例展示",
+              "title": "用户案例",
               "url": "/showcases",
               "target": "_self"
             },
             {
-              "title": "价格",
+              "title": "价格方案",
               "url": "/pricing",
               "target": "_self"
             }
@@ -511,7 +519,7 @@
           "title": "资源",
           "children": [
             {
-              "title": "文档",
+              "title": "帮助文档",
               "url": "/docs",
               "target": "_self"
             },
@@ -521,9 +529,9 @@
               "target": "_self"
             },
             {
-              "title": "对话",
+              "title": "聊天支持",
               "url": "/chat",
-              "target": "_blank"
+              "target": "_self"
             }
           ]
         },
@@ -531,18 +539,18 @@
           "title": "合作伙伴",
           "children": [
             {
-              "title": "ShipAny",
-              "url": "https://shipany.ai",
+              "title": "Turbo AI",
+              "url": "https://turbo.ai",
               "target": "_blank"
             },
             {
-              "title": "ThinkAny",
-              "url": "https://thinkany.ai",
+              "title": "教育合作",
+              "url": "https://edu.turbo.ai",
               "target": "_blank"
             },
             {
-              "title": "MCP.so",
-              "url": "https://mcp.so",
+              "title": "开发者",
+              "url": "https://dev.turbo.ai",
               "target": "_blank"
             }
           ]
@@ -570,7 +578,7 @@
           "target": "_blank"
         },
         {
-          "title": "邮箱",
+          "title": "Email",
           "icon": "Mail",
           "url": "mailto:support@your-domain.com",
           "target": "_self"

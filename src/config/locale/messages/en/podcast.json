@@ -1,0 +1,103 @@
+{
+  "title": "Study Podcasts - Study Smarter",
+  "subtitle": "Transform your notes into engaging audio podcasts and learn on the go",
+  "upload": {
+    "title": "Convert Notes to Audio",
+    "subtitle": "Perfect for learning during commutes, workouts, or downtime",
+    "drag_text": "Drop your study files here or browse",
+    "supported_formats": "All formats: TXT, PDF, DOC, MD, or paste text directly",
+    "file_selected": "Selected: ",
+    "processing": "AI is creating your study podcast...",
+    "upload_button": "Choose Study Files"
+  },
+  "settings": {
+    "title": "Podcast Settings",
+    "voice_style": {
+      "label": "Voice Style",
+      "professional": "Professional Narration",
+      "friendly": "Friendly Conversation",
+      "academic": "Academic Explanation"
+    },
+    "duration": {
+      "label": "Podcast Duration",
+      "short": "Short (3-5 minutes)",
+      "medium": "Medium (5-10 minutes)",
+      "long": "Detailed (10-15 minutes)"
+    },
+    "language": {
+      "label": "Podcast Language",
+      "chinese": "Chinese",
+      "english": "English"
+    },
+    "speed": {
+      "label": "Speech Speed",
+      "slow": "Slow",
+      "normal": "Normal",
+      "fast": "Fast"
+    }
+  },
+  "generate": {
+    "title": "Generate Podcast",
+    "button": "Start Generating Podcast",
+    "generating": "AI is generating podcast...",
+    "error": "Error generating podcast, please try again",
+    "success": "Podcast generated successfully!"
+  },
+  "player": {
+    "title": "Podcast Player",
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "download": "Download Audio",
+    "share": "Share Podcast",
+    "current_time": "Current Time",
+    "total_time": "Total Duration",
+    "no_audio": "No audio available, please generate a podcast first"
+  },
+  "history": {
+    "title": "History",
+    "subtitle": "All your previously generated podcasts",
+    "no_history": "No history available",
+    "play": "Play",
+    "download": "Download",
+    "delete": "Delete",
+    "regenerate": "Regenerate"
+  },
+  "features": {
+    "ai_script": {
+      "title": "AI Script Generation",
+      "description": "Intelligently generate conversational scripts suitable for podcasts"
+    },
+    "multiple_voices": {
+      "title": "Multiple Voice Styles",
+      "description": "Choose from professional, friendly, academic and other styles"
+    },
+    "background_music": {
+      "title": "Background Music",
+      "description": "Automatically add suitable background music"
+    },
+    "export_options": {
+      "title": "Multiple Export Formats",
+      "description": "Support for MP3, WAV and other common audio formats"
+    }
+  },
+  "tips": {
+    "quality": "Tip: Higher quality uploaded notes result in better podcast quality",
+    "length": "Suggestion: Upload content under 2000 words for best results",
+    "format": "Format: Structured notes work better than plain text"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "reset": "Reset",
+    "save": "Save",
+    "close": "Close"
+  },
+  "errors": {
+    "upload_failed": "File upload failed",
+    "generation_failed": "Podcast generation failed",
+    "invalid_format": "Unsupported file format",
+    "file_too_large": "File too large, please select a file smaller than 10MB",
+    "network_error": "Network error, please check connection"
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "title": "AI笔记助手 - 智能学习",
+  "subtitle": "将任何学习材料快速转换为智能笔记",
+  "description": "上传讲座、视频、PDF或任何内容，让AI为您生成个性化的智能学习笔记",
+  "upload": {
+    "title": "上传任何学习材料",
+    "subtitle": "将讲座、视频、文档转换为智能笔记",
+    "drag_text": "拖拽学习文件到此处或点击选择",
+    "supported_formats": "支持所有格式：MP3, WAV, MP4, MOV, PDF, DOC, TXT, YouTube链接",
+    "file_selected": "已选择：",
+    "processing": "AI正在创建您的智能笔记...",
+    "upload_button": "选择学习文件",
+    "audio_files": "讲座录音",
+    "video_files": "视频讲座",
+    "pdf_docs": "PDF资料",
+    "pdf_desc": "教材、幻灯片、研究论文",
+    "text_docs": "学习笔记"
+  },
+  "record": {
+    "title": "录制现场讲座",
+    "subtitle": "AI实时捕获讲座内容并整理成结构化笔记",
+    "start_button": "开始录音"
+  },
+  "notes": {
+    "title": "您的AI学习笔记",
+    "subtitle": "智能组织的笔记，为您的学习而优化",
+    "download": "下载PDF",
+    "share": "分享给朋友",
+    "copy": "复制笔记",
+    "regenerate": "创建新版本",
+    "no_notes": "还没有笔记。上传学习材料开始吧！"
+  },
+  "retry": "重试",
+  "toolbar": {
+    "generate_flashcards": "创建闪卡",
+    "create_quiz": "生成测验",
+    "generate_podcast": "制作学习播客"
+  },
+  "features": {
+    "smart_analysis": {
+      "title": "智能分析",
+      "description": "AI 自动识别关键概念和重要信息"
+    },
+    "structured_format": {
+      "title": "结构化格式",
+      "description": "清晰的层次结构，便于复习和理解"
+    },
+    "multiple_formats": {
+      "title": "多格式支持",
+      "description": "支持音频、视频、PDF和文本文件"
+    },
+    "export_options": {
+      "title": "导出选项",
+      "description": "支持多种格式导出，方便分享和学习"
+    }
+  },
+  "tabs": {
+    "upload": "上传文件",
+    "record": "录音",
+    "notes": "查看笔记",
+    "history": "历史记录"
+  },
+  "history": {
+    "title": "历史记录",
+    "subtitle": "您之前生成的所有笔记",
+    "no_history": "暂无历史记录",
+    "regenerate": "重新生成",
+    "download": "下载",
+    "delete": "删除"
+  },
+  "errors": {
+    "upload_failed": "文件上传失败，请重试",
+    "processing_failed": "文件处理失败，请重试",
+    "file_too_large": "文件太大，请选择小于 100MB 的文件",
+    "unsupported_format": "不支持的文件格式",
+    "generation_failed": "笔记生成失败，请重试"
+  },
+  "status": {
+    "uploading": "上传中...",
+    "processing": "处理中...",
+    "completed": "完成",
+    "failed": "失败"
+  }
+}

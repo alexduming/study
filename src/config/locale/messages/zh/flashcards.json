@@ -1,0 +1,59 @@
+{
+  "title": "AI闪卡 - 智能学习",
+  "subtitle": "科学证明的间隔重复闪卡，由AI驱动以提升记忆力和学习速度",
+  "stats": {
+    "total_cards": "总卡片",
+    "due_cards": "待复习",
+    "mastered_cards": "已掌握",
+    "learning_cards": "学习中"
+  },
+  "modes": {
+    "review": "复习模式",
+    "new_cards": "新卡片",
+    "all_cards": "全部卡片"
+  },
+  "card": {
+    "difficulty": {
+      "easy": "简单",
+      "medium": "中等",
+      "hard": "困难"
+    },
+    "review_count": "复习 #",
+    "click_to_flip": "点击查看答案",
+    "click_to_return": "点击返回问题"
+  },
+  "rating": {
+    "again": "再来一次",
+    "hard": "困难",
+    "good": "良好",
+    "easy": "简单"
+  },
+  "empty_state": {
+    "no_due_cards": "暂无需要复习的卡片",
+    "no_due_cards_desc": "恭喜！您已复习完所有待复习的卡片",
+    "no_cards": "暂无卡片",
+    "no_cards_desc": "开始创建您的第一张闪卡吧",
+    "create_cards": "创建新卡片"
+  },
+  "create": {
+    "title": "创建智能闪卡",
+    "placeholder": "粘贴您的学习笔记、章节内容或任何要转换为智能闪卡的学习材料...",
+    "error": "请添加内容以创建闪卡",
+    "generation_error": "创建闪卡时遇到问题。请重试。",
+    "ai_generating": "AI正在构建您的闪卡...",
+    "generate": "创建闪卡"
+  },
+  "quick_actions": {
+    "ai_generate": "AI 生成闪卡",
+    "reset_progress": "重置进度",
+    "view_stats": "查看统计"
+  },
+  "buttons": {
+    "cancel": "取消",
+    "close": "关闭"
+  },
+  "errors": {
+    "generation_failed": "生成闪卡时出错",
+    "invalid_content": "内容无效，请重新输入"
+  }
+}

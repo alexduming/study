@@ -1,0 +1,84 @@
+{
+  "title": "AI Note Taker - Study Smarter",
+  "subtitle": "Transform any study material into intelligent notes in seconds",
+  "description": "Upload lectures, videos, PDFs or any content and let AI generate comprehensive study notes tailored to your learning style",
+  "upload": {
+    "title": "Upload Any Study Material",
+    "subtitle": "Transform lectures, videos, documents into smart notes",
+    "drag_text": "Drop your study files here or click to browse",
+    "supported_formats": "All formats supported: MP3, WAV, MP4, MOV, PDF, DOC, TXT, YouTube links",
+    "file_selected": "Selected: ",
+    "processing": "AI is creating your smart notes...",
+    "upload_button": "Choose Study Files",
+    "audio_files": "Lecture Recordings",
+    "video_files": "Video Lectures",
+    "pdf_docs": "PDF Materials",
+    "pdf_desc": "Textbooks, slides, research papers",
+    "text_docs": "Study Notes"
+  },
+  "record": {
+    "title": "Record Live Lectures",
+    "subtitle": "AI captures and organizes lectures into structured notes in real-time",
+    "start_button": "Start Recording"
+  },
+  "notes": {
+    "title": "Your AI Study Notes",
+    "subtitle": "Intelligently organized notes optimized for your learning",
+    "download": "Download PDF",
+    "share": "Share with Friends",
+    "copy": "Copy Notes",
+    "regenerate": "Create New Version",
+    "no_notes": "No notes yet. Upload study materials to get started!"
+  },
+  "retry": "Retry",
+  "toolbar": {
+    "generate_flashcards": "Create Flashcards",
+    "create_quiz": "Generate Quiz",
+    "generate_podcast": "Make Study Podcast"
+  },
+  "features": {
+    "smart_analysis": {
+      "title": "Smart Analysis",
+      "description": "AI automatically identifies key concepts and important information"
+    },
+    "structured_format": {
+      "title": "Structured Format",
+      "description": "Clear hierarchical structure for easy review and understanding"
+    },
+    "multiple_formats": {
+      "title": "Multiple Format Support",
+      "description": "Supports audio, video, PDF and text files"
+    },
+    "export_options": {
+      "title": "Export Options",
+      "description": "Supports multiple export formats for easy sharing and learning"
+    }
+  },
+  "tabs": {
+    "upload": "Upload File",
+    "record": "Record",
+    "notes": "View Notes",
+    "history": "History"
+  },
+  "history": {
+    "title": "History",
+    "subtitle": "All your previously generated notes",
+    "no_history": "No history available",
+    "regenerate": "Regenerate",
+    "download": "Download",
+    "delete": "Delete"
+  },
+  "errors": {
+    "upload_failed": "File upload failed, please try again",
+    "processing_failed": "File processing failed, please try again",
+    "file_too_large": "File too large, please select a file smaller than 100MB",
+    "unsupported_format": "Unsupported file format",
+    "generation_failed": "Note generation failed, please try again"
+  },
+  "status": {
+    "uploading": "Uploading...",
+    "processing": "Processing...",
+    "completed": "Completed",
+    "failed": "Failed"
+  }
+}

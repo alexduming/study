@@ -1,0 +1,88 @@
+{
+  "title": "AI Quiz Generator - Study Smarter",
+  "subtitle": "Personalized quizzes that adapt to your knowledge level and learning pace to maximize retention",
+  "modes": {
+    "practice": "Practice Mode",
+    "exam": "Exam Mode",
+    "review": "Review Mode"
+  },
+  "stats": {
+    "total_questions": "Total Questions",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "accuracy": "Accuracy",
+    "time_spent": "Time Spent",
+    "best_streak": "Best Streak"
+  },
+  "question": {
+    "of": "Question {current} of {total}",
+    "multiple_choice": "Multiple Choice",
+    "true_false": "True/False",
+    "fill_blank": "Fill in the Blank",
+    "select_answer": "Select an answer",
+    "type_answer": "Type your answer",
+    "next": "Next Question",
+    "submit": "Submit Answer",
+    "finish": "Finish Quiz"
+  },
+  "results": {
+    "title": "Quiz Results",
+    "score": "Score",
+    "percentage": "{score}%",
+    "completed": "Completed",
+    "time_taken": "Time: {time}",
+    "review_answers": "Review Answers",
+    "restart": "Restart",
+    "return_home": "Return Home"
+  },
+  "create": {
+    "title": "Create Smart Quiz",
+    "content_label": "Study Material",
+    "content_placeholder": "Add your study notes, textbook chapters, or any content you want to test yourself on...",
+    "questions_label": "Number of Questions",
+    "types_label": "Question Types",
+    "difficulty_label": "Difficulty Level",
+    "all_types": "All Types",
+    "generate": "Generate Quiz",
+    "generating": "AI is creating your personalized quiz...",
+    "error_content": "Please add study content to create a quiz",
+    "error_generation": "Quiz creation failed. Please try again."
+  },
+  "feedback": {
+    "correct": "Correct!",
+    "incorrect": "Incorrect!",
+    "explanation": "Explanation",
+    "correct_answer": "Correct Answer: ",
+    "your_answer": "Your Answer: "
+  },
+  "actions": {
+    "start_quiz": "Start Quiz",
+    "pause_quiz": "Pause Quiz",
+    "resume_quiz": "Resume Quiz",
+    "skip_question": "Skip Question",
+    "review_mistakes": "Review Mistakes",
+    "share_results": "Share Results"
+  },
+  "empty_state": {
+    "title": "No quizzes yet",
+    "description": "Start creating your first quiz",
+    "create_button": "Create New Quiz"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete"
+  },
+  "difficulty": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+  "errors": {
+    "generation_failed": "Quiz generation failed",
+    "invalid_content": "Invalid content, please re-enter",
+    "network_error": "Network error, please check connection"
+  }
+}
