@@ -14,7 +14,9 @@
     "video_files": "视频讲座",
     "pdf_docs": "PDF资料",
     "pdf_desc": "教材、幻灯片、研究论文",
-    "text_docs": "学习笔记"
+    "text_docs": "学习笔记",
+    "output_language": "输出语言",
+    "output_language_desc": "选择AI生成笔记的语言"
   },
   "record": {
     "title": "录制现场讲座",
@@ -80,5 +82,18 @@
     "processing": "处理中...",
     "completed": "完成",
     "failed": "失败"
+  },
+  "languages": {
+    "auto": "自动（与上传资料语言一致）",
+    "zh": "中文",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "ja": "日本語",
+    "ko": "한국어",
+    "pt": "Português",
+    "ru": "Русский",
+    "ar": "العربية"
   }
 }

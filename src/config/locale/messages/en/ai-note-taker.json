@@ -14,7 +14,9 @@
     "video_files": "Video Lectures",
     "pdf_docs": "PDF Materials",
     "pdf_desc": "Textbooks, slides, research papers",
-    "text_docs": "Study Notes"
+    "text_docs": "Study Notes",
+    "output_language": "Output Language",
+    "output_language_desc": "Select the language for AI-generated notes"
   },
   "record": {
     "title": "Record Live Lectures",
@@ -80,5 +82,18 @@
     "processing": "Processing...",
     "completed": "Completed",
     "failed": "Failed"
+  },
+  "languages": {
+    "auto": "Auto (Match source language)",
+    "zh": "中文",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "ja": "日本語",
+    "ko": "한국어",
+    "pt": "Português",
+    "ru": "Русский",
+    "ar": "العربية"
   }
 }

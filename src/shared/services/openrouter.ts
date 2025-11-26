@@ -3,6 +3,7 @@ export interface GenerateNotesParams {
   content: string;
   type: 'audio' | 'video' | 'pdf' | 'text';
   fileName: string;
+  outputLanguage?: string; // 输出语言，如 'auto', 'zh', 'en' 等
 }
 
 export interface GenerateFlashcardsParams {
@@ -125,14 +126,65 @@ export class OpenRouterService {
   }
 
   /**
+   * 检测文本内容的主要语言
+   * 简单实现：通过中文字符比例判断
+   */
+  private detectLanguage(content: string): string {
+    if (!content || content.trim().length === 0) {
+      return 'en'; // 默认英文
+    }
+
+    // 统计中文字符数量
+    const chineseCharCount = (content.match(/[\u4e00-\u9fff]/g) || []).length;
+    const totalCharCount = content.replace(/\s/g, '').length;
+
+    // 如果中文字符占比超过30%，认为是中文
+    if (totalCharCount > 0 && chineseCharCount / totalCharCount > 0.3) {
+      return 'zh';
+    }
+
+    return 'en'; // 默认英文
+  }
+
+  /**
    * Generate notes from various input sources (audio, video, PDF, text)
+   * 生成笔记，支持指定输出语言
    */
   async generateNotes(input: {
     content: string;
     type: 'audio' | 'video' | 'pdf' | 'text';
     fileName?: string;
+    outputLanguage?: string; // 输出语言：'auto' | 'zh' | 'en' | 其他语言代码
   }) {
+    // 确定实际使用的输出语言
+    let targetLanguage = input.outputLanguage || 'auto';
+
+    // 如果选择"自动"，则检测输入内容的语言
+    if (targetLanguage === 'auto') {
+      targetLanguage = this.detectLanguage(input.content);
+    }
+
+    // 构建语言指令
+    const languageInstructions: Record<string, string> = {
+      zh: '请使用中文生成笔记。所有内容（包括标题、要点、总结等）都必须是中文。',
+      en: 'Please generate notes in English. All content (including titles, points, summaries, etc.) must be in English.',
+      es: 'Por favor, genera las notas en español. Todo el contenido debe estar en español.',
+      fr: 'Veuillez générer les notes en français. Tout le contenu doit être en français.',
+      de: 'Bitte generieren Sie die Notizen auf Deutsch. Alle Inhalte müssen auf Deutsch sein.',
+      ja: '日本語でノートを生成してください。すべてのコンテンツは日本語である必要があります。',
+      ko: '한국어로 노트를 생성해주세요. 모든 내용은 한국어여야 합니다.',
+      pt: 'Por favor, gere as notas em português. Todo o conteúdo deve estar em português.',
+      ru: 'Пожалуйста, создайте заметки на русском языке. Весь контент должен быть на русском языке.',
+      ar: 'يرجى إنشاء الملاحظات باللغة العربية. يجب أن يكون كل المحتوى باللغة العربية.',
+    };
+
+    const languageInstruction =
+      languageInstructions[targetLanguage] ||
+      `Please generate notes in ${targetLanguage}. All content must be in ${targetLanguage}.`;
+
     const prompt = `You are an AI-powered note-taking assistant for Turbo AI. Generate comprehensive, well-structured notes from the following ${input.type} content.
+
+${languageInstruction}
 
 Content: ${input.content}
 File name: ${input.fileName || 'Unknown'}

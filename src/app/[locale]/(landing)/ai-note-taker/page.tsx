@@ -16,8 +16,16 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { MarkdownPreview } from '@/shared/blocks/common/markdown-preview';
 import { Button } from '@/shared/components/ui/button';
 import { ScrollAnimation } from '@/shared/components/ui/scroll-animation';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/components/ui/select';
 import {
   detectLearningFileType,
   readLearningFileContent,
@@ -30,6 +38,8 @@ const AINoteTaker = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedNotes, setGeneratedNotes] = useState('');
   const [activeTab, setActiveTab] = useState('upload');
+  // 输出语言选择，默认为"自动"
+  const [outputLanguage, setOutputLanguage] = useState<string>('auto');
   // 用于拿到隐藏的文件输入框 DOM 节点
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -53,6 +63,8 @@ const AINoteTaker = () => {
           // 使用统一的文件类型检测，便于后续统计或扩展
           type: detectLearningFileType(file.type),
           fileName: file.name,
+          // 传递用户选择的输出语言
+          outputLanguage: outputLanguage,
         });
 
         if (result.success) {
@@ -153,11 +165,51 @@ const AINoteTaker = () => {
                   </h3>
                   <p className="mb-8 text-gray-400">{t('upload.subtitle')}</p>
 
+                  {/* 语言选择器 */}
+                  <div className="mb-6 flex items-center justify-center gap-3">
+                    <label
+                      htmlFor="output-language-select"
+                      className="text-sm font-medium text-gray-300"
+                    >
+                      {t('upload.output_language')}:
+                    </label>
+                    <Select
+                      value={outputLanguage}
+                      onValueChange={setOutputLanguage}
+                      disabled={isProcessing}
+                    >
+                      <SelectTrigger
+                        id="output-language-select"
+                        className="w-[280px] border-purple-500/30 bg-gray-800/50 text-white hover:border-purple-500/50"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="border-purple-500/30 bg-gray-900">
+                        <SelectItem value="auto">
+                          {t('languages.auto')}
+                        </SelectItem>
+                        <SelectItem value="zh">{t('languages.zh')}</SelectItem>
+                        <SelectItem value="en">{t('languages.en')}</SelectItem>
+                        <SelectItem value="es">{t('languages.es')}</SelectItem>
+                        <SelectItem value="fr">{t('languages.fr')}</SelectItem>
+                        <SelectItem value="de">{t('languages.de')}</SelectItem>
+                        <SelectItem value="ja">{t('languages.ja')}</SelectItem>
+                        <SelectItem value="ko">{t('languages.ko')}</SelectItem>
+                        <SelectItem value="pt">{t('languages.pt')}</SelectItem>
+                        <SelectItem value="ru">{t('languages.ru')}</SelectItem>
+                        <SelectItem value="ar">{t('languages.ar')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="mb-6 text-xs text-gray-500">
+                    {t('upload.output_language_desc')}
+                  </p>
+
                   {/* 
                     非程序员解释：
-                    - 浏览器出于安全原因，有时不允许用 JS 直接“点”隐藏的 <input type="file">
+                    - 浏览器出于安全原因，有时不允许用 JS 直接"点"隐藏的 <input type="file">
                     - 更稳妥的方式是：用 <label htmlFor="..."> 绑定到 input 上
-                    - 用户点按钮本质上是在点 label，浏览器就会乖乖弹出“选择文件”的对话框
+                    - 用户点按钮本质上是在点 label，浏览器就会乖乖弹出"选择文件"的对话框
                   */}
                   <input
                     id="ai-note-file-input"
@@ -310,36 +362,10 @@ const AINoteTaker = () => {
                     </Button>
                   </div>
                 ) : generatedNotes ? (
-                  <div className="prose prose-invert max-w-none">
-                    <div className="rounded-lg bg-gray-800/50 p-6 leading-relaxed text-gray-300">
-                      {generatedNotes.split('\n').map((line, idx) => (
-                        <div
-                          key={idx}
-                          className={
-                            line.startsWith('#')
-                              ? 'mb-4 font-bold text-white'
-                              : 'mb-2'
-                          }
-                        >
-                          {line.startsWith('##') ? (
-                            <h2 className="mt-6 mb-3 text-xl font-semibold text-purple-400">
-                              {line.replace('##', '')}
-                            </h2>
-                          ) : line.startsWith('###') ? (
-                            <h3 className="mt-4 mb-2 text-lg font-medium text-blue-400">
-                              {line.replace('###', '')}
-                            </h3>
-                          ) : line.startsWith('-') ? (
-                            <li className="ml-4">
-                              {line.replace('-', '').trim()}
-                            </li>
-                          ) : line.match(/^\d+\./) ? (
-                            <li className="ml-4 list-decimal">{line}</li>
-                          ) : (
-                            line && <p>{line}</p>
-                          )}
-                        </div>
-                      ))}
+                  <div className="rounded-lg bg-gray-800/50 p-6">
+                    {/* 使用 MarkdownPreview 组件渲染 markdown 格式的笔记 */}
+                    <div className="prose prose-invert prose-headings:text-white prose-headings:font-bold prose-h1:text-2xl prose-h1:text-purple-400 prose-h2:text-xl prose-h2:text-purple-400 prose-h3:text-lg prose-h3:text-blue-400 prose-p:text-gray-300 prose-strong:text-white prose-ul:text-gray-300 prose-ol:text-gray-300 prose-li:text-gray-300 prose-a:text-blue-400 prose-code:text-purple-300 prose-pre:bg-gray-900/50 max-w-none">
+                      <MarkdownPreview content={generatedNotes} />
                     </div>
                   </div>
                 ) : (
