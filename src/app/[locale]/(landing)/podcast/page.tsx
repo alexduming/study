@@ -139,7 +139,7 @@ const PodcastApp = () => {
         <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-blue-600/10 blur-3xl" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
+      <div className="relative z-10 container mx-auto px-4 py-24">
         <ScrollAnimation>
           <div className="text-center mb-12">
             <motion.div

@@ -37,31 +37,83 @@ export const readLearningFileContent = async (file: File): Promise<string> => {
   }
 
   // 3. PDF：走后端 /api/pdf/analyze，用 pdfjs-dist 在服务器解析
+  // 非程序员解释：
+  // - PDF 文件不能直接在浏览器中读取文本，需要服务器端解析
+  // - 我们把文件发送到 /api/pdf/analyze 接口，服务器用 PDF.js 库解析
+  // - 解析完成后，服务器返回提取的文本内容
   if (mime === 'application/pdf' || name.endsWith('.pdf')) {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch('/api/pdf/analyze', {
-      method: 'POST',
-      body: formData,
-    });
+    try {
+      const response = await fetch('/api/pdf/analyze', {
+        method: 'POST',
+        body: formData,
+      });
 
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(
-        `PDF 解析失败：${response.status} ${response.statusText || text}`
-      );
+      // 检查 HTTP 响应状态
+      if (!response.ok) {
+        // Response 的 body 只能读取一次，这里克隆一份做兜底解析
+        const fallbackResponse = response.clone();
+        let errorMessage = `PDF 解析失败：HTTP ${response.status}`;
+
+        try {
+          // 尝试解析错误响应（可能是 JSON 格式）
+          const errorData = await response.json();
+          if (errorData?.error) {
+            errorMessage = errorData.error;
+            if (errorData?.details) {
+              errorMessage += ` (${errorData.details})`;
+            }
+          }
+        } catch {
+          try {
+            // 如果不是 JSON，尝试读取文本
+            const text = await fallbackResponse.text();
+            if (text) {
+              errorMessage += ` - ${text}`;
+            }
+          } catch {
+            // ignore secondary failure
+          }
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      // 解析响应数据
+      const data = await response.json();
+
+      // 检查 API 返回的 success 字段
+      if (data.success === false) {
+        throw new Error(data.error || 'PDF 解析失败，请稍后重试');
+      }
+
+      // 从多个可能的路径提取内容
+      // 非程序员解释：
+      // - API 可能返回不同的数据结构
+      // - 我们尝试从多个可能的路径获取内容，确保兼容性
+      const content =
+        data?.content || // 直接返回 content
+        data?.data?.content || // 嵌套在 data 对象中（标准格式）
+        data?.data?.text || // 备用路径
+        data?.text || // 另一个备用路径
+        '';
+
+      if (!content || !content.trim()) {
+        throw new Error(
+          'PDF 文件中未提取到任何可用文本。这可能是因为 PDF 是扫描版（图片格式）或文件已损坏。'
+        );
+      }
+
+      return content;
+    } catch (error) {
+      // 重新抛出错误，让调用者处理
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('读取 PDF 文件时出现未知错误');
     }
-
-    const data = await response.json();
-    const content =
-      data?.content || data?.data?.content || data?.data?.text || '';
-
-    if (!content || !content.trim()) {
-      throw new Error('PDF 文件中未提取到任何可用文本');
-    }
-
-    return content;
   }
 
   // 4. DOCX：走后端 /api/docx/extract，用 mammoth 在服务器解析 Word 正文

@@ -13,6 +13,7 @@ import {
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/shared/components/ui/button';
+import { Dialog, DialogContent } from '@/shared/components/ui/dialog';
 import { ScrollAnimation } from '@/shared/components/ui/scroll-animation';
 import { readLearningFileContent } from '@/shared/lib/file-reader';
 
@@ -53,6 +54,9 @@ const InfographicPage = () => {
   const [outputFormat, setOutputFormat] = useState<'png' | 'jpg'>('png');
   const [fileInfo, setFileInfo] = useState<string>('');
   const [isFileLoading, setIsFileLoading] = useState(false);
+  // 用于控制图片放大查看的模态框状态
+  // 当用户点击图片时，这个状态会保存要显示的图片 URL
+  const [enlargedImageUrl, setEnlargedImageUrl] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -203,7 +207,7 @@ const InfographicPage = () => {
         <div className="absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-blue-600/10 blur-3xl" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
+      <div className="relative z-10 container mx-auto px-4 py-24">
         <ScrollAnimation>
           <div className="mb-12 text-center">
             <motion.div
@@ -377,7 +381,7 @@ const InfographicPage = () => {
                   ) : (
                     <>
                       <Zap className="mr-2 h-4 w-4" />
-                      生成信息图（nano-banana-pro）
+                      生成信息图
                     </>
                   )}
                 </Button>
@@ -439,7 +443,9 @@ const InfographicPage = () => {
                       <img
                         src={url}
                         alt={`Infographic ${idx + 1}`}
-                        className="h-auto w-full bg-black/40 object-contain"
+                        className="h-auto w-full cursor-pointer bg-black/40 object-contain transition-opacity hover:opacity-90"
+                        onClick={() => setEnlargedImageUrl(url)}
+                        title="点击图片可放大查看"
                       />
                     </div>
                   ))}
@@ -449,6 +455,39 @@ const InfographicPage = () => {
           </div>
         </ScrollAnimation>
       </div>
+
+      {/* 图片放大查看模态框 */}
+      {/* 
+        非程序员解释：
+        - 当用户点击图片时，enlargedImageUrl 会被设置，这个模态框就会显示
+        - 模态框会显示一个放大的图片，方便用户查看细节
+        - 点击关闭按钮或背景区域可以关闭模态框
+      */}
+      <Dialog
+        open={enlargedImageUrl !== null}
+        onOpenChange={(open) => {
+          // 当模态框关闭时，清空 enlargedImageUrl
+          if (!open) {
+            setEnlargedImageUrl(null);
+          }
+        }}
+      >
+        <DialogContent
+          className="max-h-[95vh] max-w-[95vw] border-purple-500/30 bg-gray-900/95 p-0"
+          showCloseButton={true}
+        >
+          {enlargedImageUrl && (
+            <div className="relative flex items-center justify-center p-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={enlargedImageUrl}
+                alt="放大查看的信息图"
+                className="h-auto max-h-[85vh] w-auto max-w-full rounded-lg object-contain"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

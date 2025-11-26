@@ -233,8 +233,32 @@ Make it educational and easy to understand for students.`;
   /**
    * Generate flashcards from content
    */
-  async generateFlashcards(content: string, count: number = 10) {
+  async generateFlashcards(
+    content: string,
+    count: number = 10,
+    outputLanguage: string = 'auto'
+  ) {
+    // 非程序员解释：
+    // - outputLanguage = 'auto' 时，我们会自动检测资料内容的主语言
+    // - 这样就能做到“上传中文 -> 默认生成中文闪卡；上传英文 -> 默认英文”
+    // - 用户也可以在前端强制指定英文或中文
+    let targetLanguage = outputLanguage || 'auto';
+    if (targetLanguage === 'auto') {
+      targetLanguage = this.detectLanguage(content);
+    }
+
+    const languageInstructions: Record<string, string> = {
+      zh: '请使用中文生成每一张闪卡。问句（front）与答案（back）都必须是中文，保持教学友好语气。',
+      en: 'Please generate each flashcard in English. Both the question (front) and the answer (back) must be written in English.',
+    };
+
+    const languageInstruction =
+      languageInstructions[targetLanguage] ||
+      `Please generate each flashcard in ${targetLanguage}. All questions and answers must consistently use ${targetLanguage}.`;
+
     const prompt = `Create ${count} high-quality educational flashcards from the following content for Turbo AI students. Each flashcard should have a front (question) and back (answer) side.
+
+${languageInstruction}
 
 Content: ${content}
 
@@ -284,7 +308,8 @@ Return ONLY valid JSON.`;
         // Fallback: create simple flashcards from the text
         const fallbackFlashcards = this.createFallbackFlashcards(
           content,
-          count
+          count,
+          targetLanguage
         );
         return {
           success: true,
@@ -442,16 +467,23 @@ Format as a complete script with speaker notes and timing cues where appropriate
    */
   private createFallbackFlashcards(
     content: string,
-    count: number
+    count: number,
+    language: string = 'en'
   ): Flashcard[] {
-    const sentences = content.split('.').filter((s) => s.trim().length > 20);
+    // 防御性兜底：若 AI JSON 解析失败，仍然返回基础可用的闪卡
+    const sentences = content
+      .split(/[\n。.!?]/)
+      .filter((s) => s.trim().length > 20);
     const flashcards: Flashcard[] = [];
+    const isChinese = language === 'zh';
 
     for (let i = 0; i < Math.min(count, sentences.length); i++) {
       const sentence = sentences[i].trim();
       if (sentence) {
         flashcards.push({
-          front: `What is described in the following: "${sentence.substring(0, 100)}..."`,
+          front: isChinese
+            ? `这段内容的考点是什么：「${sentence.substring(0, 100)}...」`
+            : `What is described in the following: "${sentence.substring(0, 100)}..."`,
           back: sentence,
           difficulty: 'medium',
         });

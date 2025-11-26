@@ -30,7 +30,29 @@
     "share": "Share with Friends",
     "copy": "Copy Notes",
     "regenerate": "Create New Version",
-    "no_notes": "No notes yet. Upload study materials to get started!"
+    "no_notes": "No notes yet. Upload study materials to get started!",
+    "transfer_unavailable": "Unable to hand off notes right now. Please retry after the page finishes loading.",
+    "toast_no_notes": "Please generate notes first to use these actions.",
+    "download_success": "PDF ready! Saving to your device...",
+    "download_error": "Failed to export PDF. Please try again.",
+    "copy_success": "Notes copied. Paste anywhere to reuse.",
+    "copy_error": "Copy failed. Please try again.",
+    "share_success": "Notes shared via system share sheet.",
+    "share_fallback": "Notes copied to clipboard. Paste anywhere to share.",
+    "share_error": "Sharing failed. Please try again.",
+    "dialog": {
+      "flashcards_title": "AI Flashcards",
+      "flashcards_desc": "Question-answer cards distilled from your notes for quick review.",
+      "quiz_title": "AI Quiz",
+      "quiz_desc": "Instant knowledge check with questions, options, and explanations.",
+      "podcast_title": "AI Podcast Script",
+      "podcast_desc": "Convert notes into a ready-to-read script for listening anywhere.",
+      "loading": "AI is preparing this for you...",
+      "error": "Generation failed. Please try again.",
+      "difficulty": "Difficulty",
+      "correct_answer": "Correct Answer",
+      "explanation": "Explanation"
+    }
   },
   "retry": "Retry",
   "toolbar": {

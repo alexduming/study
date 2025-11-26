@@ -46,7 +46,10 @@
     "generate": "Generate Quiz",
     "generating": "AI is creating your personalized quiz...",
     "error_content": "Please add study content to create a quiz",
-    "error_generation": "Quiz creation failed. Please try again."
+    "error_generation": "Quiz creation failed. Please try again.",
+    "transfer_info": "Study notes received. Preparing quiz generation…",
+    "transfer_success": "Content filled in. AI is generating your quiz.",
+    "transfer_error": "Unable to read shared notes. Please try again."
   },
   "feedback": {
     "correct": "Correct!",

@@ -41,7 +41,17 @@
     "error": "请添加内容以创建闪卡",
     "generation_error": "创建闪卡时遇到问题。请重试。",
     "ai_generating": "AI正在构建您的闪卡...",
-    "generate": "创建闪卡"
+    "generate": "创建闪卡",
+    "transfer_info": "已接收到 AI 笔记内容，即将自动生成闪卡。",
+    "transfer_success": "内容已填入，AI 正在为您生成闪卡…",
+    "transfer_error": "无法读取从 AI 笔记传来的内容，请重试。",
+    "language_label": "选择输出语言",
+    "language_desc": "自动模式会保持与上传资料一致的语言，也可以手动切换为中文或英文。"
+  },
+  "languages": {
+    "auto": "自动（保持与资料一致）",
+    "zh": "中文输出",
+    "en": "英文输出"
   },
   "quick_actions": {
     "ai_generate": "AI 生成闪卡",

@@ -41,7 +41,17 @@
     "error": "Please add content to create flashcards",
     "generation_error": "Having trouble creating flashcards. Please try again.",
     "ai_generating": "AI is building your flashcards...",
-    "generate": "Create Flashcards"
+    "generate": "Create Flashcards",
+    "transfer_info": "Study notes received from AI Note Taker. Preparing flashcards…",
+    "transfer_success": "Content filled in. AI is generating flashcards for you.",
+    "transfer_error": "Unable to read shared notes. Please try again.",
+    "language_label": "Flashcard output language",
+    "language_desc": "Auto keeps the same language as your uploaded material, or switch manually to English/Chinese."
+  },
+  "languages": {
+    "auto": "Auto (match material)",
+    "zh": "Chinese output",
+    "en": "English output"
   },
   "quick_actions": {
     "ai_generate": "AI Generate Flashcards",

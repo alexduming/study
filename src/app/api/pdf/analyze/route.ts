@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import * as pdfjsLib from 'pdfjs-dist';
+import pdf from 'pdf-parse';
 
 // 使用 Node.js 运行时，方便在服务端解析 PDF
 export const runtime = 'nodejs';
-
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 interface AnalysisResult {
   title: string;
@@ -15,18 +12,32 @@ interface AnalysisResult {
   content: string;
 }
 
-async function extractTextFromPDF(buffer: ArrayBuffer): Promise<string> {
-  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-  let fullText = '';
+/**
+ * 从 PDF 文件中提取文本内容
+ *
+ * 非程序员解释：
+ * - pdf-parse 是封装好的 PDF 解析库，专门用于 Node.js 环境
+ * - 它内置了 PDF.js 以及各种浏览器 API 的 polyfill，不再需要我们手动补 DOMMatrix 等对象
+ * - 把 PDF 文件转成 Buffer 后丢给 pdf-parse，它会返回整份文档的纯文本
+ */
+async function extractTextFromPDF(buffer: ArrayBuffer): Promise<{
+  text: string;
+  totalPages: number;
+}> {
+  try {
+    const nodeBuffer = Buffer.from(buffer);
+    const parsed = await pdf(nodeBuffer);
 
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const textContent = await page.getTextContent();
-    const pageText = textContent.items.map((item: any) => item.str).join(' ');
-    fullText += pageText + '\n';
+    return {
+      text: (parsed.text || '').trim(),
+      totalPages: parsed.numpages || 0,
+    };
+  } catch (error) {
+    console.error('❌ PDF 文本提取失败:', error);
+    throw new Error(
+      `提取 PDF 文本失败: ${error instanceof Error ? error.message : '未知错误'}`
+    );
   }
-
-  return fullText;
 }
 
 async function analyzeContentWithAI(text: string): Promise<AnalysisResult> {
@@ -94,45 +105,101 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-    }
-
-    if (file.type !== 'application/pdf') {
+      console.error('❌ PDF 解析失败: 未提供文件');
       return NextResponse.json(
-        { error: 'Only PDF files are supported' },
+        { success: false, error: '未提供文件，请选择要解析的 PDF 文件' },
         { status: 400 }
       );
     }
+
+    // 检查文件类型：同时检查 MIME 类型和文件扩展名
+    // 非程序员解释：
+    // - 有些 PDF 文件可能没有正确的 MIME 类型（file.type 可能为空或错误）
+    // - 所以我们也检查文件名的扩展名，确保能识别 .pdf 文件
+    const fileName = file.name.toLowerCase();
+    const isPdfByMime = file.type === 'application/pdf';
+    const isPdfByExtension = fileName.endsWith('.pdf');
+
+    if (!isPdfByMime && !isPdfByExtension) {
+      console.error('❌ PDF 解析失败: 文件类型不正确', {
+        fileName: file.name,
+        mimeType: file.type,
+      });
+      return NextResponse.json(
+        {
+          success: false,
+          error: `不支持的文件类型。请上传 PDF 文件（当前文件: ${file.name}, 类型: ${file.type || '未知'}）`,
+        },
+        { status: 400 }
+      );
+    }
+
+    console.log('✅ 开始解析 PDF 文件:', {
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+    });
 
     // Convert file to buffer
+    // 非程序员解释：
+    // - File 对象需要转换为 ArrayBuffer（二进制数据）才能被 PDF.js 解析
     const buffer = await file.arrayBuffer();
 
-    // Extract text from PDF
-    const extractedText = await extractTextFromPDF(buffer);
+    console.log('📄 开始提取 PDF 文本内容...');
 
-    if (!extractedText.trim()) {
+    // Extract text from PDF
+    const { text: extractedText, totalPages } =
+      await extractTextFromPDF(buffer);
+
+    if (!extractedText || !extractedText.trim()) {
+      console.error('❌ PDF 解析失败: 未能从 PDF 中提取到任何文本');
       return NextResponse.json(
-        { error: 'No text could be extracted from the PDF' },
+        {
+          success: false,
+          error:
+            '无法从 PDF 文件中提取文本。这可能是因为 PDF 是扫描版（图片格式）或文件已损坏。',
+        },
         { status: 400 }
       );
     }
+
+    console.log('✅ PDF 文本提取成功:', {
+      textLength: extractedText.length,
+      totalPages,
+    });
 
     // Analyze the content
     const analysis = await analyzeContentWithAI(extractedText);
+
+    console.log('✅ PDF 分析完成:', {
+      title: analysis.title,
+      contentLength: analysis.content.length,
+      keyPointsCount: analysis.keyPoints.length,
+    });
 
     return NextResponse.json({
       success: true,
       data: analysis,
     });
   } catch (error) {
-    console.error('PDF Analysis Error:', error);
+    // 详细的错误处理和日志记录
+    const errorMessage = error instanceof Error ? error.message : '未知错误';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
+    console.error('❌ PDF 解析错误:', {
+      message: errorMessage,
+      stack: errorStack,
+      error: error,
+    });
+
     return NextResponse.json(
       {
-        error: 'Failed to analyze PDF',
+        success: false,
+        error: '解析 PDF 文件时出现错误',
         details:
           process.env.NODE_ENV === 'development'
-            ? (error as Error).message
-            : undefined,
+            ? errorMessage
+            : '请检查文件格式是否正确，或稍后重试。',
       },
       { status: 500 }
     );

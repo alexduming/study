@@ -30,7 +30,29 @@
     "share": "分享给朋友",
     "copy": "复制笔记",
     "regenerate": "创建新版本",
-    "no_notes": "还没有笔记。上传学习材料开始吧！"
+    "no_notes": "还没有笔记。上传学习材料开始吧！",
+    "transfer_unavailable": "当前环境无法跳转，请先完成页面加载后重试",
+    "toast_no_notes": "请先上传或生成笔记，再使用这些功能",
+    "download_success": "PDF 已准备好，正在为您保存",
+    "download_error": "PDF 导出失败，请稍后重试",
+    "copy_success": "笔记内容已复制，直接粘贴即可分享。",
+    "copy_error": "复制失败，请重试或手动选择文本。",
+    "share_success": "已通过系统分享笔记",
+    "share_fallback": "笔记已复制，粘贴即可分享",
+    "share_error": "分享失败，请重试",
+    "dialog": {
+      "flashcards_title": "AI 生成的闪卡",
+      "flashcards_desc": "根据当前笔记自动提炼问答卡片，适合复习背诵",
+      "quiz_title": "AI 生成的测验题",
+      "quiz_desc": "快速检测掌握程度，包含题目、选项与答案解析",
+      "podcast_title": "AI 学习播客脚本",
+      "podcast_desc": "把笔记转换成可朗读的脚本，随时随地听学习",
+      "loading": "AI 正在整理内容，请稍候...",
+      "error": "生成失败，请稍后再试",
+      "difficulty": "难度",
+      "correct_answer": "正确答案",
+      "explanation": "解析"
+    }
   },
   "retry": "重试",
   "toolbar": {

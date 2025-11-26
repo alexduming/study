@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   BookOpen,
@@ -16,11 +16,15 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 import { Button } from '@/shared/components/ui/button';
 import { ScrollAnimation } from '@/shared/components/ui/scroll-animation';
 import { readLearningFileContent } from '@/shared/lib/file-reader';
-import { OpenRouterService } from '@/shared/services/openrouter';
+import {
+  OpenRouterService,
+  type QuizQuestion as AIQuizQuestion,
+} from '@/shared/services/openrouter';
 
 interface Question {
   id: number;
@@ -41,6 +45,8 @@ interface UserAnswer {
   timeSpent: number;
   hintsUsed: number;
 }
+
+const NOTE_TRANSFER_KEY = 'ai-note-transfer';
 
 const QuizApp = () => {
   const t = useTranslations('quiz');
@@ -110,6 +116,7 @@ const QuizApp = () => {
     Date.now()
   );
   const [usedHints, setUsedHints] = useState<Set<number>>(new Set());
+  const transferAutoGenerateRef = useRef(false);
 
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -118,6 +125,47 @@ const QuizApp = () => {
       setQuestionStartTime(Date.now());
     }
   }, [currentQuestionIndex, quizStarted, quizCompleted]);
+
+  useEffect(() => {
+    /**
+     * 非程序员解释：
+     * - AI 笔记页会把总结写入 sessionStorage，我们在此自动接收
+     * - 打开本页时就能直接看到笔记内容，并立即生成测验
+     */
+    if (typeof window === 'undefined') return;
+    const payloadRaw = sessionStorage.getItem(NOTE_TRANSFER_KEY);
+    if (!payloadRaw) return;
+
+    sessionStorage.removeItem(NOTE_TRANSFER_KEY);
+    try {
+      const payload = JSON.parse(payloadRaw);
+      if (payload?.type !== 'quiz' || !payload?.content) {
+        return;
+      }
+
+      setShowGenerateForm(true);
+      setQuizContent(payload.content);
+      setFileInfo(t('create.transfer_info'));
+      setGenerationError('');
+      transferAutoGenerateRef.current = true;
+    } catch (error) {
+      console.error('Failed to read transfer data for quiz:', error);
+      toast.error(t('create.transfer_error'));
+    }
+  }, [t]);
+
+  useEffect(() => {
+    // 当文本已就绪且没有其他生成任务时，自动触发一次“生成测验”
+    if (
+      transferAutoGenerateRef.current &&
+      quizContent.trim() &&
+      !isGenerating
+    ) {
+      transferAutoGenerateRef.current = false;
+      toast.success(t('create.transfer_success'));
+      handleGenerateQuiz();
+    }
+  }, [quizContent, isGenerating]);
 
   const handleStartQuiz = () => {
     setQuizStarted(true);
@@ -138,17 +186,27 @@ const QuizApp = () => {
       const result = await aiService.generateQuiz(quizContent, questionCount);
 
       if (result.success && result.questions.length > 0) {
-        const newQuestions: Question[] = result.questions.map((q, index) => ({
-          id: Date.now() + index, // 确保唯一ID
-          type: q.type,
-          question: q.question,
-          options: q.options,
-          correctAnswer: q.correctAnswer,
-          explanation: q.explanation,
-          difficulty: q.difficulty as 'easy' | 'medium' | 'hard',
-          topic: q.topic,
-          hints: q.hints || [],
-        }));
+        const newQuestions: Question[] = result.questions.map(
+          (q: AIQuizQuestion, index: number) => {
+            const extended = q as AIQuizQuestion & {
+              topic?: string;
+              hints?: string[];
+            };
+
+            return {
+              id: Date.now() + index, // 确保唯一ID
+              type: extended.type,
+              question: extended.question,
+              options: extended.options,
+              correctAnswer: extended.correctAnswer,
+              explanation: extended.explanation,
+              difficulty: (extended.difficulty ||
+                'medium') as Question['difficulty'],
+              topic: extended.topic || 'General',
+              hints: extended.hints || [],
+            };
+          }
+        );
 
         setQuestions(newQuestions);
         setQuizContent('');
@@ -156,7 +214,6 @@ const QuizApp = () => {
         setCurrentQuestionIndex(0);
         setUserAnswers([]);
         setSelectedAnswer('');
-        setIsFlipped(false);
         setShowResult(false);
         setQuizCompleted(false);
       } else {
@@ -481,7 +538,7 @@ const QuizApp = () => {
         <div className="absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-blue-600/10 blur-3xl" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
+      <div className="relative z-10 container mx-auto px-4 py-24">
         {/* 进度条 */}
         <div className="mx-auto mb-8 max-w-4xl">
           <div className="mb-2 flex items-center justify-between">

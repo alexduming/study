@@ -16,11 +16,22 @@ import {
   X,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 import { Button } from '@/shared/components/ui/button';
 import { ScrollAnimation } from '@/shared/components/ui/scroll-animation';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/components/ui/select';
 import { readLearningFileContent } from '@/shared/lib/file-reader';
-import { OpenRouterService } from '@/shared/services/openrouter';
+import {
+  OpenRouterService,
+  type Flashcard as AIGeneratedFlashcard,
+} from '@/shared/services/openrouter';
 
 interface Flashcard {
   id: number;
@@ -31,6 +42,8 @@ interface Flashcard {
   nextReview?: Date;
   reviewCount: number;
 }
+
+const NOTE_TRANSFER_KEY = 'ai-note-transfer';
 
 const FlashcardsApp = () => {
   const t = useTranslations('flashcards');
@@ -72,6 +85,10 @@ const FlashcardsApp = () => {
   const [isFileLoading, setIsFileLoading] = useState(false);
   const [fileInfo, setFileInfo] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // 让用户指定 AI 生成语言；默认“自动”保持与上传资料一致
+  const [outputLanguage, setOutputLanguage] = useState<'auto' | 'zh' | 'en'>(
+    'auto'
+  );
 
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -80,6 +97,7 @@ const FlashcardsApp = () => {
   );
   // 是否展开「详细统计」面板
   const [showStats, setShowStats] = useState(false);
+  const transferAutoGenerateRef = useRef(false);
 
   const currentCard = flashcards[currentCardIndex];
   // 所有看过至少一次（reviewCount > 0）的卡片，都视为“待复习”
@@ -94,6 +112,48 @@ const FlashcardsApp = () => {
       setCurrentCardIndex(dueIndex);
     }
   }, [studyMode]);
+
+  useEffect(() => {
+    /**
+     * 非程序员解释：
+     * - AI 笔记页面会把“已生成的总结”暂存到 sessionStorage
+     * - 我们在这里自动读取，并把内容塞进闪卡生成表单
+     * - 这样用户点击“创建闪卡”按钮后即可直接跳转过来，无需再粘贴一次材料
+     */
+    if (typeof window === 'undefined') return;
+    const payloadRaw = sessionStorage.getItem(NOTE_TRANSFER_KEY);
+    if (!payloadRaw) return;
+
+    sessionStorage.removeItem(NOTE_TRANSFER_KEY);
+    try {
+      const payload = JSON.parse(payloadRaw);
+      if (payload?.type !== 'flashcards' || !payload?.content) {
+        return;
+      }
+
+      setShowCreateForm(true);
+      setNewCardContent(payload.content);
+      setFileInfo(t('create.transfer_info'));
+      setGenerationError('');
+      transferAutoGenerateRef.current = true;
+    } catch (error) {
+      console.error('Failed to read transfer data for flashcards:', error);
+      toast.error(t('create.transfer_error'));
+    }
+  }, [t]);
+
+  useEffect(() => {
+    // 当文本已经填充且没有其他生成任务时，自动触发一次 "生成闪卡"
+    if (
+      transferAutoGenerateRef.current &&
+      newCardContent.trim() &&
+      !isGenerating
+    ) {
+      transferAutoGenerateRef.current = false;
+      toast.success(t('create.transfer_success'));
+      handleGenerateFlashcards();
+    }
+  }, [newCardContent, isGenerating]);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -144,15 +204,19 @@ const FlashcardsApp = () => {
 
     try {
       const aiService = OpenRouterService.getInstance();
-      const result = await aiService.generateFlashcards(newCardContent, 10);
+      const result = await aiService.generateFlashcards(
+        newCardContent,
+        10,
+        outputLanguage
+      );
 
       if (result.success && result.flashcards.length > 0) {
         const newFlashcards: Flashcard[] = result.flashcards.map(
-          (fc, index) => ({
+          (fc: AIGeneratedFlashcard, index: number) => ({
             id: Date.now() + index, // 确保唯一ID
             front: fc.front,
             back: fc.back,
-            difficulty: fc.difficulty as 'easy' | 'medium' | 'hard',
+            difficulty: fc.difficulty as Flashcard['difficulty'],
             reviewCount: 0,
             lastReviewed: undefined,
             nextReview: new Date(),
@@ -184,7 +248,7 @@ const FlashcardsApp = () => {
   const handleResetProgress = () => {
     const resetCards = flashcards.map((card) => ({
       ...card,
-      difficulty: 'medium',
+      difficulty: 'medium' as Flashcard['difficulty'],
       reviewCount: 0,
       lastReviewed: undefined,
       nextReview: undefined,
@@ -308,7 +372,7 @@ const FlashcardsApp = () => {
         <div className="absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-blue-600/10 blur-3xl" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
+      <div className="relative z-10 container mx-auto px-4 py-24">
         <ScrollAnimation>
           <div className="mb-12 text-center">
             <motion.div
@@ -716,6 +780,37 @@ const FlashcardsApp = () => {
                   <span>{fileInfo}</span>
                 </div>
               )}
+
+              {/* 语言选择：帮助非程序员理解可手动切换输出语言 */}
+              <div className="mb-4">
+                <label
+                  htmlFor="flashcards-language-select"
+                  className="mb-1 block text-sm font-medium text-gray-200"
+                >
+                  {t('create.language_label')}
+                </label>
+                <Select
+                  value={outputLanguage}
+                  onValueChange={(value) =>
+                    setOutputLanguage(value as 'auto' | 'zh' | 'en')
+                  }
+                >
+                  <SelectTrigger
+                    id="flashcards-language-select"
+                    className="border-gray-600 bg-gray-800/50 text-gray-200"
+                  >
+                    <SelectValue placeholder={t('languages.auto')} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900 text-gray-100">
+                    <SelectItem value="auto">{t('languages.auto')}</SelectItem>
+                    <SelectItem value="zh">{t('languages.zh')}</SelectItem>
+                    <SelectItem value="en">{t('languages.en')}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="mt-1 text-xs text-gray-400">
+                  {t('create.language_desc')}
+                </p>
+              </div>
 
               <textarea
                 value={newCardContent}

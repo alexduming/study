@@ -46,7 +46,10 @@
     "generate": "生成测验",
     "generating": "AI正在创建您的个性化测验...",
     "error_content": "请添加学习内容以创建测验",
-    "error_generation": "测验创建失败。请重试。"
+    "error_generation": "测验创建失败。请重试。",
+    "transfer_info": "已自动接收 AI 笔记内容，即将生成测验题。",
+    "transfer_success": "内容已就绪，AI 正在生成测验…",
+    "transfer_error": "无法读取从 AI 笔记传来的内容，请重试。"
   },
   "feedback": {
     "correct": "正确！",
