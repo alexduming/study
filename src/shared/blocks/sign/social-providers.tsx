@@ -17,11 +17,13 @@ export function SocialProviders({
   callbackUrl,
   loading,
   setLoading,
+  buttonText,
 }: {
   configs: Record<string, string>;
   callbackUrl: string;
   loading: boolean;
   setLoading: (loading: boolean) => void;
+  buttonText?: string;
 }) {
   const t = useTranslations('common.sign');
   const router = useRouter();
