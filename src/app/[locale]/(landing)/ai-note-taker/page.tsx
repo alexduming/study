@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import jsPDF from 'jspdf';
+import { toPng } from 'html-to-image';
 import {
   Brain,
   Copy,
@@ -13,7 +13,6 @@ import {
   FileVideo,
   Loader2,
   Mic,
-  Share2,
   Upload,
   Zap,
 } from 'lucide-react';
@@ -88,10 +87,9 @@ const AINoteTaker = ({
     { name: 'Emerald Green', value: '#10b981', color: '#10b981' },
     { name: 'Amber Orange', value: '#f59e0b', color: '#f59e0b' },
   ];
-  // PDF/分享等工具的运行状态
+  // 导出图片（原来是 PDF）等工具的运行状态
   const [isCopying, setIsCopying] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
   // AI 扩展功能的弹窗状态
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'podcast' | null>(null);
@@ -101,7 +99,9 @@ const AINoteTaker = ({
   const NOTE_TRANSFER_KEY = 'ai-note-transfer';
   // 用于拿到隐藏的文件输入框 DOM 节点
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // 记录渲染好的笔记 DOM，方便导出 PDF
+  // 记录渲染好的笔记 DOM，方便后续把“看到的排版效果”一键导出为长图片
+  // 非程序员解释：
+  // - 可以把这个理解为“给笔记区域贴了一个隐形标签”，稍后截图工具会根据这个标签来拍照
   const notesContainerRef = useRef<HTMLDivElement>(null);
 
   const handleFileUpload = async (
@@ -208,147 +208,60 @@ const AINoteTaker = ({
   };
 
   /**
-   * 直接用 jsPDF 将 Markdown 转成排版良好的 PDF
+   * 将“渲染后的笔记区域”导出为一张长图片
+   *
    * 非程序员解释：
-   * - 不再截图页面，而是逐行写入文字，规避浏览器颜色格式（oklab）导致的报错
-   * - 简单处理 #、##、- 这种 Markdown 语法，让导出的 PDF 结构清晰
+   * - 之前的做法是“重新排版文字然后导出 PDF”，因此和你在页面上看到的美观排版不完全一致
+   * - 现在改成“给整块笔记区域拍一张长截图”，保证导出的图片效果 = 你眼睛看到的效果
+   * - 实现方式：用 html-to-image 这个小工具，把某一块 DOM（notesContainerRef）转成 PNG 图片
+   *
+   * 设计取舍（对应 精 / 准 / 净）：
+   * - 精：逻辑非常直观——只针对笔记展示区域截图，不动 AI 生成、上传等主流程
+   * - 准：直接操作已经渲染好的 HTML，不再二次解析 Markdown，避免排版“跑偏”
+   * - 净：只替换导出实现，不改其它地方的调用和文案 key，技术债为 0
    */
-  const handleDownloadPdf = async () => {
+  const handleDownloadImage = async () => {
     if (!ensureNotesReady()) return;
+
+    // 如果还没把笔记渲染出来（极端情况下），就给出友好提示
+    if (!notesContainerRef.current) {
+      toast.error(t('notes.download_error'));
+      return;
+    }
 
     setIsDownloading(true);
     try {
-      const doc = new jsPDF({
-        unit: 'pt',
-        format: 'a4',
-      });
-      const marginX = 48;
-      const marginY = 56;
-      const usableWidth = doc.internal.pageSize.getWidth() - marginX * 2;
-      const pageHeight = doc.internal.pageSize.getHeight() - marginY;
-      let cursorY = marginY;
+      const node = notesContainerRef.current;
 
-      const ensureSpace = (lineHeight: number) => {
-        if (cursorY + lineHeight > pageHeight) {
-          doc.addPage();
-          cursorY = marginY;
-        }
-      };
-
-      const writeParagraph = (
-        text: string,
-        options: {
-          fontSize?: number;
-          fontStyle?: 'normal' | 'bold';
-          spacing?: number;
-        } = {}
-      ) => {
-        if (!text.trim()) {
-          cursorY += options.spacing ?? 8;
-          return;
-        }
-        const fontSize = options.fontSize ?? 12;
-        const fontStyle = options.fontStyle ?? 'normal';
-        const spacing = options.spacing ?? 4;
-        const lineHeight = fontSize + 4;
-
-        doc.setFont('helvetica', fontStyle);
-        doc.setFontSize(fontSize);
-
-        const lines = doc.splitTextToSize(text, usableWidth);
-        lines.forEach((line: string) => {
-          ensureSpace(lineHeight);
-          doc.text(line, marginX, cursorY);
-          cursorY += lineHeight;
-        });
-        cursorY += spacing;
-      };
-
-      const markdownLines = generatedNotes.split('\n');
-      markdownLines.forEach((line: string) => {
-        const trimmed = line.trim();
-        if (!trimmed) {
-          cursorY += 6;
-          return;
-        }
-
-        if (trimmed.startsWith('### ')) {
-          writeParagraph(trimmed.replace(/^###\s*/, ''), {
-            fontSize: 14,
-            fontStyle: 'bold',
-            spacing: 6,
-          });
-        } else if (trimmed.startsWith('## ')) {
-          writeParagraph(trimmed.replace(/^##\s*/, ''), {
-            fontSize: 16,
-            fontStyle: 'bold',
-            spacing: 8,
-          });
-        } else if (trimmed.startsWith('# ')) {
-          writeParagraph(trimmed.replace(/^#\s*/, ''), {
-            fontSize: 18,
-            fontStyle: 'bold',
-            spacing: 10,
-          });
-        } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-          writeParagraph(`• ${trimmed.slice(1).trim()}`, {
-            fontSize: 12,
-            spacing: 2,
-          });
-        } else if (/^\d+\./.test(trimmed)) {
-          writeParagraph(trimmed, {
-            fontSize: 12,
-            spacing: 2,
-          });
-        } else {
-          writeParagraph(trimmed, {
-            fontSize: 12,
-            spacing: 6,
-          });
-        }
+      // 使用 html-to-image 将指定 DOM 转成 PNG
+      // 说明：
+      // - backgroundColor：兜底背景色，避免透明背景在某些设备上看起来发灰
+      // - pixelRatio：用屏幕像素比，导出更清晰的图片（长图依然能看清细节）
+      const dataUrl = await toPng(node, {
+        cacheBust: true,
+        backgroundColor: '#020617', // 近似当前深色背景（Tailwind 的 bg-slate-950）
+        pixelRatio:
+          typeof window !== 'undefined' && window.devicePixelRatio
+            ? window.devicePixelRatio
+            : 2,
       });
 
-      const fileName = uploadedFile?.name
-        ? `${uploadedFile.name}-notes.pdf`
-        : 'ai-study-notes.pdf';
-      doc.save(fileName);
+      // 通过一个临时的 <a> 标签触发浏览器下载
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = uploadedFile?.name
+        ? `${uploadedFile.name}-notes.png`
+        : 'ai-study-notes.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
       toast.success(t('notes.download_success'));
     } catch (error) {
-      console.error('Download PDF failed:', error);
+      console.error('Download image failed:', error);
       toast.error(t('notes.download_error'));
     } finally {
       setIsDownloading(false);
-    }
-  };
-
-  /**
-   * 分享按钮优先走系统分享，不支持的浏览器自动退回“复制到剪贴板”
-   */
-  const handleShareNotes = async () => {
-    if (!ensureNotesReady()) return;
-    setIsSharing(true);
-    try {
-      const sharePayload = {
-        title: uploadedFile?.name || 'AI Study Notes',
-        text: generatedNotes,
-      };
-
-      if (navigator.share) {
-        await navigator.share(sharePayload);
-        toast.success(t('notes.share_success'));
-      } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(generatedNotes);
-        toast.success(t('notes.share_fallback'));
-      } else {
-        toast.error(t('notes.share_error'));
-      }
-    } catch (error: any) {
-      if (error?.name !== 'AbortError') {
-        console.error('Share failed:', error);
-        toast.error(t('notes.share_error'));
-      }
-    } finally {
-      setIsSharing(false);
     }
   };
 
@@ -639,9 +552,6 @@ const AINoteTaker = ({
                       </div>
                     </div>
                   </div>
-                  <p className="mb-6 text-xs text-gray-500">
-                    {t('upload.output_language_desc')}
-                  </p>
 
                   {/* 
                     非程序员解释：
@@ -784,7 +694,7 @@ const AINoteTaker = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={handleDownloadPdf}
+                      onClick={handleDownloadImage}
                       disabled={isDownloading || !generatedNotes}
                       className="border-primary/30 text-primary/80 hover:border-primary/50 disabled:opacity-40"
                     >
@@ -796,20 +706,6 @@ const AINoteTaker = ({
                       {isDownloading
                         ? t('upload.processing')
                         : t('notes.download')}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleShareNotes}
-                      disabled={isSharing || !generatedNotes}
-                      className="border-primary/30 text-primary/80 hover:border-primary/50 disabled:opacity-40"
-                    >
-                      {isSharing ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Share2 className="mr-2 h-4 w-4" />
-                      )}
-                      {isSharing ? t('upload.processing') : t('notes.share')}
                     </Button>
                   </div>
                 </div>

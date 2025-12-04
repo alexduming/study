@@ -186,6 +186,9 @@ importers:
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
+      html-to-image:
+        specifier: ^1.11.13
+        version: 1.11.13
       jspdf:
         specifier: ^2.5.2
         version: 2.5.2
@@ -4243,6 +4246,9 @@ packages:
 
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
+
+  html-to-image@1.11.13:
+    resolution: {integrity: sha512-cuOPoI7WApyhBElTTb9oqsawRvZ0rHhaHwghRLlTuffoD1B2aDemlCruLeZrUIIdvG7gs9xeELEPm6PhuASqrg==}
 
   html-to-text@9.0.5:
     resolution: {integrity: sha512-qY60FjREgVZL03vJU6IfMV4GDjGBIoOyvuFdpBDIX9yTlDw0TjxVBQp+P8NvpdIXNJvfWBTNul7fsAQJq2FNpg==}
@@ -10271,6 +10277,8 @@ snapshots:
       hermes-estree: 0.25.1
 
   html-escaper@2.0.2: {}
+
+  html-to-image@1.11.13: {}
 
   html-to-text@9.0.5:
     dependencies:

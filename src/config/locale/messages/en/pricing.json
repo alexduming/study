@@ -8,7 +8,19 @@
     "sr_only_title": "StudyHacks Pricing Plans",
     "title": "Pricing Plans",
     "description": "Study smarter, not harder. Choose the plan that fits your learning goals.",
-    "groups": [],
+    "groups": [
+      {
+        "name": "monthly",
+        "title": "Monthly",
+        "is_featured": true,
+        "label": "Most Popular"
+      },
+      {
+        "name": "yearly",
+        "title": "Yearly",
+        "label": "Save 30%"
+      }
+    ],
     "items": [
       {
         "title": "Free",
@@ -39,22 +51,56 @@
         "product_name": "StudyHacks Free Plan",
         "credits": 10,
         "valid_days": 30,
-        "group": null,
+        "group": "monthly",
         "plan_name": "Free"
       },
       {
-        "title": "Premium",
-        "description": "Unlimited AI credits",
+        "title": "Plus",
+        "description": "Perfect for serious students who want to excel.",
+        "label": "Most Popular",
         "features_title": "Everything in Free, plus",
         "features": [
-          "Unlimited AI credits",
+          "600 AI credits per month",
           "Advanced AI note generation",
           "Unlimited flashcards & quizzes",
           "Spaced repetition algorithm",
-          "Unlimited file upload",
+          "100MB file upload limit",
           "Study podcast generation",
           "Progress tracking & analytics",
-          "Priority 24/7 support"
+          "Priority email support"
+        ],
+        "interval": "month",
+        "amount": 999,
+        "currency": "USD",
+        "price": "$9.99",
+        "original_price": "",
+        "unit": "/ month",
+        "is_featured": true,
+        "tip": "Unlimited AI tools, study smarter",
+        "button": {
+          "title": "Start Free Trial",
+          "url": "/#pricing",
+          "icon": "RiFlashlightFill"
+        },
+        "product_id": "plus-monthly",
+        "product_name": "StudyHacks Plus Monthly",
+        "credits": 600,
+        "valid_days": 30,
+        "group": "monthly",
+        "plan_name": "Plus"
+      },
+      {
+        "title": "Pro",
+        "description": "Maximum features for students who want the best results.",
+        "features_title": "Everything in Plus, plus",
+        "features": [
+          "2000 AI credits per month",
+          "Advanced learning analytics",
+          "Custom learning paths",
+          "AI study assistant",
+          "500MB file upload limit",
+          "Collaborative study groups",
+          "Offline learning mode"
         ],
         "interval": "month",
         "amount": 1999,
@@ -62,57 +108,120 @@
         "price": "$19.99",
         "original_price": "",
         "unit": "/ month",
-        "is_featured": true,
+        "is_featured": false,
+        "tip": "Ultimate learning experience, unlimited usage",
         "button": {
-          "title": "Upgrade Now",
+          "title": "Upgrade to Pro",
           "url": "/#pricing",
-          "icon": "Sparkles"
+          "icon": "RiFlashlightFill"
         },
-        "product_id": "premium-monthly",
-        "product_name": "StudyHacks Premium Monthly",
-        "credits": 9999,
+        "product_id": "pro-monthly",
+        "product_name": "StudyHacks Pro Monthly",
+        "credits": 2000,
         "valid_days": 30,
-        "group": null,
-        "plan_name": "Premium",
-        "annual_product_id": "premium-yearly",
-        "annual_price": "$9.99",
-        "annual_original_price": "$19.99",
-        "annual_amount": 999,
-        "annual_savings": "Save 50%"
+        "group": "monthly",
+        "plan_name": "Pro"
       },
       {
-        "title": "Premium",
-        "description": "Unlimited AI credits",
+        "title": "Free",
+        "description": "Perfect for trying out StudyHacks.",
+        "features_title": "Includes",
+        "features": [
+          "10 AI credits per month",
+          "Basic note generation",
+          "Limited flashcard creation",
+          "Simple quiz generation",
+          "5MB file upload limit",
+          "Community support"
+        ],
+        "interval": "year",
+        "amount": 0,
+        "currency": "USD",
+        "price": "Free",
+        "original_price": "",
+        "unit": "",
+        "is_featured": false,
+        "tip": "",
+        "button": {
+          "title": "Start Free",
+          "url": "/#pricing",
+          "icon": "RiFlashlightFill"
+        },
+        "product_id": "free-yearly",
+        "product_name": "StudyHacks Free Plan Yearly",
+        "credits": 120,
+        "valid_days": 365,
+        "group": "yearly",
+        "plan_name": "Free"
+      },
+      {
+        "title": "Plus",
+        "description": "Perfect for serious students who want to excel.",
+        "label": "Most Popular",
         "features_title": "Everything in Free, plus",
         "features": [
-          "Unlimited AI credits",
+          "600 AI credits per month",
           "Advanced AI note generation",
           "Unlimited flashcards & quizzes",
           "Spaced repetition algorithm",
-          "Unlimited file upload",
+          "100MB file upload limit",
           "Study podcast generation",
           "Progress tracking & analytics",
-          "Priority 24/7 support"
+          "Priority email support"
         ],
         "interval": "year",
-        "amount": 799,
+        "amount": 699,
         "currency": "USD",
-        "price": "$9.99",
-        "original_price": "$19.99",
+        "price": "$6.99",
+        "original_price": "$9.99",
         "unit": "/ month",
         "is_featured": true,
-        "label": "Most popular",
+        "tip": "Annual subscription, study smarter and save money",
         "button": {
-          "title": "Upgrade Now",
+          "title": "Start Free Trial",
           "url": "/#pricing",
-          "icon": "Sparkles"
+          "icon": "RiFlashlightFill"
         },
-        "product_id": "premium-yearly",
-        "product_name": "StudyHacks Premium Annually",
-        "credits": 9999,
+        "product_id": "plus-yearly",
+        "product_name": "StudyHacks Plus Yearly",
+        "credits": 7200,
         "valid_days": 365,
-        "group": null,
-        "plan_name": "Premium"
+        "group": "yearly",
+        "plan_name": "Plus"
+      },
+      {
+        "title": "Pro",
+        "description": "Maximum features for students who want the best results.",
+        "features_title": "Everything in Plus, plus",
+        "features": [
+          "2000 AI credits per month",
+          "Advanced learning analytics",
+          "Custom learning paths",
+          "AI study assistant",
+          "500MB file upload limit",
+          "Collaborative study groups",
+          "Offline learning mode",
+          "24/7 priority support"
+        ],
+        "interval": "year",
+        "amount": 1399,
+        "currency": "USD",
+        "price": "$13.99",
+        "original_price": "$19.99",
+        "unit": "/ month",
+        "is_featured": false,
+        "tip": "Ultimate learning experience, unlimited usage",
+        "button": {
+          "title": "Upgrade to Pro",
+          "url": "/#pricing",
+          "icon": "RiFlashlightFill"
+        },
+        "product_id": "pro-yearly",
+        "product_name": "StudyHacks Pro Yearly",
+        "credits": 24000,
+        "valid_days": 365,
+        "group": "yearly",
+        "plan_name": "Pro"
       }
     ]
   },

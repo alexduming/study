@@ -94,8 +94,32 @@ export function Pricing({
     configs,
   } = useAppContext();
 
-  // We only show three plans horizontally: Free, Annual, Monthly
-  const visibleItems = pricing.items ? pricing.items.slice(0, 3) : [];
+  // 月付/年付切换状态管理
+  // 业务说明：这个状态用来控制显示月付还是年付的定价方案
+  // - 'monthly' 表示显示月付方案（Free, Plus, Pro 的月付版本）
+  // - 'yearly' 表示显示年付方案（Free, Plus, Pro 的年付版本）
+  // 初始值优先选择：当前订阅的 group > 标记为 featured 的 group > 第一个 group
+  const [group, setGroup] = useState(() => {
+    // 查找当前订阅对应的定价项
+    const currentItem = pricing.items?.find(
+      (i) => i.product_id === currentSubscription?.productId
+    );
+
+    // 优先查找标记为 featured 的 group（通常是"最受欢迎"的选项）
+    const featuredGroup = pricing.groups?.find((g) => g.is_featured);
+
+    // 返回优先级：当前订阅的 group > featured group > 第一个 group
+    return (
+      currentItem?.group || featuredGroup?.name || pricing.groups?.[0]?.name
+    );
+  });
+
+  // 根据选中的 group 过滤显示的定价项
+  // 业务说明：只显示与当前选中 group 匹配的定价方案
+  // 如果 item 没有 group 字段，则始终显示（兼容旧数据）
+  const visibleItems = pricing.items
+    ? pricing.items.filter((item) => !item.group || item.group === group)
+    : [];
 
   // current pricing item
   const [pricingItem, setPricingItem] = useState<PricingItem | null>(null);
@@ -329,7 +353,57 @@ export function Pricing({
       </div>
 
       <div className="container">
-        <div className="mt-0 grid w-full gap-6 md:grid-cols-3">
+        {/* 
+          月付/年付切换按钮区域
+          业务说明：这个切换按钮让用户可以在月付和年付之间快速切换
+          - 点击 "Pay monthly" 会显示所有月付方案（group === 'monthly'）
+          - 点击 "Pay yearly" 会显示所有年付方案（group === 'yearly'）
+          - 选中的按钮会高亮显示，未选中的按钮显示为灰色
+        */}
+        {pricing.groups && pricing.groups.length > 0 && (
+          <div className="mx-auto mt-8 mb-16 flex w-full justify-center md:max-w-lg">
+            <div className="border-border/60 bg-muted/60 inline-flex items-center gap-2 rounded-full border px-1 py-1 text-xs">
+              {/* 月付按钮 */}
+              <button
+                type="button"
+                onClick={() => setGroup('monthly')}
+                className={cn(
+                  'rounded-full px-3 py-1 text-xs font-medium transition-colors',
+                  group === 'monthly'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Pay monthly
+              </button>
+
+              {/* 中间提示文案：年付更省钱（仅在中等以上屏幕显示） */}
+              <span className="text-muted-foreground hidden text-[11px] md:inline">
+                Save more with annual billing
+              </span>
+
+              {/* 年付按钮 */}
+              <button
+                type="button"
+                onClick={() => setGroup('yearly')}
+                className={cn(
+                  'rounded-full px-3 py-1 text-xs font-medium transition-colors',
+                  group === 'yearly'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Pay yearly
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div
+          className={`mt-0 grid w-full gap-6 md:grid-cols-${
+            visibleItems.length
+          }`}
+        >
           {visibleItems.map((item: PricingItem, idx) => {
             let isCurrentPlan = false;
             if (
@@ -371,7 +445,7 @@ export function Pricing({
                     </span>
                     {item.interval === 'year' && (
                       <span className="rounded-full bg-emerald-400 px-2 py-0.5 text-[11px] font-bold text-emerald-950">
-                        Save 50%
+                        Save 30%
                       </span>
                     )}
                   </div>
