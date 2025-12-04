@@ -101,6 +101,34 @@ export const verification = pgTable(
   ]
 );
 
+export const emailVerification = pgTable(
+  'email_verification',
+  {
+    id: text('id').primaryKey(),
+    email: text('email').notNull(),
+    token: text('token').notNull().unique(),
+    type: text('type').notNull().default('registration'), // registration, password_reset
+    attempts: integer('attempts').default(0).notNull(),
+    isVerified: boolean('is_verified').default(false).notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+    lastSentAt: timestamp('last_sent_at'),
+    verifiedAt: timestamp('verified_at'),
+  },
+  (table) => [
+    // Find verification by email
+    index('idx_email_verification_email').on(table.email),
+    // Find verification by token
+    index('idx_email_verification_token').on(table.token),
+    // Composite: Query unverified tokens by expiration
+    index('idx_email_verification_expires').on(table.expiresAt, table.isVerified),
+  ]
+);
+
 export const config = pgTable('config', {
   name: text('name').unique().notNull(),
   value: text('value'),
