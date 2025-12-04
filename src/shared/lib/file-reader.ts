@@ -33,7 +33,7 @@ export const readLearningFileContent = async (file: File): Promise<string> => {
       file.type
     }\n\n这是一个${
       file.type.startsWith('audio/') ? '音频' : '视频'
-    }文件。Turbo AI 可以帮助您：\n\n1. 转录音频内容为文字\n2. 提取关键信息和要点\n3. 生成结构化的学习笔记\n4. 创建相关的闪卡和测验\n\n请稍候，AI 正在处理您的文件...`;
+    }文件。StudyHacks 可以帮助您：\n\n1. 转录音频内容为文字\n2. 提取关键信息和要点\n3. 生成结构化的学习笔记\n4. 创建相关的闪卡和测验\n\n请稍候，AI 正在处理您的文件...`;
   }
 
   // 3. PDF：走后端 /api/pdf/analyze，用 pdfjs-dist 在服务器解析

@@ -28,10 +28,7 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select';
 import { readLearningFileContent } from '@/shared/lib/file-reader';
-import {
-  OpenRouterService,
-  type Flashcard as AIGeneratedFlashcard,
-} from '@/shared/services/openrouter';
+import { type Flashcard as AIGeneratedFlashcard } from '@/shared/services/openrouter';
 
 interface Flashcard {
   id: number;
@@ -203,14 +200,27 @@ const FlashcardsApp = () => {
     setGenerationError('');
 
     try {
-      const aiService = OpenRouterService.getInstance();
-      const result = await aiService.generateFlashcards(
-        newCardContent,
-        10,
-        outputLanguage
-      );
+      /**
+       * 非程序员解释：
+       * - 这里的改造思路与「AI 笔记」和「AI 测验」完全一致：
+       *   原本浏览器直接拿密钥请求 OpenRouter，现在改为请求我们自己的 /api/ai/flashcards。
+       * - 好处：用户体验不变，但密钥永远只保存在服务器环境变量中。
+       */
+      const response = await fetch('/api/ai/flashcards', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: newCardContent,
+          count: 10,
+          outputLanguage,
+        }),
+      });
 
-      if (result.success && result.flashcards.length > 0) {
+      const result = await response.json();
+
+      if (result.success && result.flashcards && result.flashcards.length > 0) {
         const newFlashcards: Flashcard[] = result.flashcards.map(
           (fc: AIGeneratedFlashcard, index: number) => ({
             id: Date.now() + index, // 确保唯一ID

@@ -41,7 +41,6 @@ import {
   detectLearningFileType,
   readLearningFileContent,
 } from '@/shared/lib/file-reader';
-import { OpenRouterService } from '@/shared/services/openrouter';
 
 /**
  * 非程序员友好解释：
@@ -117,16 +116,33 @@ const AINoteTaker = ({
         // 读取文件内容（支持 txt / pdf / docx 等）
         const fileContent = await readLearningFileContent(file);
 
-        // 调用 AI API 生成笔记
-        const aiService = OpenRouterService.getInstance();
-        const result = await aiService.generateNotes({
-          content: fileContent,
-          // 使用统一的文件类型检测，便于后续统计或扩展
-          type: detectLearningFileType(file.type),
-          fileName: file.name,
-          // 传递用户选择的输出语言
-          outputLanguage: outputLanguage,
+        /**
+         * 调用后端 API 生成笔记（替代在前端直接 new OpenRouterService）：
+         *
+         * 非程序员解释：
+         * - 之前的做法：浏览器里直接拿着 OpenRouter 的密钥去请求第三方 AI 服务，
+         *   这样虽然能用，但密钥很容易在浏览器开发者工具中被看到 → 不安全。
+         * - 现在的做法：浏览器只请求我们自己的网站接口 /api/ai/notes，
+         *   真正去请求 OpenRouter 的动作放在服务器里完成，密钥只保存在服务器环境变量中。
+         *
+         * 对你来说，使用方式几乎不变：只不过从「调本地 service」换成了「调后端接口」。
+         */
+        const response = await fetch('/api/ai/notes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: fileContent,
+            // 使用统一的文件类型检测，便于后续统计或扩展
+            type: detectLearningFileType(file.type),
+            fileName: file.name,
+            // 传递用户选择的输出语言
+            outputLanguage,
+          }),
         });
+
+        const result = await response.json();
 
         if (result.success) {
           // 成功：保存生成的笔记内容，并自动切换到“笔记”标签页
@@ -278,8 +294,23 @@ const AINoteTaker = ({
     setPodcastResult('');
 
     try {
-      const aiService = OpenRouterService.getInstance();
-      const result = await aiService.generatePodcastScript(generatedNotes);
+      /**
+       * 非程序员解释：
+       * - 这里的逻辑和「生成笔记」一样，也从“直接调 OpenRouter”改成“调我们自己的后端接口”。
+       * - 好处：播客脚本生成依然可用，但 OpenRouter 的密钥始终只在服务器端。
+       */
+      const response = await fetch('/api/ai/podcast', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: generatedNotes,
+          // 未来如果需要支持选择播客风格，可以在这里追加 voiceStyle
+        }),
+      });
+
+      const result = await response.json();
       if (result.success && result.script) {
         setPodcastResult(result.script);
       } else {

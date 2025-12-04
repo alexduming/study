@@ -52,12 +52,23 @@ export class OpenRouterService {
   private baseURL = 'https://openrouter.ai/api/v1';
 
   private constructor() {
-    // 非程序员解释：
-    // 1. 这里从前端可用的环境变量中读取 OpenRouter 的密钥
-    // 2. 变量名必须以 NEXT_PUBLIC_ 开头，Next.js 才会把它注入到浏览器里
-    // 3. 请在 .env.local 中新增（或确认已有）这一行：
-    //    NEXT_PUBLIC_OPENROUTER_API_KEY=你的 OpenRouter API Key
-    this.apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || '';
+    /**
+     * 非程序员解释：
+     * - 这里读取的是「只在服务器上存在」的密钥，而不是公开给浏览器看的变量。
+     * - 这样做的核心目的是：即使用户在浏览器按 F12 看源码，也看不到真正的 API Key。
+     *
+     * 使用方式（需要你在环境变量里配置，而不是写死在代码里）：
+     * - 本地开发：在 .env.development / .env.local 中设置
+     *     OPENROUTER_API_KEY=你的 OpenRouter API Key
+     * - 线上部署（Vercel）：
+     *     在 Vercel 的 Environment Variables 中新增同名变量 OPENROUTER_API_KEY
+     *
+     * 重要说明：
+     * - 这个服务类设计为「仅供服务端使用」，不要在 'use client' 的前端组件里直接 new / 调用，
+     *   否则会把这部分逻辑打包到浏览器中，失去安全性。
+     * - 正确姿势：在 app/api/ai/** 这样的后端接口里使用它，对外只暴露我们自己的 /api/ai/* 路由。
+     */
+    this.apiKey = process.env.OPENROUTER_API_KEY || '';
   }
 
   static getInstance(): OpenRouterService {
@@ -71,9 +82,10 @@ export class OpenRouterService {
     try {
       // 防御性检查：如果没有配置密钥，直接给出清晰错误，方便排查
       if (!this.apiKey) {
-        // 这一条信息只会出现在浏览器控制台，真实页面仍然只会显示“生成失败”之类的文案
+        // 这一条信息只会出现在服务器日志 / 浏览器控制台的错误信息中，
+        // 对于真实用户界面，我们仍然只会展示“生成失败，请稍后重试”等安全文案。
         throw new Error(
-          'OpenRouter API 密钥未配置：请在 .env.local 中设置 NEXT_PUBLIC_OPENROUTER_API_KEY=你的密钥'
+          'OpenRouter API 密钥未配置：请在 .env.development / .env.production 或 Vercel 环境变量中设置 OPENROUTER_API_KEY=你的密钥（仅服务端使用）'
         );
       }
 
@@ -83,7 +95,7 @@ export class OpenRouterService {
           Authorization: `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': 'http://localhost:3000',
-          'X-Title': 'Turbo AI Study Platform',
+          'X-Title': 'StudyHacks Study Platform',
         },
         body: JSON.stringify({
           // 使用 DeepSeek V3.2 Exp 模型
@@ -379,7 +391,7 @@ Please start generating notes:`;
       languageInstructions[targetLanguage] ||
       `Please generate each flashcard in ${targetLanguage}. All questions and answers must consistently use ${targetLanguage}.`;
 
-    const prompt = `Create ${count} high-quality educational flashcards from the following content for Turbo AI students. Each flashcard should have a front (question) and back (answer) side.
+    const prompt = `Create ${count} high-quality educational flashcards from the following content for StudyHacks AI students. Each flashcard should have a front (question) and back (answer) side.
 
 ${languageInstruction}
 
@@ -457,7 +469,7 @@ Return ONLY valid JSON.`;
    * Generate quiz questions from content
    */
   async generateQuiz(content: string, questionCount: number = 5) {
-    const prompt = `Create ${questionCount} diverse educational quiz questions from the following content for Turbo AI. Include multiple choice, true/false, and fill-in-the-blank questions.
+    const prompt = `Create ${questionCount} diverse educational quiz questions from the following content for StudyHacks AI. Include multiple choice, true/false, and fill-in-the-blank questions.
 
 Content: ${content}
 
@@ -544,7 +556,7 @@ Return ONLY valid JSON.`;
         'Use precise, scholarly language. Maintain academic rigor while ensuring clarity and accessibility.',
     };
 
-    const prompt = `Convert the following content into an engaging educational podcast script for Turbo AI. ${styleInstructions[voiceStyle]}
+    const prompt = `Convert the following content into an engaging educational podcast script for StudyHacks AI. ${styleInstructions[voiceStyle]}
 
 Content: ${content}
 
