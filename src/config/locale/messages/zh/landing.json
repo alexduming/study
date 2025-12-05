@@ -490,98 +490,6 @@
       },
       "url": "/"
     },
-    "nav": {
-      "items": [
-        {
-          "title": "产品",
-          "children": [
-            {
-              "title": "功能特色",
-              "url": "/#features",
-              "target": "_self"
-            },
-            {
-              "title": "价格方案",
-              "url": "/pricing",
-              "target": "_self"
-            },
-            {
-              "title": "成功案例",
-              "url": "/success-stories",
-              "target": "_self"
-            }
-          ]
-        },
-        {
-          "title": "资源",
-          "children": [
-            {
-              "title": "学习博客",
-              "url": "/blog",
-              "target": "_self"
-            },
-            {
-              "title": "学习中心",
-              "url": "/learning-center",
-              "target": "_self"
-            },
-            {
-              "title": "帮助中心",
-              "url": "/help",
-              "target": "_self"
-            }
-          ]
-        },
-        {
-          "title": "公司",
-          "children": [
-            {
-              "title": "关于我们",
-              "url": "/about",
-              "target": "_self"
-            },
-            {
-              "title": "招聘",
-              "url": "/careers",
-              "target": "_self"
-            },
-            {
-              "title": "联系我们",
-              "url": "/contact",
-              "target": "_self"
-            }
-          ]
-        }
-      ]
-    },
-    "social": {
-      "items": [
-        {
-          "title": "X",
-          "icon": "RiTwitterXFill",
-          "url": "https://x.com/studyhacks",
-          "target": "_blank"
-        },
-        {
-          "title": "Instagram",
-          "icon": "Instagram",
-          "url": "https://instagram.com/studyhacks",
-          "target": "_blank"
-        },
-        {
-          "title": "LinkedIn",
-          "icon": "Linkedin",
-          "url": "https://linkedin.com/company/studyhacks",
-          "target": "_blank"
-        },
-        {
-          "title": "Email",
-          "icon": "Mail",
-          "url": "mailto:hello@studyhacks.com",
-          "target": "_self"
-        }
-      ]
-    },
     "agreement": {
       "items": [
         {
@@ -594,7 +502,7 @@
         }
       ]
     },
-    "show_theme": true,
+    "show_theme": false,
     "show_locale": true
   }
 }

@@ -17,15 +17,58 @@ if (
 
 export type ConfigMap = Record<string, string>;
 
+/**
+ * 环境变量配置
+ * 作用：从 .env 文件或 Vercel 环境变量中读取配置
+ * 优先级：数据库配置 > 环境变量配置
+ *
+ * 非程序员解释：
+ * - 这个对象包含了所有系统需要的配置项
+ * - 在 Vercel 部署时，如果数据库连接失败，会使用这里的环境变量配置作为备用方案
+ * - 支付配置（Stripe）现在可以通过环境变量配置，提高部署可靠性
+ */
 export const envConfigs = {
   app_url: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
   app_name: process.env.NEXT_PUBLIC_APP_NAME ?? 'ShipAny App',
   theme: process.env.NEXT_PUBLIC_THEME ?? 'default',
-  appearance: process.env.NEXT_PUBLIC_APPEARANCE ?? 'system',
+  // 非程序员解释：
+  // - appearance 控制网站的整体外观（亮色/暗色/跟随系统）
+  // - 默认值从 'system'（跟随系统）改为 'dark'（默认暗色模式）
+  // - 如果用户想改回跟随系统，可以在 .env.development 中设置 NEXT_PUBLIC_APPEARANCE=system
+  appearance: process.env.NEXT_PUBLIC_APPEARANCE ?? 'dark',
   locale: process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'en',
   database_url: process.env.DATABASE_URL ?? '',
   database_provider: process.env.DATABASE_PROVIDER ?? 'postgresql',
   db_singleton_enabled: process.env.DB_SINGLETON_ENABLED || 'false',
   auth_url: process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || '',
   auth_secret: process.env.AUTH_SECRET ?? '', // openssl rand -base64 32
+
+  // ====== 支付配置（Payment Configuration） ======
+  // 非程序员解释：
+  // - 这些配置控制支付功能（Stripe/PayPal/Creem）
+  // - 即使数据库连接失败，也能从环境变量读取支付配置
+  // - 在 Vercel 部署时特别有用，确保支付功能不会因为数据库问题而失败
+
+  // 默认支付提供商（stripe/paypal/creem）
+  default_payment_provider: process.env.DEFAULT_PAYMENT_PROVIDER ?? '',
+
+  // Stripe 配置
+  stripe_enabled: process.env.STRIPE_ENABLED ?? 'false', // 必须设置为 'true' 才能启用
+  stripe_publishable_key: process.env.STRIPE_PUBLISHABLE_KEY ?? '', // Stripe 公钥（以 pk_ 开头）
+  stripe_secret_key: process.env.STRIPE_SECRET_KEY ?? '', // Stripe 密钥（以 sk_ 开头）
+  stripe_signing_secret: process.env.STRIPE_SIGNING_SECRET ?? '', // Stripe Webhook 签名密钥（以 whsec_ 开头）
+  stripe_payment_methods: process.env.STRIPE_PAYMENT_METHODS ?? '["card"]', // 支持的支付方式（JSON 数组字符串）
+
+  // PayPal 配置
+  paypal_enabled: process.env.PAYPAL_ENABLED ?? 'false',
+  paypal_client_id: process.env.PAYPAL_CLIENT_ID ?? '',
+  paypal_client_secret: process.env.PAYPAL_CLIENT_SECRET ?? '',
+  paypal_environment: process.env.PAYPAL_ENVIRONMENT ?? 'sandbox', // sandbox 或 production
+
+  // Creem 配置
+  creem_enabled: process.env.CREEM_ENABLED ?? 'false',
+  creem_api_key: process.env.CREEM_API_KEY ?? '',
+  creem_environment: process.env.CREEM_ENVIRONMENT ?? 'sandbox', // sandbox 或 production
+  creem_signing_secret: process.env.CREEM_SIGNING_SECRET ?? '',
+  creem_product_ids: process.env.CREEM_PRODUCT_IDS ?? '', // JSON 字符串，映射产品 ID
 };
