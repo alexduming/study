@@ -8,11 +8,23 @@ import OpenRouterService from '@/shared/services/openrouter';
  * - 前端页面不会直接拿着 API Key 去请求 OpenRouter，而是只请求我们自己的 /api/ai/notes。
  * - 好处：真正的 OPENROUTER_API_KEY 只存在服务器环境变量里，用户在浏览器里看不到。
  *
- * 安全设计要点（对应“精 / 准 / 净”）：
+ * 安全设计要点（对应"精 / 准 / 净"）：
  * - 精：前端只知道一个简单的 HTTP 接口，复杂提示词和 OpenRouter 细节全部藏在服务端。
  * - 准：所有与 OpenRouter 相关的逻辑都集中在 OpenRouterService + 这条路由里，出错好排查。
- * - 净：不改动现有的 AI 页面业务逻辑结构，只是把“直接调 service”改成“调后端接口”。
+ * - 净：不改动现有的 AI 页面业务逻辑结构，只是把"直接调 service"改成"调后端接口"。
+ *
+ * Vercel 配置：
+ * - maxDuration: 60 秒（需要 Pro 计划，避免超时）
+ * - dynamic: 强制动态渲染（不缓存 AI 生成的内容）
  */
+
+// Vercel 配置：设置最大执行时间为 60 秒（需要 Pro 计划）
+// 如果使用 Hobby 计划，此设置无效，最大 10 秒
+export const maxDuration = 60;
+
+// 强制动态渲染，不缓存 AI 生成的内容
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();

@@ -8,6 +8,11 @@ import OpenRouterService from '@/shared/services/openrouter';
  * - 前端只需要把文本和题目数量发到 /api/ai/quiz，就能拿到 JSON 形式的问题列表。
  * - OpenRouter 的密钥仍然只在服务器端，通过 OPENROUTER_API_KEY 读取。
  */
+
+// Vercel 配置：设置最大执行时间为 60 秒（需要 Pro 计划）
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();

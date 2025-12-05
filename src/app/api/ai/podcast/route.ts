@@ -8,6 +8,11 @@ import OpenRouterService from '@/shared/services/openrouter';
  * - 前端只需要把笔记文本发到 /api/ai/podcast，就能拿到完整的播客脚本文字。
  * - OpenRouter 的密钥同样只在服务器端读取，前端永远看不到。
  */
+
+// Vercel 配置：设置最大执行时间为 60 秒（需要 Pro 计划）
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();

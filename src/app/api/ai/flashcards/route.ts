@@ -8,6 +8,11 @@ import OpenRouterService from '@/shared/services/openrouter';
  * - 前端只需要把文字内容发到 /api/ai/flashcards，就能拿到 JSON 结构化的卡片列表。
  * - 真正的 OPENROUTER_API_KEY 仍然只存在于服务器，不会暴露给浏览器。
  */
+
+// Vercel 配置：设置最大执行时间为 60 秒（需要 Pro 计划）
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
