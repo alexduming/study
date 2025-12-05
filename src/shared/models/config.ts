@@ -169,10 +169,33 @@ export async function getAllConfigs(): Promise<Configs> {
   }
 
   // 合并配置：数据库配置会覆盖环境变量配置（如果存在）
+  // 但对于关键配置（app_url、auth_url），如果环境变量已明确设置，则优先使用环境变量
+  // 这样可以防止数据库中的 localhost 配置泄露到生产环境
   const configs = {
     ...envConfigs,
     ...dbConfigs,
   };
+
+  // 关键配置列表：如果环境变量已明确设置，则强制使用环境变量（不被数据库覆盖）
+  // 原因：防止本地开发时在数据库中配置的 localhost 地址影响生产环境
+  const criticalEnvVars = [
+    { key: 'app_url', envVar: 'NEXT_PUBLIC_APP_URL' },
+    { key: 'auth_url', envVar: 'AUTH_URL' },
+  ];
+
+  for (const { key, envVar } of criticalEnvVars) {
+    // 如果环境变量明确设置了值，强制使用环境变量（覆盖数据库配置）
+    if (process.env[envVar]) {
+      configs[key] = process.env[envVar];
+      
+      // 警告：如果数据库配置与环境变量不一致，输出警告日志
+      if (dbConfigs[key] && dbConfigs[key] !== process.env[envVar]) {
+        console.warn(
+          `[配置警告] ${key} 环境变量 (${process.env[envVar]}) 覆盖了数据库配置 (${dbConfigs[key]})`
+        );
+      }
+    }
+  }
 
   return configs;
 }
