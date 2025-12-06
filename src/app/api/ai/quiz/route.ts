@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 
 import OpenRouterService from '@/shared/services/openrouter';
+import { getUserInfo } from '@/shared/models/user';
+import { consumeCredits, getRemainingCredits } from '@/shared/models/credit';
 
 /**
  * 非程序员解释：
@@ -34,6 +36,57 @@ export async function POST(request: Request) {
           questions: [],
         },
         { status: 400 }
+      );
+    }
+
+    // 积分验证和消耗
+    const user = await getUserInfo();
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Please sign in to use AI features',
+          questions: [],
+        },
+        { status: 401 }
+      );
+    }
+
+    const remainingCredits = await getRemainingCredits(user.id);
+    const requiredCredits = 3;
+
+    if (remainingCredits < requiredCredits) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Insufficient credits. Required: ${requiredCredits}, Available: ${remainingCredits}`,
+          insufficientCredits: true,
+          requiredCredits,
+          remainingCredits,
+          questions: [],
+        },
+        { status: 402 }
+      );
+    }
+
+    // 消耗积分
+    try {
+      await consumeCredits({
+        userId: user.id,
+        credits: requiredCredits,
+        scene: 'ai_quiz',
+        description: `AI Quiz - Generate ${questionCount || 5} questions`,
+        metadata: JSON.stringify({ questionCount }),
+      });
+    } catch (creditError: any) {
+      console.error('Failed to consume credits:', creditError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Failed to consume credits. Please try again.',
+          questions: [],
+        },
+        { status: 500 }
       );
     }
 

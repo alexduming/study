@@ -16,6 +16,7 @@ import { Button } from '@/shared/components/ui/button';
 import { Dialog, DialogContent } from '@/shared/components/ui/dialog';
 import { ScrollAnimation } from '@/shared/components/ui/scroll-animation';
 import { readLearningFileContent } from '@/shared/lib/file-reader';
+import { CreditsCost } from '@/shared/components/ai-elements/credits-display';
 
 type AspectRatioOption =
   | '1:1'
@@ -381,6 +382,7 @@ const InfographicPage = () => {
                     </>
                   ) : (
                     <>
+                      <CreditsCost credits={3} />
                       <Zap className="mr-2 h-4 w-4" />
                       生成信息图
                     </>

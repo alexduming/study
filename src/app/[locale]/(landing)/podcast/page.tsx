@@ -7,6 +7,7 @@ import { Play, Pause, SkipBack, SkipForward, Volume2, Upload, Mic, Headphones, C
 import { Button } from '@/shared/components/ui/button';
 import { ScrollAnimation } from '@/shared/components/ui/scroll-animation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 interface Podcast {
   id: number;
@@ -88,25 +89,8 @@ const PodcastApp = () => {
   const handleGeneratePodcast = () => {
     if (!inputText.trim()) return;
 
-    setIsGenerating(true);
-
-    // 模拟AI生成播客
-    setTimeout(() => {
-      const newPodcast: Podcast = {
-        id: podcasts.length + 1,
-        title: `AI生成的学习播客 ${podcasts.length + 1}`,
-        description: `基于您提供的文本内容生成的${selectedVoice === 'professional' ? '专业' : selectedVoice === 'friendly' ? '友好' : '学术'}风格播客。`,
-        duration: Math.floor(inputText.length / 10), // 基于文本长度估算时长
-        voiceType: selectedVoice,
-        content: inputText,
-        createdDate: new Date(),
-        isPlaying: false
-      };
-
-      setPodcasts([newPodcast, ...podcasts]);
-      setIsGenerating(false);
-      setInputText('');
-    }, 3000);
+    // 显示功能升级提示
+    toast.error('Podcast功能正在升级维护中，请稍后再试');
   };
 
   const formatTime = (seconds: number) => {

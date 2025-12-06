@@ -20,6 +20,8 @@ import { toast } from 'sonner';
 
 import { Button } from '@/shared/components/ui/button';
 import { ScrollAnimation } from '@/shared/components/ui/scroll-animation';
+import { CreditsCost } from '@/shared/components/ai-elements/credits-display';
+import { useAppContext } from '@/shared/contexts/app';
 import {
   Select,
   SelectContent,
@@ -44,6 +46,7 @@ const NOTE_TRANSFER_KEY = 'ai-note-transfer';
 
 const FlashcardsApp = () => {
   const t = useTranslations('flashcards');
+  const { user, fetchUserCredits } = useAppContext();
   const [flashcards, setFlashcards] = useState<Flashcard[]>([
     {
       id: 1,
@@ -220,7 +223,7 @@ const FlashcardsApp = () => {
 
       const result = await response.json();
 
-      if (result.success && result.flashcards && result.flashcards.length > 0) {
+        if (result.success && result.flashcards && result.flashcards.length > 0) {
         const newFlashcards: Flashcard[] = result.flashcards.map(
           (fc: AIGeneratedFlashcard, index: number) => ({
             id: Date.now() + index, // 确保唯一ID
@@ -238,7 +241,19 @@ const FlashcardsApp = () => {
         setShowCreateForm(false);
         setCurrentCardIndex(0);
         setStudyMode('new');
+        
+        // 刷新积分余额
+        if (user) {
+          fetchUserCredits();
+        }
+        toast.success(t('create.generation_success'));
       } else {
+        // 积分不足的特殊处理
+        if (result.insufficientCredits) {
+          toast.error(`积分不足！需要 ${result.requiredCredits} 积分，当前仅有 ${result.remainingCredits} 积分`);
+        } else {
+          toast.error(result.error || t('create.generation_error'));
+        }
         setGenerationError(result.error || t('create.generation_error'));
       }
     } catch (error) {
@@ -862,6 +877,7 @@ const FlashcardsApp = () => {
                     </>
                   ) : (
                     <>
+                      <CreditsCost credits={3} />
                       <Brain className="mr-2 h-4 w-4" />
                       {t('create.generate')}
                     </>

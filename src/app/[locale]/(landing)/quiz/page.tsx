@@ -18,8 +18,10 @@ import {
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
+import { CreditsCost } from '@/shared/components/ai-elements/credits-display';
 import { Button } from '@/shared/components/ui/button';
 import { ScrollAnimation } from '@/shared/components/ui/scroll-animation';
+import { useAppContext } from '@/shared/contexts/app';
 import { readLearningFileContent } from '@/shared/lib/file-reader';
 import { type QuizQuestion as AIQuizQuestion } from '@/shared/services/openrouter';
 
@@ -47,47 +49,8 @@ const NOTE_TRANSFER_KEY = 'ai-note-transfer';
 
 const QuizApp = () => {
   const t = useTranslations('quiz');
-  const [questions, setQuestions] = useState<Question[]>([
-    {
-      id: 1,
-      type: 'multiple-choice',
-      question: '机器学习中的过拟合是指什么？',
-      options: [
-        '模型在训练数据上表现很好，但在新数据上表现较差',
-        '模型在训练数据和新数据上都表现很好',
-        '模型在训练数据上表现较差，但在新数据上表现很好',
-        '模型在训练数据和新数据上都表现较差',
-      ],
-      correctAnswer: 0,
-      explanation:
-        '过拟合是指模型过于复杂，过度适应了训练数据的噪声和特征，导致在新的、未见过的数据上表现不佳。',
-      difficulty: 'medium',
-      topic: '机器学习基础',
-      hints: ['考虑模型在不同数据集上的表现差异', '训练误差和测试误差的对比'],
-    },
-    {
-      id: 2,
-      type: 'true-false',
-      question: '深度学习必须使用GPU才能运行。',
-      correctAnswer: 1, // false
-      explanation:
-        '虽然GPU能显著加速深度学习训练，但并不是必需的。深度学习模型也可以在CPU上运行，只是速度较慢。',
-      difficulty: 'easy',
-      topic: '深度学习硬件',
-      hints: ['考虑CPU和GPU的作用差异'],
-    },
-    {
-      id: 3,
-      type: 'fill-blank',
-      question: '在监督学习中，我们通常将数据集分为训练集、______和测试集。',
-      correctAnswer: '验证集',
-      explanation:
-        '验证集用于调整模型的超参数和评估模型性能，测试集用于最终评估模型的泛化能力。',
-      difficulty: 'easy',
-      topic: '数据集划分',
-      hints: ['思考模型训练过程中需要哪些数据集'],
-    },
-  ]);
+  const { user, fetchUserCredits } = useAppContext();
+  const [questions, setQuestions] = useState<Question[]>([]);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [showGenerateForm, setShowGenerateForm] = useState(false);
@@ -230,7 +193,21 @@ const QuizApp = () => {
         setSelectedAnswer('');
         setShowResult(false);
         setQuizCompleted(false);
+
+        // 刷新积分余额
+        if (user) {
+          fetchUserCredits();
+        }
+        toast.success('测验题目生成成功！');
       } else {
+        // 积分不足的特殊处理
+        if (result.insufficientCredits) {
+          toast.error(
+            `积分不足！需要 ${result.requiredCredits} 积分，当前仅有 ${result.remainingCredits} 积分`
+          );
+        } else {
+          toast.error(result.error || '生成测验时出错');
+        }
         setGenerationError(result.error || '生成测验时出错');
       }
     } catch (error) {
@@ -285,7 +262,40 @@ const QuizApp = () => {
     if (selectedAnswer === '') return;
 
     const timeSpent = Date.now() - questionStartTime;
-    const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+
+    // 增强答案比对逻辑
+    let isCorrect = false;
+
+    if (currentQuestion.type === 'fill-blank') {
+      // 填空题：不区分大小写，去除首尾空格
+      const userAns = String(selectedAnswer).trim().toLowerCase();
+      const correctAns = String(currentQuestion.correctAnswer)
+        .trim()
+        .toLowerCase();
+      isCorrect = userAns === correctAns;
+    } else {
+      // 选择题和判断题
+      // 1. 直接全等比较
+      if (selectedAnswer === currentQuestion.correctAnswer) {
+        isCorrect = true;
+      }
+      // 2. 字符串化比较 (解决 0 vs "0" 的问题)
+      else if (
+        String(selectedAnswer) === String(currentQuestion.correctAnswer)
+      ) {
+        isCorrect = true;
+      }
+      // 3. 解决 AI 返回选项文本作为答案的情况
+      else if (
+        typeof selectedAnswer === 'number' &&
+        currentQuestion.options &&
+        currentQuestion.options[selectedAnswer] ===
+          currentQuestion.correctAnswer
+      ) {
+        isCorrect = true;
+      }
+    }
+
     const hintsUsedCount = currentHints.length;
 
     const answer: UserAnswer = {
@@ -354,6 +364,7 @@ const QuizApp = () => {
     }
   };
 
+  // 如果还未开始测验，显示欢迎/开始界面
   if (!quizStarted) {
     return (
       <div className="via-primary/5 flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-950 to-gray-950">
@@ -376,61 +387,217 @@ const QuizApp = () => {
               </h1>
               <p className="mb-8 text-lg text-gray-300">{t('subtitle')}</p>
 
-              <div className="border-primary/20 mb-8 rounded-2xl border bg-gray-900/50 p-8 backdrop-blur-sm">
-                <h3 className="mb-6 text-xl font-semibold text-white">
-                  测验信息
-                </h3>
-                <div className="grid gap-6 text-left md:grid-cols-2">
-                  <div>
-                    <p className="mb-2 text-gray-400">
-                      {t('stats.total_questions')}
-                    </p>
-                    <p className="text-lg font-medium text-white">
-                      {questionCount} 题
-                    </p>
-                  </div>
-                  <div>
-                    <p className="mb-2 text-gray-400">
-                      {t('stats.time_spent')}
-                    </p>
-                    <p className="text-lg font-medium text-white">
-                      {expectedTime} 分钟
-                    </p>
-                  </div>
-                  <div>
-                    <p className="mb-2 text-gray-400">
-                      {t('question.multiple_choice')},{' '}
-                      {t('question.true_false')}, {t('question.fill_blank')}
-                    </p>
-                    <p className="text-lg font-medium text-white"></p>
-                  </div>
-                  <div>
-                    <p className="mb-2 text-gray-400">智能提示</p>
-                    <p className="text-lg font-medium text-white">
-                      每题提供学习提示
-                    </p>
+              {questions.length > 0 && (
+                <div className="border-primary/20 mb-8 rounded-2xl border bg-gray-900/50 p-8 backdrop-blur-sm">
+                  <h3 className="mb-6 text-xl font-semibold text-white">
+                    测验信息
+                  </h3>
+                  <div className="grid gap-6 text-left md:grid-cols-2">
+                    <div>
+                      <p className="mb-2 text-gray-400">
+                        {t('stats.total_questions')}
+                      </p>
+                      <p className="text-lg font-medium text-white">
+                        {questions.length} 题
+                      </p>
+                    </div>
+                    <div>
+                      <p className="mb-2 text-gray-400">
+                        {t('stats.time_spent')}
+                      </p>
+                      <p className="text-lg font-medium text-white">
+                        {Math.ceil(questions.length * 2)} 分钟
+                      </p>
+                    </div>
+                    <div>
+                      <p className="mb-2 text-gray-400">
+                        {t('question.multiple_choice')},{' '}
+                        {t('question.true_false')}, {t('question.fill_blank')}
+                      </p>
+                      <p className="text-lg font-medium text-white"></p>
+                    </div>
+                    <div>
+                      <p className="mb-2 text-gray-400">智能提示</p>
+                      <p className="text-lg font-medium text-white">
+                        每题提供学习提示
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div className="flex justify-center gap-4">
                 <Button
                   onClick={() => setShowGenerateForm(true)}
                   variant="outline"
                   className="border-primary/30 text-primary/80 hover:border-primary/50 px-8 py-4 text-lg"
+                  type="button"
                 >
+                  <CreditsCost credits={3} />
                   <Brain className="mr-2 h-5 w-5" />
                   {t('create.generate')}
                 </Button>
-                <Button
-                  onClick={handleStartQuiz}
-                  className="from-primary to-primary/70 hover:from-primary/90 hover:to-primary/80 bg-gradient-to-r px-8 py-4 text-lg text-white"
-                >
-                  {t('actions.start_quiz')}
-                </Button>
+                {questions.length > 0 && (
+                  <Button
+                    onClick={handleStartQuiz}
+                    className="from-primary to-primary/70 hover:from-primary/90 hover:to-primary/80 bg-gradient-to-r px-8 py-4 text-lg text-white"
+                  >
+                    {t('actions.start_quiz')}
+                  </Button>
+                )}
               </div>
+
+              {questions.length === 0 && (
+                <p className="mt-4 text-sm text-gray-500">
+                  点击 "Generate Quiz" 上传学习资料生成测验题目
+                </p>
+              )}
             </motion.div>
           </ScrollAnimation>
+
+          {/* 生成测验表单 */}
+          {showGenerateForm && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+              onClick={() => setShowGenerateForm(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                onClick={(e) => e.stopPropagation()}
+                className="border-primary/20 max-h-[80vh] w-full max-w-3xl overflow-y-auto rounded-2xl border bg-gray-900 p-8"
+              >
+                <h3 className="mb-6 text-2xl font-bold text-white">
+                  生成 AI 测验
+                </h3>
+                {/* 文件上传入口：可以直接从课件 / 笔记文件生成测验 */}
+                <div className="mb-4 flex items-center gap-3">
+                  <input
+                    ref={fileInputRef}
+                    id="quiz-file-input"
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="border-primary/40 text-primary/80 hover:border-primary/70"
+                    disabled={isFileLoading || isGenerating}
+                  >
+                    <label
+                      htmlFor="quiz-file-input"
+                      className="flex cursor-pointer items-center"
+                    >
+                      {isFileLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          正在读取文件...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-4 w-4" />
+                          从文件读取内容（PDF / Word / TXT）
+                        </>
+                      )}
+                    </label>
+                  </Button>
+                  <span className="text-xs text-gray-400">
+                    也可以直接在下方粘贴或编辑要生成测验的内容
+                  </span>
+                </div>
+
+                {fileInfo && (
+                  <div className="border-primary/30 bg-primary/5 text-primary/80 mb-3 flex items-start gap-2 rounded-lg border p-2 text-xs">
+                    <FileText className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+                    <span>{fileInfo}</span>
+                  </div>
+                )}
+
+                <div className="mb-6 grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-3 block font-medium text-white">
+                      测验题目数量
+                    </label>
+                    <select
+                      value={questionCount}
+                      onChange={(e) => setQuestionCount(Number(e.target.value))}
+                      className="focus:border-primary w-full rounded-lg border border-gray-600 bg-gray-800/50 p-3 text-white focus:outline-none"
+                    >
+                      <option value={3}>3 题</option>
+                      <option value={5}>5 题</option>
+                      <option value={10}>10 题</option>
+                      <option value={15}>15 题</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-3 block font-medium text-white">
+                      预计用时（分钟）
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={120}
+                      value={expectedTime}
+                      onChange={(e) =>
+                        setExpectedTime(
+                          Number.isNaN(Number(e.target.value))
+                            ? 10
+                            : Number(e.target.value)
+                        )
+                      }
+                      className="focus:border-primary w-full rounded-lg border border-gray-600 bg-gray-800/50 p-3 text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <textarea
+                  value={quizContent}
+                  onChange={(e) => setQuizContent(e.target.value)}
+                  placeholder="粘贴您的学习笔记、课程内容或任何想要转换为测验的文本..."
+                  className="focus:border-primary mb-4 h-48 w-full resize-none rounded-lg border border-gray-600 bg-gray-800/50 p-4 text-white placeholder-gray-400 focus:outline-none"
+                />
+                {generationError && (
+                  <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3">
+                    <p className="text-sm text-red-400">{generationError}</p>
+                  </div>
+                )}
+                <div className="flex justify-end gap-3">
+                  <Button
+                    onClick={() => {
+                      setShowGenerateForm(false);
+                      setGenerationError('');
+                      setQuizContent('');
+                    }}
+                    variant="outline"
+                    className="border-gray-600 text-gray-300 hover:border-gray-500"
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    onClick={handleGenerateQuiz}
+                    disabled={isGenerating}
+                    className="from-primary to-primary/70 hover:from-primary/90 hover:to-primary/80 bg-gradient-to-r text-white"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        AI 正在生成...
+                      </>
+                    ) : (
+                      <>
+                        <Brain className="mr-2 h-4 w-4" />
+                        生成测验
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
         </div>
       </div>
     );
@@ -449,7 +616,7 @@ const QuizApp = () => {
               transition={{ duration: 0.8 }}
               className="mx-auto max-w-2xl text-center"
             >
-              <div className="from-primary to-primary/70 mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br">
+              <div className="from-primary to-primary/70 mx-auto mt-20 mb-8 flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br">
                 <Trophy className="h-12 w-12 text-white" />
               </div>
 
@@ -780,7 +947,7 @@ const QuizApp = () => {
 
                 {!showResult && (
                   <Button
-                    onClick={() => setShowExplanation(true)}
+                    onClick={handleNextQuestion}
                     variant="outline"
                     className="border-primary/30 text-primary/80 hover:border-primary/50"
                   >

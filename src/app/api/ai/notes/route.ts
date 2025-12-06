@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 
 import OpenRouterService from '@/shared/services/openrouter';
+import { getUserInfo } from '@/shared/models/user';
+import { consumeCredits, getRemainingCredits } from '@/shared/models/credit';
 
 /**
  * 非程序员解释：
@@ -50,6 +52,64 @@ export async function POST(request: Request) {
       );
     }
 
+    /**
+     * 积分验证和消耗逻辑
+     * 
+     * 非程序员解释：
+     * - 在生成笔记之前，先检查用户是否有足够的积分（需要3积分）
+     * - 如果积分不足，返回错误提示，不执行AI生成
+     * - 如果积分足够，先消耗积分，然后再调用AI生成
+     * - 这样确保每次使用AI功能都会正确扣除积分
+     */
+    const user = await getUserInfo();
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Please sign in to use AI features',
+        },
+        { status: 401 }
+      );
+    }
+
+    // 检查积分余额
+    const remainingCredits = await getRemainingCredits(user.id);
+    const requiredCredits = 3; // AI笔记生成需要3积分
+
+    if (remainingCredits < requiredCredits) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Insufficient credits. Required: ${requiredCredits}, Available: ${remainingCredits}`,
+          insufficientCredits: true,
+          requiredCredits,
+          remainingCredits,
+        },
+        { status: 402 } // 402 Payment Required
+      );
+    }
+
+    // 消耗积分
+    try {
+      await consumeCredits({
+        userId: user.id,
+        credits: requiredCredits,
+        scene: 'ai_note_taker',
+        description: `AI Note Taker - Generate notes from ${type}`,
+        metadata: JSON.stringify({ fileName, type }),
+      });
+    } catch (creditError: any) {
+      console.error('Failed to consume credits:', creditError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Failed to consume credits. Please try again.',
+        },
+        { status: 500 }
+      );
+    }
+
+    // 积分消耗成功，执行AI生成
     const aiService = OpenRouterService.getInstance();
 
     const result = await aiService.generateNotes({

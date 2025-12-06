@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getUserInfo } from '@/shared/models/user';
+import { consumeCredits, getRemainingCredits } from '@/shared/models/credit';
 
 // 使用 Node.js 运行时，保证可以安全调用外部 API 并使用环境变量
 export const runtime = 'nodejs';
@@ -30,6 +32,54 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: '缺少用于生成信息图的文本内容' },
         { status: 400 }
+      );
+    }
+
+    // 积分验证和消耗
+    const user = await getUserInfo();
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Please sign in to use AI features',
+        },
+        { status: 401 }
+      );
+    }
+
+    const remainingCredits = await getRemainingCredits(user.id);
+    const requiredCredits = 3;
+
+    if (remainingCredits < requiredCredits) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Insufficient credits. Required: ${requiredCredits}, Available: ${remainingCredits}`,
+          insufficientCredits: true,
+          requiredCredits,
+          remainingCredits,
+        },
+        { status: 402 }
+      );
+    }
+
+    // 消耗积分
+    try {
+      await consumeCredits({
+        userId: user.id,
+        credits: requiredCredits,
+        scene: 'ai_infographic',
+        description: `AI Infographic - Generate infographic`,
+        metadata: JSON.stringify({ aspectRatio, resolution, outputFormat }),
+      });
+    } catch (creditError: any) {
+      console.error('Failed to consume credits:', creditError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Failed to consume credits. Please try again.',
+        },
+        { status: 500 }
       );
     }
 

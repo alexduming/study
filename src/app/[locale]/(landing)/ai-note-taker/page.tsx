@@ -1,11 +1,12 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { toPng } from 'html-to-image';
 import {
   Brain,
+  Coins,
   Copy,
   Download,
   FileAudio,
@@ -19,6 +20,7 @@ import {
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
+import { CreditsCost } from '@/shared/components/ai-elements/credits-display';
 import { StudyNotesViewer } from '@/shared/components/ai-elements/study-notes-viewer';
 import { Button } from '@/shared/components/ui/button';
 import {
@@ -37,6 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/components/ui/select';
+import { useAppContext } from '@/shared/contexts/app';
 import {
   detectLearningFileType,
   readLearningFileContent,
@@ -69,6 +72,8 @@ const AINoteTaker = ({
   const t = useTranslations('ai-note-taker');
   const locale = useLocale();
   const router = useRouter();
+  const { user, fetchUserCredits } = useAppContext();
+
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedNotes, setGeneratedNotes] = useState('');
@@ -98,10 +103,23 @@ const AINoteTaker = ({
   const NOTE_TRANSFER_KEY = 'ai-note-transfer';
   // 用于拿到隐藏的文件输入框 DOM 节点
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // 记录渲染好的笔记 DOM，方便后续把“看到的排版效果”一键导出为长图片
+  // 记录渲染好的笔记 DOM，方便后续把"看到的排版效果"一键导出为长图片
   // 非程序员解释：
-  // - 可以把这个理解为“给笔记区域贴了一个隐形标签”，稍后截图工具会根据这个标签来拍照
+  // - 可以把这个理解为"给笔记区域贴了一个隐形标签"，稍后截图工具会根据这个标签来拍照
   const notesContainerRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * 获取用户积分
+   *
+   * 非程序员解释：
+   * - 在组件加载时和每次生成笔记后，都会刷新用户的积分余额
+   * - 这样用户可以实时看到自己还剩多少积分
+   */
+  useEffect(() => {
+    if (user) {
+      fetchUserCredits();
+    }
+  }, [user]);
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -145,12 +163,24 @@ const AINoteTaker = ({
         const result = await response.json();
 
         if (result.success) {
-          // 成功：保存生成的笔记内容，并自动切换到“笔记”标签页
+          // 成功：保存生成的笔记内容，并自动切换到"笔记"标签页
           setGeneratedNotes(result.notes);
           setActiveTab('notes');
+          // 刷新积分余额
+          if (user) {
+            fetchUserCredits();
+          }
+          toast.success(t('notes.generation_success'));
         } else {
-          // 失败：保存错误信息，并同样切到“笔记”标签页，让用户能立刻看到错误原因
-          // 结合 OpenRouterService.generateNotes 中的修改，这里会展示更具体的错误提示
+          // 失败：保存错误信息，并同样切到"笔记"标签页，让用户能立刻看到错误原因
+          // 积分不足的特殊处理
+          if (result.insufficientCredits) {
+            toast.error(
+              `积分不足！需要 ${result.requiredCredits} 积分，当前仅有 ${result.remainingCredits} 积分`
+            );
+          } else {
+            toast.error(result.error || t('errors.generation_failed'));
+          }
           setError(result.error || t('errors.generation_failed'));
           setActiveTab('notes');
         }
@@ -314,7 +344,13 @@ const AINoteTaker = ({
       if (result.success && result.script) {
         setPodcastResult(result.script);
       } else {
-        setDialogError(result.error || t('notes.dialog.error'));
+        // 检查是否是升级维护提示
+        if (result.upgrading) {
+          setDialogOpen(false);
+          toast.error('Podcast功能正在升级维护中，请稍后再试');
+        } else {
+          setDialogError(result.error || t('notes.dialog.error'));
+        }
       }
     } catch (error) {
       console.error('AI feature failed:', error);
@@ -617,6 +653,7 @@ const AINoteTaker = ({
                         </>
                       ) : (
                         <>
+                          <CreditsCost credits={3} />
                           <Upload className="mr-2 h-5 w-5" />
                           {t('upload.upload_button')}
                         </>
@@ -682,7 +719,12 @@ const AINoteTaker = ({
                   </h3>
                   <p className="mb-8 text-gray-400">{t('record.subtitle')}</p>
 
-                  <Button className="from-primary hover:from-primary/90 to-primary/70 hover:to-primary/80 bg-gradient-to-r px-8 py-4 text-lg text-white">
+                  <Button
+                    onClick={() =>
+                      toast.error('录音功能正在升级维护中，请稍后再试')
+                    }
+                    className="from-primary hover:from-primary/90 to-primary/70 hover:to-primary/80 bg-gradient-to-r px-8 py-4 text-lg text-white"
+                  >
                     <Mic className="mr-2 h-5 w-5" />
                     {t('record.start_button')}
                   </Button>

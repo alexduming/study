@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 
 import OpenRouterService from '@/shared/services/openrouter';
+import { getUserInfo } from '@/shared/models/user';
+import { consumeCredits, getRemainingCredits } from '@/shared/models/credit';
 
 /**
  * 非程序员解释：
@@ -35,6 +37,57 @@ export async function POST(request: Request) {
           flashcards: [],
         },
         { status: 400 }
+      );
+    }
+
+    // 积分验证和消耗
+    const user = await getUserInfo();
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Please sign in to use AI features',
+          flashcards: [],
+        },
+        { status: 401 }
+      );
+    }
+
+    const remainingCredits = await getRemainingCredits(user.id);
+    const requiredCredits = 3;
+
+    if (remainingCredits < requiredCredits) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Insufficient credits. Required: ${requiredCredits}, Available: ${remainingCredits}`,
+          insufficientCredits: true,
+          requiredCredits,
+          remainingCredits,
+          flashcards: [],
+        },
+        { status: 402 }
+      );
+    }
+
+    // 消耗积分
+    try {
+      await consumeCredits({
+        userId: user.id,
+        credits: requiredCredits,
+        scene: 'ai_flashcards',
+        description: `AI Flashcards - Generate ${count || 10} flashcards`,
+        metadata: JSON.stringify({ count, outputLanguage }),
+      });
+    } catch (creditError: any) {
+      console.error('Failed to consume credits:', creditError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Failed to consume credits. Please try again.',
+          flashcards: [],
+        },
+        { status: 500 }
       );
     }
 

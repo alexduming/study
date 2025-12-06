@@ -6,6 +6,8 @@ import { EmailVerificationService } from '@/shared/services/email-verification-s
 import { db } from '@/core/db';
 import { user, account } from '@/config/db/schema';
 import { getUuid } from '@/shared/lib/hash';
+import { createCredit, CreditTransactionType, CreditStatus, CreditTransactionScene } from '@/shared/models/credit';
+import { getSnowId } from '@/shared/lib/hash';
 
 // 强制使用 Node.js 运行时，因为需要使用 bcryptjs 和数据库操作
 export const runtime = 'nodejs';
@@ -89,6 +91,33 @@ export async function POST(request: NextRequest) {
         providerId: 'credential', // better-auth 的邮箱密码提供者
         userId: userId,
         password: hashedPassword,
+      });
+
+      /**
+       * 赠送免费用户月度积分（10积分）
+       * 
+       * 非程序员解释：
+       * - 每个新注册的用户都会获得10个AI积分
+       * - 这些积分会在当月最后一天的23:59:59过期
+       * - 下个月第一天会通过定时任务重新发放新的10积分
+       * - 这样确保免费用户每月都有10积分可以体验AI功能
+       */
+      const now = new Date();
+      // 计算当月最后一天的23:59:59
+      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+      await createCredit({
+        id: getUuid(),
+        userId: userId,
+        userEmail: email,
+        transactionNo: getSnowId(),
+        transactionType: CreditTransactionType.GRANT,
+        transactionScene: CreditTransactionScene.GIFT, // 使用GIFT场景表示免费赠送
+        credits: 10, // 免费用户每月10积分
+        remainingCredits: 10,
+        description: 'Monthly free credits for new user registration',
+        expiresAt: lastDayOfMonth, // 当月最后一天过期
+        status: CreditStatus.ACTIVE,
       });
 
       // 发送欢迎邮件
