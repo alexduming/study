@@ -12,11 +12,11 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { CreditsCost } from '@/shared/components/ai-elements/credits-display';
 import { Button } from '@/shared/components/ui/button';
 import { Dialog, DialogContent } from '@/shared/components/ui/dialog';
 import { ScrollAnimation } from '@/shared/components/ui/scroll-animation';
 import { readLearningFileContent } from '@/shared/lib/file-reader';
-import { CreditsCost } from '@/shared/components/ai-elements/credits-display';
 
 type AspectRatioOption =
   | '1:1'
@@ -217,7 +217,7 @@ const InfographicPage = () => {
               transition={{ duration: 0.8 }}
             >
               {/* 标题渐变：白色 → primary，而不是白色 → 蓝色 */}
-              <h1 className="via-primary/80 mb-6 bg-gradient-to-r from-white to-primary/60 bg-clip-text text-4xl font-bold text-transparent md:text-5xl">
+              <h1 className="via-primary/80 to-primary/60 mb-6 bg-gradient-to-r from-white bg-clip-text text-4xl font-bold text-transparent md:text-5xl">
                 {t('title', { defaultMessage: 'AI 学习信息图生成器' })}
               </h1>
               <p className="mx-auto max-w-3xl text-lg text-gray-300 md:text-xl">
@@ -373,7 +373,7 @@ const InfographicPage = () => {
                 <Button
                   onClick={handleGenerate}
                   disabled={isGenerating}
-                  className="from-primary hover:from-primary/90 bg-gradient-to-r to-primary/70 text-white hover:to-primary/80"
+                  className="from-primary hover:from-primary/90 to-primary/70 hover:to-primary/80 bg-gradient-to-r text-white"
                 >
                   {isGenerating ? (
                     <>
