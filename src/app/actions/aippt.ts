@@ -115,7 +115,7 @@ Ensure the content is concise, professional, and suitable for a presentation.
 Do not include any markdown formatting (like \`\`\`json), just the raw JSON object.`;
 
   try {
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
+    const response: Response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
