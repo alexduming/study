@@ -53,6 +53,8 @@ export function RegisterCompletePage({ email, token }: Props) {
     setLoading(true);
 
     try {
+      console.log('🚀 [Frontend] 开始调用注册 API', { email, name: name.trim() });
+      
       const response = await fetch('/api/auth/register-with-email', {
         method: 'POST',
         headers: {
@@ -66,17 +68,28 @@ export function RegisterCompletePage({ email, token }: Props) {
         }),
       });
 
+      console.log('📡 [Frontend] API 响应状态:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ [Frontend] API 返回错误:', errorText);
+        throw new Error(`API 返回错误: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('📦 [Frontend] API 返回数据:', data);
 
       if (data.success) {
+        console.log('✅ [Frontend] 注册成功，准备跳转');
         toast.success(t('email_register.welcome_title'));
         // 跳转到登录页面或用户仪表板
         router.push('/sign-in');
       } else {
+        console.error('❌ [Frontend] 注册失败:', data.error);
         toast.error(data.error || t('email_register.registering'));
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('❌ [Frontend] 注册异常:', error);
       toast.error(t('email_register.registering'));
     } finally {
       setLoading(false);

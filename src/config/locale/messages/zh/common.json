@@ -51,6 +51,7 @@
     "email_sent": "验证邮件已发送至 {email}",
     "resend_title": "重新发送验证邮件",
     "resend_button": "重新发送邮件",
+    "send_verification": "继续",
     "enter_email": "请输入您的邮箱地址",
     "back_to_register": "返回注册",
     "go_to_login": "前往登录",

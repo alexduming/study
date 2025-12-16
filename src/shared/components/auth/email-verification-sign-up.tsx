@@ -204,7 +204,7 @@ export function EmailVerificationSignUp({ configs, callbackUrl = '/' }: Props) {
                   <Loader2 size={16} className="animate-spin" />
                 ) : (
                   <>
-                    {t('email_verification.resend_button')}
+                    {t('email_verification.send_verification')}
                     <ArrowRight size={16} className="ml-2" />
                   </>
                 )}

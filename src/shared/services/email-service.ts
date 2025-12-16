@@ -166,7 +166,7 @@ export class EmailService {
         <body>
           <div class="container">
             <div class="header">
-              <div class="logo">Study</div>
+              <div class="logo">StudyHacks</div>
               <h1>${isRegistration ? '验证您的邮箱地址' : '重置您的密码'}</h1>
             </div>
 
@@ -243,7 +243,7 @@ export class EmailService {
         <body>
           <div class="container">
             <div class="header">
-              <div class="logo">Study</div>
+              <div class="logo">StudyHacks</div>
               <h1>欢迎加入我们！🎉</h1>
             </div>
 
