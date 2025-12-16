@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserInfo } from '@/shared/models/user';
-import { consumeCredits, getRemainingCredits } from '@/shared/models/credit';
+
 import { getAllConfigs } from '@/shared/models/config';
+import { consumeCredits, getRemainingCredits } from '@/shared/models/credit';
+import { getUserInfo } from '@/shared/models/user';
 
 // 使用 Node.js 运行时，保证可以安全调用外部 API 并使用环境变量
 export const runtime = 'nodejs';
 
 /**
  * 多提供商图片生成API（带自动降级）
- * 
+ *
  * 非程序员解释：
  * - 这个接口实现了"托底服务"功能
  * - 首先尝试使用KIE生成图片
@@ -16,7 +17,7 @@ export const runtime = 'nodejs';
  * - 如果Replicate也失败，尝试Together AI
  * - 如果Together AI也失败，最后尝试Novita AI
  * - 这样可以大大提高生成成功率
- * 
+ *
  * 降级策略：
  * KIE (主服务) → Replicate (托底1) → Together AI (托底2) → Novita AI (托底3)
  */
@@ -36,10 +37,15 @@ interface GenerateParams {
 async function tryGenerateWithKie(
   params: GenerateParams,
   apiKey: string
-): Promise<{ success: boolean; taskId?: string; imageUrls?: string[]; error?: string }> {
+): Promise<{
+  success: boolean;
+  taskId?: string;
+  imageUrls?: string[];
+  error?: string;
+}> {
   try {
     console.log('🔄 尝试使用 KIE (nano-banana-pro) 生成...');
-    
+
     const prompt = `Create an educational infographic explaining the provided file or text. You select some typical visual elements. Style: Flat vector. Labels in the language the same as provided information.\n\nContent:\n${params.content}`;
 
     const payload = {
@@ -88,10 +94,15 @@ async function tryGenerateWithKie(
 async function tryGenerateWithReplicate(
   params: GenerateParams,
   apiToken: string
-): Promise<{ success: boolean; taskId?: string; imageUrls?: string[]; error?: string }> {
+): Promise<{
+  success: boolean;
+  taskId?: string;
+  imageUrls?: string[];
+  error?: string;
+}> {
   try {
     console.log('🔄 尝试使用 Replicate (FLUX) 生成...');
-    
+
     const prompt = `Educational infographic, flat vector style: ${params.content}`;
 
     // 解析分辨率
@@ -117,22 +128,19 @@ async function tryGenerateWithReplicate(
     const Replicate = require('replicate').default;
     const replicate = new Replicate({ auth: apiToken });
 
-    const output = await replicate.run(
-      'black-forest-labs/flux-schnell',
-      {
-        input: {
-          prompt,
-          width,
-          height,
-          num_outputs: 1,
-        },
-      }
-    );
+    const output = await replicate.run('black-forest-labs/flux-schnell', {
+      input: {
+        prompt,
+        width,
+        height,
+        num_outputs: 1,
+      },
+    });
 
     console.log('✅ Replicate 生成成功');
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       taskId: `replicate-${Date.now()}`,
       imageUrls: Array.isArray(output) ? output : [output],
     };
@@ -148,10 +156,15 @@ async function tryGenerateWithReplicate(
 async function tryGenerateWithTogether(
   params: GenerateParams,
   apiKey: string
-): Promise<{ success: boolean; taskId?: string; imageUrls?: string[]; error?: string }> {
+): Promise<{
+  success: boolean;
+  taskId?: string;
+  imageUrls?: string[];
+  error?: string;
+}> {
   try {
     console.log('🔄 尝试使用 Together AI (FLUX) 生成...');
-    
+
     const prompt = `Educational infographic, flat vector style: ${params.content}`;
 
     // 解析分辨率
@@ -184,14 +197,17 @@ async function tryGenerateWithTogether(
       n: 1,
     };
 
-    const response = await fetch('https://api.together.xyz/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(requestBody),
-    });
+    const response = await fetch(
+      'https://api.together.xyz/v1/images/generations',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -200,12 +216,13 @@ async function tryGenerateWithTogether(
     }
 
     const result = await response.json();
-    const imageUrls = result.data?.map((item: any) => item.url).filter(Boolean) || [];
+    const imageUrls =
+      result.data?.map((item: any) => item.url).filter(Boolean) || [];
 
     console.log('✅ Together AI 生成成功，返回', imageUrls.length, '张图片');
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       taskId: result.id || `together-${Date.now()}`,
       imageUrls,
     };
@@ -221,10 +238,15 @@ async function tryGenerateWithTogether(
 async function tryGenerateWithNovita(
   params: GenerateParams,
   apiKey: string
-): Promise<{ success: boolean; taskId?: string; imageUrls?: string[]; error?: string }> {
+): Promise<{
+  success: boolean;
+  taskId?: string;
+  imageUrls?: string[];
+  error?: string;
+}> {
   try {
     console.log('🔄 尝试使用 Novita AI (FLUX) 生成...');
-    
+
     const prompt = `Educational infographic, flat vector style: ${params.content}`;
 
     // 解析分辨率
@@ -276,9 +298,9 @@ async function tryGenerateWithNovita(
     const result = await response.json();
 
     console.log('✅ Novita AI 任务创建成功, taskId:', result.task_id);
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       taskId: result.task_id,
     };
   } catch (error: any) {
@@ -354,7 +376,7 @@ export async function POST(request: NextRequest) {
 
     // 获取配置
     const configs = await getAllConfigs();
-    
+
     const params: GenerateParams = {
       content,
       aspectRatio,
@@ -364,49 +386,49 @@ export async function POST(request: NextRequest) {
 
     // 降级策略：依次尝试各个提供商
     const providers = [
-      { 
-        name: 'KIE', 
+      {
+        name: 'KIE',
         key: configs.kie_api_key,
         envKey: process.env.KIE_NANO_BANANA_PRO_KEY,
-        fn: tryGenerateWithKie 
+        fn: tryGenerateWithKie,
       },
-      { 
-        name: 'Replicate', 
+      {
+        name: 'Replicate',
         key: configs.replicate_api_token,
         envKey: process.env.REPLICATE_API_TOKEN,
-        fn: tryGenerateWithReplicate 
+        fn: tryGenerateWithReplicate,
       },
-      { 
-        name: 'Together AI', 
+      {
+        name: 'Together AI',
         key: configs.together_api_key,
         envKey: process.env.TOGETHER_API_KEY,
-        fn: tryGenerateWithTogether 
+        fn: tryGenerateWithTogether,
       },
-      { 
-        name: 'Novita AI', 
+      {
+        name: 'Novita AI',
         key: configs.novita_api_key,
         envKey: process.env.NOVITA_API_KEY,
-        fn: tryGenerateWithNovita 
+        fn: tryGenerateWithNovita,
       },
     ];
 
     const errors: string[] = [];
-    
+
     for (const provider of providers) {
       const apiKey = provider.key || provider.envKey;
-      
+
       if (!apiKey) {
         console.log(`⏭️ 跳过 ${provider.name}（未配置API Key）`);
         continue;
       }
 
       console.log(`\n🎯 尝试提供商: ${provider.name}`);
-      
+
       const result = await provider.fn(params, apiKey);
-      
+
       if (result.success) {
         console.log(`✅ ${provider.name} 生成成功！`);
-        
+
         return NextResponse.json({
           success: true,
           taskId: result.taskId,
@@ -422,7 +444,7 @@ export async function POST(request: NextRequest) {
 
     // 所有提供商都失败
     console.error('❌ 所有提供商都失败:', errors);
-    
+
     return NextResponse.json(
       {
         success: false,
@@ -445,4 +467,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

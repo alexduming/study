@@ -21,6 +21,7 @@ function ResetPasswordContent() {
   const t = useTranslations('common');
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [email, setEmail] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -30,9 +31,11 @@ function ResetPasswordContent() {
 
   useEffect(() => {
     const tokenParam = searchParams.get('token');
+    const emailParam = searchParams.get('email');
     setToken(tokenParam);
+    setEmail(emailParam);
     
-    if (!tokenParam) {
+    if (!tokenParam || !emailParam) {
       toast.error(t('reset_password.invalid_link'));
     }
   }, [searchParams, t]);
@@ -40,7 +43,7 @@ function ResetPasswordContent() {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!token) {
+    if (!token || !email) {
       toast.error(t('reset_password.invalid_link'));
       return;
     }
@@ -66,6 +69,7 @@ function ResetPasswordContent() {
         },
         body: JSON.stringify({
           token,
+          email,
           password,
         }),
       });

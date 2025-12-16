@@ -106,7 +106,14 @@ export class EmailVerificationService {
 
       // 生成验证链接
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-      const verificationUrl = `${baseUrl}/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
+      // 根据不同类型生成不同的跳转路径
+      // - registration: 走原有的邮箱验证 + 完成注册流程
+      // - password_reset: 直接跳转到重置密码页面
+      const path =
+        type === 'password_reset' ? '/reset-password' : '/verify-email';
+      const verificationUrl = `${baseUrl}${path}?token=${token}&email=${encodeURIComponent(
+        email
+      )}`;
 
       console.log('🔧 验证链接已生成:');
       console.log(`- 邮箱: ${email}`);
