@@ -22,7 +22,7 @@ export default async function AiTasksPage({
     return <Empty message="no auth" />;
   }
 
-  const t = await getTranslations('activity.ai-tasks');
+  const t = await getTranslations('library.ai-tasks');
 
   const aiTasks = await getAITasks({
     userId: user.id,
@@ -111,7 +111,7 @@ export default async function AiTasksPage({
           ) {
             items.push({
               title: t('list.buttons.refresh'),
-              url: `/activity/ai-tasks/${item.id}/refresh`,
+              url: `/library/ai-tasks/${item.id}/refresh`,
               icon: 'RiRefreshLine',
             });
           }
@@ -133,37 +133,37 @@ export default async function AiTasksPage({
     {
       name: 'all',
       title: t('list.tabs.all'),
-      url: '/activity/ai-tasks',
+      url: '/library/ai-tasks',
       is_active: !type || type === 'all',
     },
     {
       name: 'music',
       title: t('list.tabs.music'),
-      url: '/activity/ai-tasks?type=music',
+      url: '/library/ai-tasks?type=music',
       is_active: type === 'music',
     },
     {
       name: 'image',
       title: t('list.tabs.image'),
-      url: '/activity/ai-tasks?type=image',
+      url: '/library/ai-tasks?type=image',
       is_active: type === 'image',
     },
     {
       name: 'video',
       title: t('list.tabs.video'),
-      url: '/activity/ai-tasks?type=video',
+      url: '/library/ai-tasks?type=video',
       is_active: type === 'video',
     },
     {
       name: 'audio',
       title: t('list.tabs.audio'),
-      url: '/activity/ai-tasks?type=audio',
+      url: '/library/ai-tasks?type=audio',
       is_active: type === 'audio',
     },
     {
       name: 'text',
       title: t('list.tabs.text'),
-      url: '/activity/ai-tasks?type=text',
+      url: '/library/ai-tasks?type=text',
       is_active: type === 'text',
     },
   ];

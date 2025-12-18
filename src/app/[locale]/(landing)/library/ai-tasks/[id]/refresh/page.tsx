@@ -12,7 +12,7 @@ export default async function RefreshAITaskPage({
   params: Promise<{ locale: string; id: string }>;
 }) {
   const { locale, id } = await params;
-  const t = await getTranslations('activity.ai-tasks');
+  const t = await getTranslations('library.ai-tasks');
 
   const task = await findAITaskById(id);
   if (!task || !task.taskId || !task.provider || !task.status) {
@@ -46,5 +46,5 @@ export default async function RefreshAITaskPage({
     }
   }
 
-  redirect({ href: `/activity/ai-tasks`, locale });
+  redirect({ href: `/library/ai-tasks`, locale });
 }

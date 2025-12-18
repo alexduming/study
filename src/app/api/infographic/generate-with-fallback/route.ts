@@ -417,7 +417,7 @@ export async function POST(request: NextRequest) {
       if (result.success) {
         console.log(`✅ ${provider.name} 生成成功！`);
 
-        // --- 记录到通用 AI 任务表（ai_task），方便在 /activity/infographics 里统一展示 ---
+        // --- 记录到通用 AI 任务表（ai_task），方便在 /library/infographics 里统一展示 ---
         // 非程序员解释：
         // - 这里不会再次扣积分（上面已经调用过 consumeCredits），只是在 ai_task 这张“任务流水表”里记一笔
         // - 以后不管是 Infographic、PPT 还是别的图片任务，都可以用一套通用的历史列表组件来查看

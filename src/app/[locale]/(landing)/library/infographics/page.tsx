@@ -13,7 +13,7 @@ import {
 } from '@/shared/components/ui/card';
 
 /**
- * 信息图历史列表页面（/activity/infographics）
+ * 信息图历史列表页面（/library/infographics）
  *
  * 非程序员解释：
  * - 这个页面会读取你在“AI 信息图生成器”里发起过的任务（数据来自 ai_task 表）

@@ -120,7 +120,7 @@ export function SignUser({
 
             {/* My Library - For Everyone */}
             <DropdownMenuItem asChild>
-              <Link className="w-full cursor-pointer" href="/activity">
+              <Link className="w-full cursor-pointer" href="/library">
                 <LayoutDashboard />
                 {t('my_library')}
               </Link>

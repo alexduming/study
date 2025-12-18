@@ -3,12 +3,12 @@ import { getTranslations } from 'next-intl/server';
 
 import { ConsoleLayout } from '@/shared/blocks/console/layout';
 
-export default async function ActivityLayout({
+export default async function LibraryLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const t = await getTranslations('activity.sidebar');
+  const t = await getTranslations('library.sidebar');
 
   // settings title
   const title = t('title');

@@ -12,7 +12,7 @@ import { getSignUser as getCurrentUser } from '@/shared/models/user';
  *   1）只看当前登录用户自己的记录
  *   2）mediaType=IMAGE（也就是图片类的 AI 任务）
  *   3）scene='ai_infographic'（只保留信息图生成的任务，不和别的图片混在一起）
- * - 返回结果会在 /activity/infographics 页面里渲染成一个历史列表
+ * - 返回结果会在 /library/infographics 页面里渲染成一个历史列表
  */
 export async function getUserInfographicTasksAction() {
   const user = await getCurrentUser();

@@ -4,32 +4,32 @@
     "items": [
       {
         "title": "Presentations",
-        "url": "/activity/presentations",
+        "url": "/library/presentations",
         "icon": "Presentation"
       },
       {
         "title": "Notes",
-        "url": "/activity/notes",
+        "url": "/library/notes",
         "icon": "FileText"
       },
       {
         "title": "Flashcards",
-        "url": "/activity/flashcards",
+        "url": "/library/flashcards",
         "icon": "BookOpen"
       },
       {
         "title": "Quizzes",
-        "url": "/activity/quizzes",
+        "url": "/library/quizzes",
         "icon": "Activity"
       },
       {
         "title": "Infographics",
-        "url": "/activity/infographics",
+        "url": "/library/infographics",
         "icon": "Image"
       },
       {
         "title": "Podcasts",
-        "url": "/activity/podcasts",
+        "url": "/library/podcasts",
         "icon": "Music"
       }
     ]
@@ -38,7 +38,7 @@
     "items": [
       {
         "title": "Library",
-        "url": "/activity",
+        "url": "/library",
         "icon": "Library"
       },
       {

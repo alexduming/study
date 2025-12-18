@@ -1111,7 +1111,7 @@ export default function AIPPTPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push('/activity/presentations')}
+            onClick={() => router.push('/library/presentations')}
           >
             <Presentation className="mr-2 h-4 w-4" />
             My Presentations

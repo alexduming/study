@@ -4,32 +4,32 @@
     "items": [
       {
         "title": "演示文稿",
-        "url": "/activity/presentations",
+        "url": "/library/presentations",
         "icon": "Presentation"
       },
       {
         "title": "笔记",
-        "url": "/activity/notes",
+        "url": "/library/notes",
         "icon": "FileText"
       },
       {
         "title": "闪卡",
-        "url": "/activity/flashcards",
+        "url": "/library/flashcards",
         "icon": "BookOpen"
       },
       {
         "title": "测验",
-        "url": "/activity/quizzes",
+        "url": "/library/quizzes",
         "icon": "Activity"
       },
       {
         "title": "信息图",
-        "url": "/activity/infographics",
+        "url": "/library/infographics",
         "icon": "Image"
       },
       {
         "title": "播客",
-        "url": "/activity/podcasts",
+        "url": "/library/podcasts",
         "icon": "Music"
       }
     ]
@@ -38,7 +38,7 @@
     "items": [
       {
         "title": "资料库",
-        "url": "/activity",
+        "url": "/library",
         "icon": "Library"
       },
       {

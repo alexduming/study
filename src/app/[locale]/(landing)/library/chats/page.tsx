@@ -26,7 +26,7 @@ export default async function ChatsPage({
     return <Empty message="no auth" />;
   }
 
-  const t = await getTranslations('activity.chats');
+  const t = await getTranslations('library.chats');
 
   const chats = await getChats({
     userId: user.id,
