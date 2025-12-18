@@ -32,13 +32,23 @@ export function RegisterCompletePage({ email, token }: Props) {
   const [loading, setLoading] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
 
-  // 从 URL 中获取邀请码
+  // 从 URL 或 sessionStorage 中获取邀请码
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      const invite = params.get('invite');
-      if (invite) {
-        setInviteCode(invite.toUpperCase());
+      const inviteFromUrl = params.get('invite');
+      
+      if (inviteFromUrl) {
+        // 如果 URL 中有，优先使用 URL 中的，并更新 sessionStorage
+        const code = inviteFromUrl.toUpperCase();
+        setInviteCode(code);
+        sessionStorage.setItem('invite_code', code);
+      } else {
+        // 如果 URL 中没有，尝试从 sessionStorage 读取
+        const inviteFromStorage = sessionStorage.getItem('invite_code');
+        if (inviteFromStorage) {
+          setInviteCode(inviteFromStorage);
+        }
       }
     }
   }, []);
@@ -94,6 +104,12 @@ export function RegisterCompletePage({ email, token }: Props) {
 
       if (data.success) {
         console.log('✅ [Frontend] 注册成功，准备跳转');
+        
+        // 注册成功后清除 sessionStorage 中的邀请码
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('invite_code');
+        }
+
         toast.success(t('email_register.welcome_title'));
         // 跳转到登录页面或用户仪表板
         router.push('/sign-in');

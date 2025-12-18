@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Mail, ArrowRight } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -35,6 +35,19 @@ export function EmailVerificationSignUp({ configs, callbackUrl = '/' }: Props) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sentEmail, setSentEmail] = useState('');
+
+  // 检查并保存邀请码
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const invite = params.get('invite');
+      if (invite) {
+        // 保存邀请码到 sessionStorage，以便在后续步骤中使用
+        sessionStorage.setItem('invite_code', invite.toUpperCase());
+        console.log('✅ 保存邀请码到 sessionStorage:', invite);
+      }
+    }
+  }, []);
 
   const isGoogleAuthEnabled = configs.google_auth_enabled === 'true';
   const isGithubAuthEnabled = configs.github_auth_enabled === 'true';
