@@ -53,10 +53,10 @@ export default async function CreateCreditPage({
         title: t('fields.type'),
         validation: { required: true },
         options: [
-          { label: t('list.tabs.grant'), value: 'grant' },
-          { label: t('list.tabs.consume'), value: 'consume' },
+          { title: t('list.tabs.grant'), value: 'grant' },
+          { title: t('list.tabs.consume'), value: 'consume' },
         ],
-        defaultValue: 'grant',
+        value: 'grant',
       },
       {
         name: 'amount',
