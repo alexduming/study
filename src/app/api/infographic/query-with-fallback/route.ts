@@ -78,6 +78,62 @@ async function queryKieTask(
 }
 
 /**
+ * 查询Replicate任务状态
+ * 说明：现在 Replicate 也改为异步模式，需要查询 prediction 状态
+ */
+async function queryReplicateTask(
+  predictionId: string,
+  apiToken: string
+): Promise<{ success: boolean; status?: string; resultUrls?: string[]; error?: string }> {
+  try {
+    const Replicate = require('replicate');
+    const replicate = new Replicate({ auth: apiToken });
+
+    // 查询 prediction 状态
+    const prediction = await replicate.predictions.get(predictionId);
+
+    console.log('[Replicate Query] 预测状态:', prediction.status);
+
+    if (prediction.status === 'succeeded') {
+      // 提取输出 URL
+      let resultUrls: string[] = [];
+      
+      if (Array.isArray(prediction.output)) {
+        resultUrls = prediction.output.filter((url: any) => 
+          typeof url === 'string' && url.startsWith('http')
+        );
+      } else if (typeof prediction.output === 'string') {
+        resultUrls = [prediction.output];
+      }
+
+      console.log('[Replicate Query] 提取的 URLs:', resultUrls);
+
+      return {
+        success: true,
+        status: 'SUCCESS',
+        resultUrls,
+      };
+    } else if (prediction.status === 'failed' || prediction.status === 'canceled') {
+      return {
+        success: true,
+        status: 'FAILED',
+        resultUrls: [],
+      };
+    } else {
+      // starting, processing 等状态
+      return {
+        success: true,
+        status: 'PENDING',
+        resultUrls: [],
+      };
+    }
+  } catch (error: any) {
+    console.error('[Replicate Query] 错误:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * 查询Novita任务状态
  */
 async function queryNovitaTask(
@@ -154,13 +210,18 @@ export async function GET(request: NextRequest) {
         status: 'SUCCESS',
         results: [],
       });
-    } else if (provider === 'Replicate' || taskId.startsWith('replicate-')) {
-      // Replicate通常是同步API或已经返回结果
-      return NextResponse.json({
-        success: true,
-        status: 'SUCCESS',
-        results: [],
-      });
+    } else if (provider === 'Replicate' || taskId.startsWith('replicate-') || 
+               (!taskId.includes('-') && taskId.length > 20)) {
+      // ✅ Replicate 异步查询
+      // 说明：Replicate 的 predictionId 格式类似 "ufawqhfynnddngldkgtslldrkq"（无前缀）
+      const apiToken = configs.replicate_api_token || process.env.REPLICATE_API_TOKEN;
+      if (!apiToken) {
+        return NextResponse.json(
+          { success: false, error: 'Replicate API Token 未配置' },
+          { status: 500 }
+        );
+      }
+      result = await queryReplicateTask(taskId, apiToken);
     } else if (provider === 'Novita AI' || taskId.startsWith('novita-')) {
       // Novita AI异步API
       const apiKey = configs.novita_api_key || process.env.NOVITA_API_KEY;

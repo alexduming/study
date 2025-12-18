@@ -124,113 +124,25 @@ async function tryGenerateWithReplicate(
       },
     });
 
-    // 使用 run() 并等待完成
-    let output = await replicate.run('google/nano-banana-pro', {
+    // ✅ 改为异步模式：创建预测任务但不等待完成（避免 Vercel 超时）
+    // 说明：
+    // - 使用 predictions.create() 立即返回 taskId，不会阻塞 Serverless 函数
+    // - 前端将通过轮询 query API 查询任务状态
+    // - 这样可以避免超过 Vercel 的 10 秒超时限制
+    const prediction = await replicate.predictions.create({
+      model: 'google/nano-banana-pro',
       input,
-      wait: { interval: 2000 },
     });
 
-    console.log('[Replicate] 原始输出类型:', typeof output);
+    console.log('[Replicate] 任务创建成功, predictionId:', prediction.id);
+    console.log('[Replicate] 任务状态:', prediction.status);
 
-    // 处理各种可能的输出格式
-    let imageUrls: string[];
-
-    if (typeof output === 'string') {
-      imageUrls = [output];
-    } else if (Array.isArray(output)) {
-      console.log('[Replicate] 输出是数组，第一项类型:', typeof output[0]);
-
-      // 处理数组中的 FileOutput 对象
-      imageUrls = await Promise.all(
-        output.map(async (item: any) => {
-          if (item && typeof item === 'object' && 'url' in item) {
-            const urlValue = item.url;
-            if (typeof urlValue === 'function') {
-              console.log('[Replicate] 数组项.url 是函数，正在调用...');
-              const result = await urlValue();
-
-              // 如果返回的是 URL 对象，需要转换为字符串
-              if (result && typeof result === 'object' && 'href' in result) {
-                console.log('[Replicate] 从 URL 对象提取 href');
-                return result.href;
-              }
-              return typeof result === 'string' ? result : String(result);
-            }
-            return urlValue;
-          }
-          return item;
-        })
-      );
-    } else if (output && typeof output === 'object') {
-      // 如果是 ReadableStream，需要读取内容
-      if (
-        'readable' in output ||
-        output.constructor.name === 'ReadableStream'
-      ) {
-        console.log('[Replicate] 检测到 ReadableStream，正在读取...');
-        const reader = (output as any).getReader();
-        const chunks: any[] = [];
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-        }
-
-        const blob = new Blob(chunks as BlobPart[]);
-        const text = await blob.text();
-
-        try {
-          const parsed = JSON.parse(text);
-          imageUrls = Array.isArray(parsed) ? parsed : [parsed.url || parsed];
-        } catch {
-          imageUrls = [text.trim()];
-        }
-      } else if ('url' in output) {
-        const urlValue = (output as any).url;
-        console.log('[Replicate] url 类型:', typeof urlValue);
-
-        // Replicate SDK 的 FileOutput 类型，url 可能是函数
-        if (typeof urlValue === 'function') {
-          console.log('[Replicate] url 是函数，正在调用...');
-          const result = await urlValue();
-          console.log('[Replicate] 函数返回值类型:', typeof result);
-          console.log('[Replicate] 函数返回值:', result);
-
-          // 如果返回的是 URL 对象，需要转换为字符串
-          if (result && typeof result === 'object' && 'href' in result) {
-            console.log('[Replicate] 从 URL 对象提取 href:', result.href);
-            imageUrls = [result.href];
-          } else if (typeof result === 'string') {
-            imageUrls = [result];
-          } else {
-            imageUrls = [String(result)];
-          }
-        } else {
-          imageUrls = [urlValue];
-        }
-      } else {
-        imageUrls = [String(output)];
-      }
-    } else {
-      throw new Error('Replicate 返回了无法解析的结果格式');
-    }
-
-    if (
-      !imageUrls ||
-      imageUrls.length === 0 ||
-      !imageUrls[0].startsWith('http')
-    ) {
-      console.error('[Replicate] 无效的图片 URL:', imageUrls);
-      throw new Error('Replicate 返回了无效的图片 URL');
-    }
-
-    console.log('✅ Replicate 生成成功:', imageUrls);
-
+    // ✅ 返回 taskId，前端将通过轮询查询任务状态
+    // 注意：这里不等待生成完成，避免超过 Vercel 10 秒超时限制
     return {
       success: true,
-      taskId: `replicate-${Date.now()}`,
-      imageUrls,
+      taskId: prediction.id, // 返回 Replicate 的 prediction ID
+      imageUrls: undefined, // 异步模式下不立即返回图片，需要前端轮询查询
     };
   } catch (error: any) {
     console.warn('⚠️ Replicate 异常:', error.message);
