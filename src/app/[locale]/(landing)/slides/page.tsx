@@ -1853,19 +1853,6 @@ export default function AIPPTPage() {
               )}
             </div>
             <div className="p-4">
-              {/* 显示提供商信息 */}
-              {slide.status === 'completed' && slide.provider && (
-                <div
-                  className={`mb-2 rounded-md px-2 py-1 text-[10px] font-medium ${
-                    slide.fallbackUsed
-                      ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
-                      : 'bg-green-500/10 text-green-600 dark:text-green-400'
-                  }`}
-                >
-                  {slide.fallbackUsed ? '⚠️' : '✅'} {slide.provider}
-                  {slide.fallbackUsed && ' (托底服务)'}
-                </div>
-              )}
               <h3 className="mb-1 truncate font-semibold">
                 {index + 1}. {slide.title}
               </h3>

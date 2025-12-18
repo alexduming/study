@@ -6,12 +6,19 @@ import {
   Download,
   FileImage,
   FileText,
+  Images,
   Loader2,
   Upload,
+  X,
   Zap,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
+import {
+  parseFileAction,
+  parseMultipleImagesAction,
+} from '@/app/actions/aippt';
 import { CreditsCost } from '@/shared/components/ai-elements/credits-display';
 import { Button } from '@/shared/components/ui/button';
 import { Dialog, DialogContent } from '@/shared/components/ui/dialog';
@@ -62,45 +69,78 @@ const InfographicPage = () => {
   const [provider, setProvider] = useState<string | null>(null);
   const [fallbackUsed, setFallbackUsed] = useState<boolean>(false);
 
+  // 新增：支持批量文件上传（参考 /slides 页面）
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isParsingFiles, setIsParsingFiles] = useState(false);
+  const [parsingProgress, setParsingProgress] = useState<string>('');
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // 新的文件上传处理逻辑：支持批量上传任意类型的文件（参考 /slides 页面）
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
 
-    setIsFileLoading(true);
     setError('');
     setFileInfo('');
 
-    try {
-      const content = await readLearningFileContent(file);
-      setSourceContent(content);
-      // 使用多语言文案来提示“已成功从文件读取内容”
-      // 非程序员解释：
-      // - 这里不再直接写死中文句子，而是通过 key 去读取中/英文等不同语言版本
-      // - {fileName} 是一个占位符，会被真实的文件名替换进去
+    // 说明：现在支持上传多个任意类型的文件，不仅限于图片
+    // 这样用户可以一次性上传多个PDF、DOCX、图片等文件
+
+    if (files.length > 1) {
+      // 批量文件上传（支持任意类型：图片、PDF、DOCX等）
+      setUploadedFiles(files);
+      setUploadedFile(null);
+
+      // 统计文件类型，给用户更友好的提示
+      const imageCount = files.filter(
+        (f) =>
+          f.type.startsWith('image/') ||
+          /\.(jpg|jpeg|png|webp|gif)$/i.test(f.name)
+      ).length;
+      const pdfCount = files.filter((f) => f.name.endsWith('.pdf')).length;
+      const docCount = files.filter((f) => f.name.endsWith('.docx')).length;
+      const otherCount = files.length - imageCount - pdfCount - docCount;
+
+      const typeParts = [];
+      if (imageCount > 0) typeParts.push(`${imageCount}张图片`);
+      if (pdfCount > 0) typeParts.push(`${pdfCount}个PDF`);
+      if (docCount > 0) typeParts.push(`${docCount}个文档`);
+      if (otherCount > 0) typeParts.push(`${otherCount}个其他文件`);
+
       setFileInfo(
         t('upload.file_info', {
-          fileName: file.name,
+          fileName: `${files.length} 个文件：${typeParts.join('、')}`,
         })
       );
-    } catch (err) {
-      console.error('Error reading file for infographic:', err);
-      // 文件读取失败的错误提示也统一走多语言
-      setError(t('upload.file_read_error'));
-    } finally {
-      setIsFileLoading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      toast.success(`已选择 ${files.length} 个文件：${typeParts.join('、')}`);
+    } else if (files.length === 1) {
+      // 单个文件上传
+      setUploadedFile(files[0]);
+      setUploadedFiles([]);
+      setFileInfo(
+        t('upload.file_info', {
+          fileName: files[0].name,
+        })
+      );
+    }
+
+    // 清空文件输入，允许重复选择相同文件
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
   const handleGenerate = async () => {
-    if (!sourceContent.trim()) {
-      // 没有输入内容时的校验提示
+    // 检查是否至少有一种输入（文本、单个文件或多个文件）
+    if (
+      !sourceContent.trim() &&
+      !uploadedFile &&
+      uploadedFiles.length === 0
+    ) {
       setError(t('errors.no_content'));
       return;
     }
@@ -111,6 +151,90 @@ const InfographicPage = () => {
     setImageUrls([]);
 
     try {
+      let contentToGenerate = sourceContent;
+
+      // 处理批量文件上传（支持图片、PDF、DOCX等多种类型）
+      if (uploadedFiles.length > 0) {
+        setIsParsingFiles(true);
+        setParsingProgress(`正在处理 ${uploadedFiles.length} 个文件...`);
+
+        // 检查是否全部是图片文件
+        const allImages = uploadedFiles.every(
+          (file) =>
+            file.type.startsWith('image/') ||
+            /\.(jpg|jpeg|png|webp|gif)$/i.test(file.name)
+        );
+
+        let parsedContent = '';
+
+        if (allImages) {
+          // 场景1：全部是图片 - 使用批量 OCR 处理（更高效）
+          setParsingProgress(`正在识别 ${uploadedFiles.length} 张图片...`);
+          const formData = new FormData();
+          uploadedFiles.forEach((file) => {
+            formData.append('files', file);
+          });
+          parsedContent = await parseMultipleImagesAction(formData);
+        } else {
+          // 场景2：包含非图片文件 - 逐个解析每个文件
+          const parsedContents: string[] = [];
+
+          for (let i = 0; i < uploadedFiles.length; i++) {
+            const file = uploadedFiles[i];
+            setParsingProgress(
+              `正在处理文件 ${i + 1}/${uploadedFiles.length}: ${file.name}...`
+            );
+
+            try {
+              const formData = new FormData();
+              formData.append('file', file);
+              const content = await parseFileAction(formData);
+              parsedContents.push(
+                `=== 文件 ${i + 1}: ${file.name} ===\n${content}`
+              );
+            } catch (error: any) {
+              console.error(`解析文件 ${file.name} 失败:`, error);
+              parsedContents.push(
+                `=== 文件 ${i + 1}: ${file.name} ===\n[解析失败: ${error.message}]`
+              );
+            }
+          }
+
+          parsedContent = parsedContents.join('\n\n');
+        }
+
+        setIsParsingFiles(false);
+        setParsingProgress('');
+
+        // 如果用户同时输入了文字，将文件内容和用户输入结合起来
+        // 用户输入的文字作为额外的说明或要求
+        if (sourceContent.trim()) {
+          contentToGenerate = `${sourceContent}\n\n=== 从上传文件中提取的内容 ===\n${parsedContent}`;
+        } else {
+          contentToGenerate = parsedContent;
+        }
+      }
+      // 处理单个文件上传
+      else if (uploadedFile) {
+        setIsParsingFiles(true);
+        setParsingProgress(`正在处理文件: ${uploadedFile.name}...`);
+
+        const formData = new FormData();
+        formData.append('file', uploadedFile);
+        // Use general file parser (supports PDF, DOCX, TXT, Image)
+        const parsedContent = await parseFileAction(formData);
+
+        setIsParsingFiles(false);
+        setParsingProgress('');
+
+        // 如果用户同时输入了文字，将文件内容和用户输入结合起来
+        if (sourceContent.trim()) {
+          contentToGenerate = `${sourceContent}\n\n=== 从上传文件中提取的内容 ===\n${parsedContent}`;
+        } else {
+          contentToGenerate = parsedContent;
+        }
+      }
+
       // 使用带托底的新API
       const resp = await fetch('/api/infographic/generate-with-fallback', {
         method: 'POST',
@@ -118,7 +242,7 @@ const InfographicPage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          content: sourceContent,
+          content: contentToGenerate,
           aspectRatio,
           resolution,
           outputFormat,
@@ -152,11 +276,13 @@ const InfographicPage = () => {
 
       // 否则开始轮询查询任务结果（异步API如KIE/Novita）
       await pollInfographicResult(data.taskId, data.provider);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Generate infographic error:', err);
       setError(err instanceof Error ? err.message : t('errors.unknown'));
     } finally {
       setIsGenerating(false);
+      setIsParsingFiles(false);
+      setParsingProgress('');
     }
   };
 
@@ -265,7 +391,8 @@ const InfographicPage = () => {
                   ref={fileInputRef}
                   id="infographic-file-input"
                   type="file"
-                  accept=".pdf,.doc,.docx,.txt"
+                  multiple
+                  accept=".pdf,.docx,.txt,.md,.jpg,.jpeg,.png,.webp,.gif,image/*"
                   onChange={handleFileSelect}
                   className="hidden"
                 />
@@ -273,14 +400,14 @@ const InfographicPage = () => {
                   asChild
                   variant="outline"
                   size="sm"
-                  disabled={isFileLoading || isGenerating}
+                  disabled={isFileLoading || isGenerating || isParsingFiles}
                   className="border-primary/40 text-primary/80 hover:border-primary/70"
                 >
                   <label
                     htmlFor="infographic-file-input"
                     className="flex cursor-pointer items-center"
                   >
-                    {isFileLoading ? (
+                    {isFileLoading || isParsingFiles ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         {t('upload.loading')}
@@ -288,17 +415,105 @@ const InfographicPage = () => {
                     ) : (
                       <>
                         <Upload className="mr-2 h-4 w-4" />
-                        {t('upload.button_label')}
+                        上传文件（支持批量）
                       </>
                     )}
                   </label>
                 </Button>
                 <span className="text-xs text-gray-400">
-                  {t('upload.hint')}
+                  支持PDF、DOCX、TXT、图片等，可批量上传
                 </span>
               </div>
 
-              {fileInfo && (
+              {/* 单个文件预览 */}
+              {uploadedFile && (
+                <div className="bg-muted/50 mb-3 flex items-center justify-between rounded-lg border px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    {uploadedFile.name.endsWith('.pdf') ? (
+                      <FileText className="h-4 w-4 text-red-500" />
+                    ) : uploadedFile.name.endsWith('.docx') ? (
+                      <FileText className="h-4 w-4 text-blue-500" />
+                    ) : uploadedFile.type.startsWith('image/') ? (
+                      <Images className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <FileText className="h-4 w-4 text-gray-500" />
+                    )}
+                    <span className="text-sm font-medium text-white">
+                      {uploadedFile.name}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => {
+                      setUploadedFile(null);
+                      setFileInfo('');
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+
+              {/* 批量文件预览 */}
+              {uploadedFiles.length > 0 && (
+                <div className="bg-muted/50 mb-3 rounded-lg border p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Images className="h-4 w-4 text-green-500" />
+                      <span className="text-sm font-medium text-white">
+                        已选择 {uploadedFiles.length} 个文件
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => {
+                        setUploadedFiles([]);
+                        setFileInfo('');
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <div className="max-h-[120px] space-y-1 overflow-y-auto">
+                    {uploadedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="hover:bg-muted flex items-center justify-between rounded px-2 py-1"
+                      >
+                        <span className="text-muted-foreground text-xs text-gray-300">
+                          {index + 1}. {file.name}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5"
+                          onClick={() => {
+                            setUploadedFiles(
+                              uploadedFiles.filter((_, i) => i !== index)
+                            );
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 文件解析进度提示 */}
+              {isParsingFiles && parsingProgress && (
+                <div className="border-primary/30 bg-primary/10 text-primary/90 mb-3 flex items-start gap-2 rounded-lg border p-3 text-xs">
+                  <Loader2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 animate-spin" />
+                  <span>{parsingProgress}</span>
+                </div>
+              )}
+
+              {fileInfo && !uploadedFile && uploadedFiles.length === 0 && (
                 <div className="border-primary/30 bg-primary/5 text-primary/80 mb-3 flex items-start gap-2 rounded-lg border p-2 text-xs">
                   <FileText className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
                   <span>{fileInfo}</span>
@@ -380,6 +595,8 @@ const InfographicPage = () => {
                     setError('');
                     setTaskId(null);
                     setImageUrls([]);
+                    setUploadedFile(null);
+                    setUploadedFiles([]);
                   }}
                   variant="outline"
                   className="border-gray-600 text-gray-300 hover:border-gray-500"
@@ -437,20 +654,6 @@ const InfographicPage = () => {
 
               {!isGenerating && imageUrls.length > 0 && (
                 <div className="space-y-4">
-                  {/* 显示使用的提供商信息 */}
-                  {provider && (
-                    <div
-                      className={`rounded-lg border px-3 py-2 text-xs ${
-                        fallbackUsed
-                          ? 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300'
-                          : 'border-green-500/30 bg-green-500/10 text-green-300'
-                      }`}
-                    >
-                      {fallbackUsed
-                        ? t('result.provider_fallback', { provider })
-                        : t('result.provider_normal', { provider })}
-                    </div>
-                  )}
                   {imageUrls.map((url, idx) => (
                     <div
                       key={idx}

@@ -23,11 +23,9 @@
   "result": {
     "title": "生成结果",
     "empty_title": "还没有生成结果",
-    "empty_desc": "填写左侧内容，并点击「生成信息图」，这里将显示 nano-banana-pro 返回的学习信息图。",
+    "empty_desc": "填写左侧内容，并点击「生成信息图」，这里将显示 AI 生成的学习信息图。",
     "empty_hint": "提示：生成过程可能需要几秒钟，请耐心等待图片加载完成。",
     "loading": "AI 正在生成信息图，请稍候...",
-    "provider_normal": "✅ 由 {provider} 生成",
-    "provider_fallback": "⚠️ 由 {provider} 生成（KIE 服务不可用，已自动切换到托底服务）",
     "image_title": "信息图 {index}",
     "download": "下载图片",
     "click_to_enlarge": "点击图片可放大查看"
@@ -40,6 +38,6 @@
     "generate_failed": "生成信息图失败，请稍后重试。",
     "unknown": "生成信息图时出现未知错误，请稍后重试。",
     "poll_failed": "查询信息图生成结果时出现错误，请稍后重试。",
-    "timeout": "查询超时：信息图生成时间过长，请稍后在 Kie 控制台查看任务状态。"
+    "timeout": "生成信息图超时，请稍后重试。"
   }
 }
