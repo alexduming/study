@@ -1,4 +1,45 @@
 {
   "title": "AI 学习信息图生成器",
-  "subtitle": "上传课件、学习笔记或文本，AI 自动为你生成扁平风格的教育信息图。"
+  "subtitle": "上传课件、学习笔记或文本，AI 自动为你生成扁平风格的教育信息图。",
+  "form": {
+    "input_title": "输入知识内容",
+    "textarea_placeholder": "粘贴你的学习笔记、知识点列表或课程内容，AI 会根据这些内容生成一张信息图。",
+    "aspect_ratio_label": "信息图宽高比",
+    "resolution_label": "分辨率",
+    "format_label": "输出格式"
+  },
+  "upload": {
+    "loading": "正在读取文件...",
+    "button_label": "从文件读取内容（PDF / Word / TXT）",
+    "hint": "也可以直接在下方粘贴或编辑要转换的信息。",
+    "file_info": "已从文件「{fileName}」读取内容，下面文本框中的内容将用于生成信息图。",
+    "file_read_error": "读取文件内容失败，请确认文件未损坏或格式受支持。"
+  },
+  "actions": {
+    "clear": "清空内容",
+    "generate": "生成信息图",
+    "generating": "AI 正在生成信息图任务..."
+  },
+  "result": {
+    "title": "生成结果",
+    "empty_title": "还没有生成结果",
+    "empty_desc": "填写左侧内容，并点击「生成信息图」，这里将显示 nano-banana-pro 返回的学习信息图。",
+    "empty_hint": "提示：生成过程可能需要几秒钟，请耐心等待图片加载完成。",
+    "loading": "AI 正在生成信息图，请稍候...",
+    "provider_normal": "✅ 由 {provider} 生成",
+    "provider_fallback": "⚠️ 由 {provider} 生成（KIE 服务不可用，已自动切换到托底服务）",
+    "image_title": "信息图 {index}",
+    "download": "下载图片",
+    "click_to_enlarge": "点击图片可放大查看"
+  },
+  "modal": {
+    "image_alt": "放大查看的信息图"
+  },
+  "errors": {
+    "no_content": "请先上传文件或粘贴要转换为信息图的知识内容。",
+    "generate_failed": "生成信息图失败，请稍后重试。",
+    "unknown": "生成信息图时出现未知错误，请稍后重试。",
+    "poll_failed": "查询信息图生成结果时出现错误，请稍后重试。",
+    "timeout": "查询超时：信息图生成时间过长，请稍后在 Kie 控制台查看任务状态。"
+  }
 }

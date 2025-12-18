@@ -77,12 +77,19 @@ const InfographicPage = () => {
     try {
       const content = await readLearningFileContent(file);
       setSourceContent(content);
+      // 使用多语言文案来提示“已成功从文件读取内容”
+      // 非程序员解释：
+      // - 这里不再直接写死中文句子，而是通过 key 去读取中/英文等不同语言版本
+      // - {fileName} 是一个占位符，会被真实的文件名替换进去
       setFileInfo(
-        `已从文件「${file.name}」读取内容，下面文本框中的内容将用于生成信息图。`
+        t('upload.file_info', {
+          fileName: file.name,
+        })
       );
     } catch (err) {
       console.error('Error reading file for infographic:', err);
-      setError('读取文件内容失败，请确认文件未损坏或格式受支持。');
+      // 文件读取失败的错误提示也统一走多语言
+      setError(t('upload.file_read_error'));
     } finally {
       setIsFileLoading(false);
       if (fileInputRef.current) {
@@ -93,7 +100,8 @@ const InfographicPage = () => {
 
   const handleGenerate = async () => {
     if (!sourceContent.trim()) {
-      setError('请先上传文件或粘贴要转换为信息图的知识内容。');
+      // 没有输入内容时的校验提示
+      setError(t('errors.no_content'));
       return;
     }
 
@@ -120,14 +128,15 @@ const InfographicPage = () => {
       if (!resp.ok) {
         const text = await resp.text();
         throw new Error(
-          `生成信息图请求失败：${resp.status} ${resp.statusText || text}`
+          // 这里抛出的错误只作为开发调试信息，真正给用户看的提示在下面统一处理
+          `Generate infographic request failed: ${resp.status} ${resp.statusText || text}`
         );
       }
 
       const data = await resp.json();
 
       if (!data.success) {
-        throw new Error(data.error || '生成信息图失败，请稍后重试。');
+        throw new Error(data.error || t('errors.generate_failed'));
       }
 
       setTaskId(data.taskId);
@@ -145,11 +154,7 @@ const InfographicPage = () => {
       await pollInfographicResult(data.taskId, data.provider);
     } catch (err) {
       console.error('Generate infographic error:', err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : '生成信息图时出现未知错误，请稍后重试。'
-      );
+      setError(err instanceof Error ? err.message : t('errors.unknown'));
     } finally {
       setIsGenerating(false);
     }
@@ -177,13 +182,14 @@ const InfographicPage = () => {
         if (!resp.ok) {
           const text = await resp.text();
           throw new Error(
-            `查询任务失败：${resp.status} ${resp.statusText || text}`
+            // 同样这里记录的是更技术化的错误，方便排查
+            `Query task failed: ${resp.status} ${resp.statusText || text}`
           );
         }
 
         const data = await resp.json();
         if (!data.success) {
-          throw new Error(data.error || '查询信息图任务失败');
+          throw new Error(data.error || t('errors.poll_failed'));
         }
 
         const status = data.status as string;
@@ -199,11 +205,7 @@ const InfographicPage = () => {
         }
       } catch (err) {
         console.error('Poll infographic result error:', err);
-        setError(
-          err instanceof Error
-            ? err.message
-            : '查询信息图生成结果时出现错误，请稍后重试。'
-        );
+        setError(err instanceof Error ? err.message : t('errors.poll_failed'));
         return;
       }
 
@@ -211,7 +213,7 @@ const InfographicPage = () => {
       await delay(3000);
     }
 
-    setError('查询超时：信息图生成时间过长，请稍后在 Kie 控制台查看任务状态。');
+    setError(t('errors.timeout'));
   };
 
   return (
@@ -254,7 +256,7 @@ const InfographicPage = () => {
               className="border-primary/20 rounded-2xl border bg-gray-900/60 p-6 backdrop-blur-sm"
             >
               <h2 className="mb-4 text-xl font-semibold text-white">
-                输入知识内容
+                {t('form.input_title')}
               </h2>
 
               {/* 文件上传 */}
@@ -281,18 +283,18 @@ const InfographicPage = () => {
                     {isFileLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        正在读取文件...
+                        {t('upload.loading')}
                       </>
                     ) : (
                       <>
                         <Upload className="mr-2 h-4 w-4" />
-                        从文件读取内容（PDF / Word / TXT）
+                        {t('upload.button_label')}
                       </>
                     )}
                   </label>
                 </Button>
                 <span className="text-xs text-gray-400">
-                  也可以直接在下方粘贴或编辑要转换的信息。
+                  {t('upload.hint')}
                 </span>
               </div>
 
@@ -307,7 +309,7 @@ const InfographicPage = () => {
               <textarea
                 value={sourceContent}
                 onChange={(e) => setSourceContent(e.target.value)}
-                placeholder="粘贴你的学习笔记、知识点列表或课程内容，AI 会根据这些内容生成一张信息图。"
+                placeholder={t('form.textarea_placeholder')}
                 className="focus:border-primary mb-4 h-60 w-full resize-none rounded-lg border border-gray-600 bg-gray-800/60 p-4 text-sm text-white placeholder-gray-400 focus:outline-none"
               />
 
@@ -315,7 +317,7 @@ const InfographicPage = () => {
               <div className="mb-4 grid gap-4 md:grid-cols-3">
                 <div>
                   <label className="mb-2 block text-xs font-medium text-gray-300">
-                    信息图宽高比
+                    {t('form.aspect_ratio_label')}
                   </label>
                   <select
                     value={aspectRatio}
@@ -333,7 +335,7 @@ const InfographicPage = () => {
                 </div>
                 <div>
                   <label className="mb-2 block text-xs font-medium text-gray-300">
-                    分辨率
+                    {t('form.resolution_label')}
                   </label>
                   <select
                     value={resolution}
@@ -349,7 +351,7 @@ const InfographicPage = () => {
                 </div>
                 <div>
                   <label className="mb-2 block text-xs font-medium text-gray-300">
-                    输出格式
+                    {t('form.format_label')}
                   </label>
                   <select
                     value={outputFormat}
@@ -382,7 +384,7 @@ const InfographicPage = () => {
                   variant="outline"
                   className="border-gray-600 text-gray-300 hover:border-gray-500"
                 >
-                  清空内容
+                  {t('actions.clear')}
                 </Button>
                 <Button
                   onClick={handleGenerate}
@@ -392,13 +394,13 @@ const InfographicPage = () => {
                   {isGenerating ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      AI 正在生成信息图任务...
+                      {t('actions.generating')}
                     </>
                   ) : (
                     <>
                       <CreditsCost credits={3} />
                       <Zap className="mr-2 h-4 w-4" />
-                      生成信息图
+                      {t('actions.generate')}
                     </>
                   )}
                 </Button>
@@ -413,18 +415,15 @@ const InfographicPage = () => {
               className="border-primary/20 rounded-2xl border bg-gray-900/60 p-6 backdrop-blur-sm"
             >
               <h2 className="mb-4 text-xl font-semibold text-white">
-                生成结果
+                {t('result.title')}
               </h2>
 
               {!taskId && imageUrls.length === 0 && !error && (
                 <div className="flex h-full flex-col items-center justify-center gap-4 text-center text-sm text-gray-400">
                   <FileImage className="text-primary h-10 w-10" />
-                  <p>
-                    填写左侧内容，并点击「生成信息图」，这里将显示
-                    nano-banana-pro 返回的学习信息图。
-                  </p>
+                  <p>{t('result.empty_desc')}</p>
                   <p className="text-xs text-gray-500">
-                    提示：生成过程可能需要几秒钟，请耐心等待图片加载完成。
+                    {t('result.empty_hint')}
                   </p>
                 </div>
               )}
@@ -432,7 +431,7 @@ const InfographicPage = () => {
               {isGenerating && (
                 <div className="flex h-full flex-col items-center justify-center gap-4 text-center text-sm text-gray-400">
                   <Loader2 className="text-primary h-8 w-8 animate-spin" />
-                  <p>AI 正在生成信息图，请稍候...</p>
+                  <p>{t('result.loading')}</p>
                 </div>
               )}
 
@@ -440,13 +439,16 @@ const InfographicPage = () => {
                 <div className="space-y-4">
                   {/* 显示使用的提供商信息 */}
                   {provider && (
-                    <div className={`rounded-lg border px-3 py-2 text-xs ${
-                      fallbackUsed 
-                        ? 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300'
-                        : 'border-green-500/30 bg-green-500/10 text-green-300'
-                    }`}>
-                      {fallbackUsed ? '⚠️' : '✅'} 由 <strong>{provider}</strong> 生成
-                      {fallbackUsed && ' （KIE服务不可用，已自动切换到托底服务）'}
+                    <div
+                      className={`rounded-lg border px-3 py-2 text-xs ${
+                        fallbackUsed
+                          ? 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300'
+                          : 'border-green-500/30 bg-green-500/10 text-green-300'
+                      }`}
+                    >
+                      {fallbackUsed
+                        ? t('result.provider_fallback', { provider })
+                        : t('result.provider_normal', { provider })}
                     </div>
                   )}
                   {imageUrls.map((url, idx) => (
@@ -456,7 +458,7 @@ const InfographicPage = () => {
                     >
                       <div className="border-primary/20 bg-primary/10 flex items-center justify-between border-b px-4 py-2">
                         <span className="text-primary/90 text-xs">
-                          信息图 {idx + 1}
+                          {t('result.image_title', { index: idx + 1 })}
                         </span>
                         <a
                           href={url}
@@ -464,16 +466,16 @@ const InfographicPage = () => {
                           className="border-primary/40 text-primary/90 hover:border-primary/70 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px]"
                         >
                           <Download className="h-3 w-3" />
-                          下载图片
+                          {t('result.download')}
                         </a>
                       </div>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={url}
-                        alt={`Infographic ${idx + 1}`}
+                        alt={t('modal.image_alt')}
                         className="h-auto w-full cursor-pointer bg-black/40 object-contain transition-opacity hover:opacity-90"
                         onClick={() => setEnlargedImageUrl(url)}
-                        title="点击图片可放大查看"
+                        title={t('result.click_to_enlarge')}
                       />
                     </div>
                   ))}
@@ -509,7 +511,7 @@ const InfographicPage = () => {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={enlargedImageUrl}
-                alt="放大查看的信息图"
+                alt={t('modal.image_alt')}
                 className="h-auto max-h-[85vh] w-auto max-w-full rounded-lg object-contain"
               />
             </div>

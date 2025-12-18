@@ -11,6 +11,7 @@ import {
   createKieTaskAction,
   createKieTaskWithFallbackAction,
   parseFileAction,
+  parseMultipleImagesAction,
   queryKieTaskAction,
   queryKieTaskWithFallbackAction,
 } from '@/app/actions/aippt';
@@ -42,6 +43,7 @@ import {
   X,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { flushSync } from 'react-dom';
 import { toast } from 'sonner';
 
 import { PPT_RATIOS, PPT_SIZES, PPT_STYLES } from '@/config/aippt';
@@ -115,9 +117,12 @@ export default function AIPPTPage() {
   const [inputMode, setInputMode] = useState('text');
   const [inputText, setInputText] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // 批量上传的图片文件
   const [slideCount, setSlideCount] = useState<string>('1'); // Default 8 slides
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isParsingFiles, setIsParsingFiles] = useState(false); // 批量处理进度
+  const [parsingProgress, setParsingProgress] = useState<string>(''); // 处理进度文本
   const logContainerRef = useRef<HTMLDivElement>(null); // For auto-scroll inside log container
 
   // Outline Step State
@@ -628,11 +633,8 @@ export default function AIPPTPage() {
 
   // Step 1: Analyze Content
   const handleAnalyze = async () => {
-    if (inputMode === 'text' && !inputText.trim() && !uploadedFile) {
-      toast.error(t('errors.input_required'));
-      return;
-    }
-    if (inputMode === 'pdf' && !uploadedFile) {
+    // 检查是否至少有一种输入（文本、单个文件或多个文件）
+    if (!inputText.trim() && !uploadedFile && uploadedFiles.length === 0) {
       toast.error(t('errors.input_required'));
       return;
     }
@@ -648,11 +650,86 @@ export default function AIPPTPage() {
     try {
       let contentToAnalyze = inputText;
 
-      if (uploadedFile) {
+      // 处理批量文件上传（支持图片、PDF、DOCX等多种类型）
+      if (uploadedFiles.length > 0) {
+        setIsParsingFiles(true);
+        setParsingProgress(`正在处理 ${uploadedFiles.length} 个文件...`);
+
+        // 检查是否全部是图片文件
+        const allImages = uploadedFiles.every(
+          (file) =>
+            file.type.startsWith('image/') ||
+            /\.(jpg|jpeg|png|webp|gif)$/i.test(file.name)
+        );
+
+        let parsedContent = '';
+
+        if (allImages) {
+          // 场景1：全部是图片 - 使用批量 OCR 处理（更高效）
+          setParsingProgress(`正在识别 ${uploadedFiles.length} 张图片...`);
+          const formData = new FormData();
+          uploadedFiles.forEach((file) => {
+            formData.append('files', file);
+          });
+          parsedContent = await parseMultipleImagesAction(formData);
+        } else {
+          // 场景2：包含非图片文件 - 逐个解析每个文件
+          const parsedContents: string[] = [];
+
+          for (let i = 0; i < uploadedFiles.length; i++) {
+            const file = uploadedFiles[i];
+            setParsingProgress(
+              `正在处理文件 ${i + 1}/${uploadedFiles.length}: ${file.name}...`
+            );
+
+            try {
+              const formData = new FormData();
+              formData.append('file', file);
+              const content = await parseFileAction(formData);
+              parsedContents.push(
+                `=== 文件 ${i + 1}: ${file.name} ===\n${content}`
+              );
+            } catch (error: any) {
+              console.error(`解析文件 ${file.name} 失败:`, error);
+              parsedContents.push(
+                `=== 文件 ${i + 1}: ${file.name} ===\n[解析失败: ${error.message}]`
+              );
+            }
+          }
+
+          parsedContent = parsedContents.join('\n\n');
+        }
+
+        setIsParsingFiles(false);
+        setParsingProgress('');
+
+        // 如果用户同时输入了文字，将文件内容和用户输入结合起来
+        // 用户输入的文字作为额外的说明或要求
+        if (inputText.trim()) {
+          contentToAnalyze = `${inputText}\n\n=== 从上传文件中提取的内容 ===\n${parsedContent}`;
+        } else {
+          contentToAnalyze = parsedContent;
+        }
+      }
+      // 处理单个文件上传
+      else if (uploadedFile) {
+        setIsParsingFiles(true);
+        setParsingProgress(`正在处理文件: ${uploadedFile.name}...`);
+
         const formData = new FormData();
         formData.append('file', uploadedFile);
-        // Use general file parser (supports PDF, DOCX, TXT)
-        contentToAnalyze = await parseFileAction(formData);
+        // Use general file parser (supports PDF, DOCX, TXT, Image)
+        const parsedContent = await parseFileAction(formData);
+
+        setIsParsingFiles(false);
+        setParsingProgress('');
+
+        // 如果用户同时输入了文字，将文件内容和用户输入结合起来
+        if (inputText.trim()) {
+          contentToAnalyze = `${inputText}\n\n=== 从上传文件中提取的内容 ===\n${parsedContent}`;
+        } else {
+          contentToAnalyze = parsedContent;
+        }
       }
 
       // Start Streaming
@@ -661,6 +738,8 @@ export default function AIPPTPage() {
       console.error(e);
       toast.error(e.message || t('errors.general_failed'));
       setCurrentStep('input');
+      setIsParsingFiles(false);
+      setParsingProgress('');
     }
   };
 
@@ -801,46 +880,86 @@ export default function AIPPTPage() {
         }
       }
 
+      // 🚀 智能负载均衡：将任务分配给 Replicate 和 KIE 并行处理
+      // - 偶数索引（0, 2, 4...）使用 Replicate
+      // - 奇数索引（1, 3, 5...）使用 KIE
+      // 这样可以实现真正的并行，显著提高速度！
+      console.log(
+        `🚀 启用负载均衡：${slides.length} 张图片将由 Replicate 和 KIE 并行处理`
+      );
+
       // Launch generation for all slides
       const promises = slides.map(async (slide, index) => {
         try {
-          // Update status to generating
-          setSlides((prev) =>
-            prev.map((s) =>
-              s.id === slide.id ? { ...s, status: 'generating' } : s
-            )
-          );
+          // Update status to generating - 使用 flushSync 立即显示"正在生成"状态
+          flushSync(() => {
+            setSlides((prev) =>
+              prev.map((s) =>
+                s.id === slide.id ? { ...s, status: 'generating' } : s
+              )
+            );
+          });
+
           // Update local tracker
           localSlides[index] = {
             ...localSlides[index],
             status: 'generating',
           };
 
+          console.log(`🎨 Slide ${index + 1} 状态已更新为"正在生成"`);
+
           // Construct prompt from title + content
           // This ensures the generated image text aligns with user content
           const finalPrompt = `Slide Title: "${slide.title}"\n\nKey Content:\n${slide.content}`;
 
-          // 使用带托底的Action（KIE → Replicate）
+          // 🎯 根据索引决定使用哪个提供商（真正的负载均衡）
+          const useReplicate = index % 2 === 0; // 偶数索引用 Replicate，奇数索引用 KIE
+          const preferredProvider = useReplicate ? 'Replicate' : 'KIE';
+
+          console.log(`\n📸 ============================================`);
+          console.log(
+            `📸 Slide ${index + 1}/${slides.length}: 强制分配给 ${preferredProvider}`
+          );
+          console.log(
+            `📸 索引: ${index} (${index % 2 === 0 ? '偶数→Replicate' : '奇数→KIE'})`
+          );
+          console.log(`📸 ============================================\n`);
+
+          // 使用带托底的Action，但强制指定首选提供商（负载均衡）
           const taskData = await createKieTaskWithFallbackAction({
             prompt: finalPrompt,
             styleId: selectedStyleId || undefined,
             aspectRatio,
             imageSize: resolution,
             customImages: styleImageUrls, // Pass public URLs
+            preferredProvider, // 新增：指定首选提供商
           });
 
           if (!taskData.task_id) throw new Error(t('errors.no_task_id'));
 
+          // 调试日志：查看返回的 taskData 结构
+          console.log(`[Debug] Slide ${index} - taskData:`, {
+            task_id: taskData.task_id,
+            provider: taskData.provider,
+            hasImageUrl: 'imageUrl' in taskData,
+            imageUrl: (taskData as any).imageUrl,
+            fallbackUsed: taskData.fallbackUsed,
+          });
+
           // 如果是同步API（Replicate），直接使用返回的图片URL
           let resultUrl = '';
-          if (taskData.imageUrl) {
-            resultUrl = taskData.imageUrl;
-            console.log(`✅ Slide ${index} - 同步生成完成 (${taskData.provider})`);
+          if ('imageUrl' in taskData && (taskData as any).imageUrl) {
+            resultUrl = (taskData as any).imageUrl;
+            console.log(
+              `✅ Slide ${index} - 同步生成完成 (${taskData.provider}), URL: ${resultUrl.substring(0, 50)}...`
+            );
           } else {
-            // 异步API（KIE），需要轮询
+            // 异步API（KIE托底），需要轮询
             let attempts = 0;
-            // Extend polling to 10 minutes (200 * 3s = 600s)
-            while (attempts < 200) {
+            // 100秒超时控制 (33次 * 3秒 ≈ 99秒)
+            const MAX_POLL_ATTEMPTS = 33;
+
+            while (attempts < MAX_POLL_ATTEMPTS) {
               await new Promise((r) => setTimeout(r, 3000));
               const statusRes = await queryKieTaskWithFallbackAction(
                 taskData.task_id,
@@ -858,42 +977,80 @@ export default function AIPPTPage() {
                   break;
                 }
               } else if (status === 'FAILED') {
-                throw new Error(t('errors.generation_failed'));
+                console.warn(`⚠️ Slide ${index} - KIE 任务失败`);
+                break; // 跳出轮询
               }
               attempts++;
+            }
+
+            // 如果超时或失败，且没有拿到结果
+            if (!resultUrl) {
+              console.error(`❌ Slide ${index} - 生成超时或失败 (耗时 > 100s)`);
+              throw new Error(t('errors.timeout'));
             }
           }
 
           if (resultUrl) {
-            setSlides((prev) =>
-              prev.map((s) =>
-                s.id === slide.id
-                  ? { 
-                      ...s, 
-                      status: 'completed', 
-                      imageUrl: resultUrl,
-                      provider: taskData.provider, // 记录使用的提供商
-                      fallbackUsed: taskData.fallbackUsed, // 记录是否使用了托底
-                    }
-                  : s
-              )
+            console.log(
+              `[Debug] Slide ${index} - 准备更新状态: completed, imageUrl: ${resultUrl.substring(0, 80)}...`
             );
+
+            // 使用 flushSync 强制立即渲染，这样每张图片生成后都会立即显示
+            flushSync(() => {
+              setSlides((prev) => {
+                const updated = prev.map((s) =>
+                  s.id === slide.id
+                    ? {
+                        ...s,
+                        status: 'completed' as const,
+                        imageUrl: resultUrl,
+                        provider: taskData.provider, // 记录使用的提供商
+                        fallbackUsed: taskData.fallbackUsed, // 记录是否使用了托底
+                      }
+                    : s
+                );
+
+                console.log(
+                  `[Debug] Slide ${index} - 状态更新完成:`,
+                  updated.find((s) => s.id === slide.id)
+                );
+
+                return updated;
+              });
+            });
+
+            console.log(`✨ Slide ${index + 1} 已立即渲染到页面！`);
+
             // Update local tracker
             localSlides[index] = {
               ...localSlides[index],
               status: 'completed',
               imageUrl: resultUrl,
             };
+
+            console.log(
+              `[Debug] Slide ${index} - localSlides 更新完成:`,
+              localSlides[index]
+            );
           } else {
+            console.error(
+              `[Debug] Slide ${index} - resultUrl 为空，任务数据:`,
+              taskData
+            );
             throw new Error(t('errors.timeout'));
           }
         } catch (e) {
-          console.error(`Slide ${index} error:`, e);
-          setSlides((prev) =>
-            prev.map((s) =>
-              s.id === slide.id ? { ...s, status: 'failed' } : s
-            )
-          );
+          console.error(`❌ Slide ${index + 1} 生成失败:`, e);
+
+          // 使用 flushSync 立即显示失败状态
+          flushSync(() => {
+            setSlides((prev) =>
+              prev.map((s) =>
+                s.id === slide.id ? { ...s, status: 'failed' } : s
+              )
+            );
+          });
+
           // Update local tracker
           localSlides[index] = { ...localSlides[index], status: 'failed' };
         }
@@ -1027,7 +1184,7 @@ export default function AIPPTPage() {
               }
             }}
           >
-            {/* File Preview */}
+            {/* File Preview - Single File */}
             {uploadedFile && (
               <div className="bg-muted/50 mb-2 flex items-center justify-between rounded-lg border px-4 py-2">
                 <div className="flex items-center gap-2">
@@ -1035,6 +1192,8 @@ export default function AIPPTPage() {
                     <FileText className="h-4 w-4 text-red-500" />
                   ) : uploadedFile.name.endsWith('.docx') ? (
                     <FileText className="h-4 w-4 text-blue-500" />
+                  ) : uploadedFile.type.startsWith('image/') ? (
+                    <Images className="h-4 w-4 text-green-500" />
                   ) : (
                     <FileText className="h-4 w-4 text-gray-500" />
                   )}
@@ -1056,6 +1215,55 @@ export default function AIPPTPage() {
               </div>
             )}
 
+            {/* File Preview - Multiple Images */}
+            {uploadedFiles.length > 0 && (
+              <div className="bg-muted/50 mb-2 rounded-lg border p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Images className="h-4 w-4 text-green-500" />
+                    <span className="text-sm font-medium">
+                      已选择 {uploadedFiles.length} 张图片
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => {
+                      setUploadedFiles([]);
+                      setInputMode('text');
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+                <div className="max-h-[120px] space-y-1 overflow-y-auto">
+                  {uploadedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="hover:bg-muted flex items-center justify-between rounded px-2 py-1"
+                    >
+                      <span className="text-muted-foreground text-xs">
+                        {index + 1}. {file.name}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        onClick={() => {
+                          setUploadedFiles(
+                            uploadedFiles.filter((_, i) => i !== index)
+                          );
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Text Input */}
             <Textarea
               placeholder={
@@ -1067,8 +1275,8 @@ export default function AIPPTPage() {
               value={inputText}
               onChange={(e) => {
                 setInputText(e.target.value);
-                if (uploadedFile) setUploadedFile(null); // Clear file if typing
-                setInputMode('text');
+                // 移除自动清除文件的逻辑，允许用户同时输入文字和上传文件
+                // 用户可以在文本框中添加额外说明，与上传的文件内容结合使用
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -1086,11 +1294,50 @@ export default function AIPPTPage() {
                   type="file"
                   ref={fileInputRef}
                   className="hidden"
-                  accept=".pdf,.docx,.txt,.md"
+                  multiple
+                  accept=".pdf,.docx,.txt,.md,.jpg,.jpeg,.png,.webp,.gif,image/*"
                   onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setUploadedFile(file);
+                    const files = Array.from(e.target.files || []);
+                    if (files.length === 0) return;
+
+                    // 说明：现在支持上传多个任意类型的文件，不仅限于图片
+                    // 这样用户可以一次性上传多个PDF、DOCX、图片等文件
+
+                    if (files.length > 1) {
+                      // 批量文件上传（支持任意类型：图片、PDF、DOCX等）
+                      setUploadedFiles(files);
+                      setUploadedFile(null);
+                      setInputMode('pdf');
+
+                      // 统计文件类型，给用户更友好的提示
+                      const imageCount = files.filter(
+                        (f) =>
+                          f.type.startsWith('image/') ||
+                          /\.(jpg|jpeg|png|webp|gif)$/i.test(f.name)
+                      ).length;
+                      const pdfCount = files.filter((f) =>
+                        f.name.endsWith('.pdf')
+                      ).length;
+                      const docCount = files.filter((f) =>
+                        f.name.endsWith('.docx')
+                      ).length;
+                      const otherCount =
+                        files.length - imageCount - pdfCount - docCount;
+
+                      const typeParts = [];
+                      if (imageCount > 0) typeParts.push(`${imageCount}张图片`);
+                      if (pdfCount > 0) typeParts.push(`${pdfCount}个PDF`);
+                      if (docCount > 0) typeParts.push(`${docCount}个文档`);
+                      if (otherCount > 0)
+                        typeParts.push(`${otherCount}个其他文件`);
+
+                      toast.success(
+                        `已选择 ${files.length} 个文件：${typeParts.join('、')}`
+                      );
+                    } else if (files.length === 1) {
+                      // 单个文件上传
+                      setUploadedFile(files[0]);
+                      setUploadedFiles([]);
                       setInputMode('pdf');
                     }
                   }}
@@ -1209,7 +1456,20 @@ export default function AIPPTPage() {
           ref={logContainerRef}
           className="custom-scrollbar flex-1 overflow-y-auto font-mono text-xs leading-relaxed whitespace-pre-wrap text-green-500/80"
         >
-          {completion || (
+          {isParsingFiles && parsingProgress ? (
+            <div className="space-y-2">
+              <span className="animate-pulse text-yellow-500">
+                📸 {parsingProgress}
+              </span>
+              <div className="text-green-700">
+                ⏳ 正在使用 AI 识别图片中的文字...
+                <br />
+                💡 提示：清晰的图片识别效果更好
+              </div>
+            </div>
+          ) : completion ? (
+            completion
+          ) : (
             <span className="animate-pulse text-green-900">
               Waiting for tokens...
             </span>
@@ -1595,11 +1855,13 @@ export default function AIPPTPage() {
             <div className="p-4">
               {/* 显示提供商信息 */}
               {slide.status === 'completed' && slide.provider && (
-                <div className={`mb-2 rounded-md px-2 py-1 text-[10px] font-medium ${
-                  slide.fallbackUsed 
-                    ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
-                    : 'bg-green-500/10 text-green-600 dark:text-green-400'
-                }`}>
+                <div
+                  className={`mb-2 rounded-md px-2 py-1 text-[10px] font-medium ${
+                    slide.fallbackUsed
+                      ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
+                      : 'bg-green-500/10 text-green-600 dark:text-green-400'
+                  }`}
+                >
                   {slide.fallbackUsed ? '⚠️' : '✅'} {slide.provider}
                   {slide.fallbackUsed && ' (托底服务)'}
                 </div>

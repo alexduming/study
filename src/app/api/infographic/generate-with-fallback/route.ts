@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { AIMediaType, AITaskStatus } from '@/extensions/ai';
+import { createAITaskRecordOnly } from '@/shared/models/ai_task';
 import { getAllConfigs } from '@/shared/models/config';
 import { consumeCredits, getRemainingCredits } from '@/shared/models/credit';
 import { getUserInfo } from '@/shared/models/user';
@@ -12,14 +14,12 @@ export const runtime = 'nodejs';
  *
  * 非程序员解释：
  * - 这个接口实现了"托底服务"功能
- * - 首先尝试使用KIE生成图片
- * - 如果KIE失败或不稳定，自动切换到Replicate
- * - 如果Replicate也失败，尝试Together AI
- * - 如果Together AI也失败，最后尝试Novita AI
+ * - 首先尝试使用 Replicate (google/nano-banana-pro) 生成图片（主力）
+ * - 如果 Replicate 失败或不稳定，自动切换到 KIE（托底）
  * - 这样可以大大提高生成成功率
  *
  * 降级策略：
- * KIE (主服务) → Replicate (托底1) → Together AI (托底2) → Novita AI (托底3)
+ * Replicate (主服务) → KIE (托底服务)
  */
 
 const KIE_BASE_URL = 'https://api.kie.ai/api/v1';
@@ -89,7 +89,7 @@ async function tryGenerateWithKie(
 }
 
 /**
- * 尝试使用Replicate生成（FLUX模型）
+ * 尝试使用Replicate生成（google/nano-banana-pro模型）
  */
 async function tryGenerateWithReplicate(
   params: GenerateParams,
@@ -101,48 +101,136 @@ async function tryGenerateWithReplicate(
   error?: string;
 }> {
   try {
-    console.log('🔄 尝试使用 Replicate (FLUX) 生成...');
+    console.log('🔄 尝试使用 Replicate (google/nano-banana-pro) 生成...');
 
-    const prompt = `Educational infographic, flat vector style: ${params.content}`;
+    const prompt = `Create an educational infographic explaining the provided file or text. You select some typical visual elements. Style: Flat vector. Labels in the language the same as provided information.\n\nContent:\n${params.content}`;
 
-    // 解析分辨率
-    let width = 1024;
-    let height = 1024;
-    if (params.aspectRatio) {
-      const [w, h] = params.aspectRatio.split(':').map(Number);
-      if (params.resolution === '2K') {
-        const scale = 2048 / Math.max(w, h);
-        width = Math.round(w * scale);
-        height = Math.round(h * scale);
-      } else if (params.resolution === '4K') {
-        const scale = 4096 / Math.max(w, h);
-        width = Math.round(w * scale);
-        height = Math.round(h * scale);
-      } else {
-        const scale = 1024 / Math.max(w, h);
-        width = Math.round(w * scale);
-        height = Math.round(h * scale);
-      }
-    }
-
-    const Replicate = require('replicate').default;
+    const Replicate = require('replicate');
     const replicate = new Replicate({ auth: apiToken });
 
-    const output = await replicate.run('black-forest-labs/flux-schnell', {
+    // google/nano-banana-pro 的参数结构（与 KIE 类似）
+    const input: any = {
+      prompt,
+      aspect_ratio: params.aspectRatio || '1:1',
+      resolution: params.resolution || '1K', // 1K/2K/4K
+      output_format: params.outputFormat || 'png',
+    };
+
+    console.log('[Replicate] 请求参数:', {
+      model: 'google/nano-banana-pro',
       input: {
-        prompt,
-        width,
-        height,
-        num_outputs: 1,
+        ...input,
+        prompt: input.prompt.substring(0, 100) + '...',
       },
     });
 
-    console.log('✅ Replicate 生成成功');
+    // 使用 run() 并等待完成
+    let output = await replicate.run('google/nano-banana-pro', {
+      input,
+      wait: { interval: 2000 },
+    });
+
+    console.log('[Replicate] 原始输出类型:', typeof output);
+
+    // 处理各种可能的输出格式
+    let imageUrls: string[];
+
+    if (typeof output === 'string') {
+      imageUrls = [output];
+    } else if (Array.isArray(output)) {
+      console.log('[Replicate] 输出是数组，第一项类型:', typeof output[0]);
+
+      // 处理数组中的 FileOutput 对象
+      imageUrls = await Promise.all(
+        output.map(async (item: any) => {
+          if (item && typeof item === 'object' && 'url' in item) {
+            const urlValue = item.url;
+            if (typeof urlValue === 'function') {
+              console.log('[Replicate] 数组项.url 是函数，正在调用...');
+              const result = await urlValue();
+
+              // 如果返回的是 URL 对象，需要转换为字符串
+              if (result && typeof result === 'object' && 'href' in result) {
+                console.log('[Replicate] 从 URL 对象提取 href');
+                return result.href;
+              }
+              return typeof result === 'string' ? result : String(result);
+            }
+            return urlValue;
+          }
+          return item;
+        })
+      );
+    } else if (output && typeof output === 'object') {
+      // 如果是 ReadableStream，需要读取内容
+      if (
+        'readable' in output ||
+        output.constructor.name === 'ReadableStream'
+      ) {
+        console.log('[Replicate] 检测到 ReadableStream，正在读取...');
+        const reader = (output as any).getReader();
+        const chunks: any[] = [];
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+
+        const blob = new Blob(chunks as BlobPart[]);
+        const text = await blob.text();
+
+        try {
+          const parsed = JSON.parse(text);
+          imageUrls = Array.isArray(parsed) ? parsed : [parsed.url || parsed];
+        } catch {
+          imageUrls = [text.trim()];
+        }
+      } else if ('url' in output) {
+        const urlValue = (output as any).url;
+        console.log('[Replicate] url 类型:', typeof urlValue);
+
+        // Replicate SDK 的 FileOutput 类型，url 可能是函数
+        if (typeof urlValue === 'function') {
+          console.log('[Replicate] url 是函数，正在调用...');
+          const result = await urlValue();
+          console.log('[Replicate] 函数返回值类型:', typeof result);
+          console.log('[Replicate] 函数返回值:', result);
+
+          // 如果返回的是 URL 对象，需要转换为字符串
+          if (result && typeof result === 'object' && 'href' in result) {
+            console.log('[Replicate] 从 URL 对象提取 href:', result.href);
+            imageUrls = [result.href];
+          } else if (typeof result === 'string') {
+            imageUrls = [result];
+          } else {
+            imageUrls = [String(result)];
+          }
+        } else {
+          imageUrls = [urlValue];
+        }
+      } else {
+        imageUrls = [String(output)];
+      }
+    } else {
+      throw new Error('Replicate 返回了无法解析的结果格式');
+    }
+
+    if (
+      !imageUrls ||
+      imageUrls.length === 0 ||
+      !imageUrls[0].startsWith('http')
+    ) {
+      console.error('[Replicate] 无效的图片 URL:', imageUrls);
+      throw new Error('Replicate 返回了无效的图片 URL');
+    }
+
+    console.log('✅ Replicate 生成成功:', imageUrls);
 
     return {
       success: true,
       taskId: `replicate-${Date.now()}`,
-      imageUrls: Array.isArray(output) ? output : [output],
+      imageUrls,
     };
   } catch (error: any) {
     console.warn('⚠️ Replicate 异常:', error.message);
@@ -384,14 +472,8 @@ export async function POST(request: NextRequest) {
       outputFormat,
     };
 
-    // 降级策略：依次尝试各个提供商
+    // 降级策略：依次尝试各个提供商（Replicate 主力 → KIE 托底）
     const providers = [
-      {
-        name: 'KIE',
-        key: configs.kie_api_key,
-        envKey: process.env.KIE_NANO_BANANA_PRO_KEY,
-        fn: tryGenerateWithKie,
-      },
       {
         name: 'Replicate',
         key: configs.replicate_api_token,
@@ -399,16 +481,10 @@ export async function POST(request: NextRequest) {
         fn: tryGenerateWithReplicate,
       },
       {
-        name: 'Together AI',
-        key: configs.together_api_key,
-        envKey: process.env.TOGETHER_API_KEY,
-        fn: tryGenerateWithTogether,
-      },
-      {
-        name: 'Novita AI',
-        key: configs.novita_api_key,
-        envKey: process.env.NOVITA_API_KEY,
-        fn: tryGenerateWithNovita,
+        name: 'KIE',
+        key: configs.kie_api_key,
+        envKey: process.env.KIE_NANO_BANANA_PRO_KEY,
+        fn: tryGenerateWithKie,
       },
     ];
 
@@ -428,6 +504,65 @@ export async function POST(request: NextRequest) {
 
       if (result.success) {
         console.log(`✅ ${provider.name} 生成成功！`);
+
+        // --- 记录到通用 AI 任务表（ai_task），方便在 /activity/infographics 里统一展示 ---
+        // 非程序员解释：
+        // - 这里不会再次扣积分（上面已经调用过 consumeCredits），只是在 ai_task 这张“任务流水表”里记一笔
+        // - 以后不管是 Infographic、PPT 还是别的图片任务，都可以用一套通用的历史列表组件来查看
+        try {
+          // 简单归一化一下"模型名称"，方便后续筛选/统计（只是记录用途，不影响实际调用）
+          const modelName =
+            provider.name === 'KIE'
+              ? 'nano-banana-pro'
+              : provider.name === 'Replicate'
+                ? 'google/nano-banana-pro'
+                : 'unknown';
+
+          // 如果已经直接拿到了图片 URL（同步接口），可以直接把结果标记为 SUCCESS；
+          // 如果只是拿到了 taskId（异步接口），先记录为 PENDING，后续有需要再扩展为回调/轮询更新。
+          const hasImages =
+            Array.isArray(result.imageUrls) && result.imageUrls.length > 0;
+          const taskStatus = hasImages
+            ? AITaskStatus.SUCCESS
+            : AITaskStatus.PENDING;
+
+          await createAITaskRecordOnly({
+            // 必填字段：谁、什么类型、用哪个提供商
+            userId: user.id,
+            mediaType: AIMediaType.IMAGE,
+            provider: provider.name,
+            model: modelName,
+            // 为了避免把整篇原文塞进表里，这里只存一个简要描述；
+            // 真正的全文内容依然只保留在前端/你的原始文件里。
+            prompt: `Infographic from study content (len=${content.length})`,
+            options: JSON.stringify({
+              aspectRatio,
+              resolution,
+              outputFormat,
+            }),
+            scene: 'ai_infographic',
+            costCredits: requiredCredits,
+            status: taskStatus,
+            taskId: result.taskId || null,
+            taskInfo: hasImages
+              ? JSON.stringify({
+                  status: 'SUCCESS',
+                })
+              : null,
+            taskResult:
+              hasImages && result.imageUrls
+                ? JSON.stringify({
+                    imageUrls: result.imageUrls,
+                  })
+                : null,
+          });
+        } catch (logError) {
+          // 记录历史失败不影响用户正常使用，只打印日志方便排查
+          console.error(
+            '[Infographic] Failed to create ai_task record:',
+            logError
+          );
+        }
 
         return NextResponse.json({
           success: true,

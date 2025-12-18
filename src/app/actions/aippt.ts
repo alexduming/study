@@ -5,11 +5,13 @@ import pdf from 'pdf-parse';
 
 import { PPT_STYLES } from '@/config/aippt';
 
-const KIE_API_KEY =
-  process.env.KIE_NANO_BANANA_PRO_KEY || '75a2809b76cfae9675cbdddd1af5f488';
+// 移除硬编码的 API Key，强制使用环境变量
+const KIE_API_KEY = process.env.KIE_NANO_BANANA_PRO_KEY || '';
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN || '';
 // 使用 DeepSeek 官方 Key（从环境变量读取，避免明文暴露）
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
+// 使用 OpenRouter API Key（用于视觉 OCR）
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 // 资源的基础 URL
 // 优先使用 R2 域名，其次是 App URL，最后是生产环境域名
@@ -43,7 +45,259 @@ function resolveImageUrl(url: string): string {
 }
 
 /**
- * Parse File (PDF/DOCX/TXT) to Text
+ * Parse Image to Text using Vision AI (OCR)
+ * 非程序员解释：
+ * - 这个函数使用视觉AI模型（Google Gemini Pro Vision）来识别图片中的文字
+ * - 比传统OCR更智能，能理解文字的上下文和排版结构
+ * - 支持 JPG、PNG、WEBP 等常见图片格式
+ */
+export async function parseImageAction(formData: FormData): Promise<string> {
+  const file = formData.get('file') as File;
+  if (!file) {
+    throw new Error('No file uploaded');
+  }
+
+  // 检查 API Key
+  if (!OPENROUTER_API_KEY) {
+    throw new Error('OpenRouter API Key 未配置，图片 OCR 功能需要此密钥');
+  }
+
+  try {
+    // 将图片转换为 base64
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const base64Image = buffer.toString('base64');
+    const mimeType = file.type || 'image/jpeg';
+
+    // 构建 data URL 格式
+    const imageDataUrl = `data:${mimeType};base64,${base64Image}`;
+
+    console.log('[OCR] 开始识别图片文字，使用 Qwen2.5 VL 32B...');
+    console.log('[OCR] 图片大小:', (buffer.length / 1024).toFixed(2), 'KB');
+
+    // 使用 OpenRouter 的 Qwen2.5 VL 32B Instruct 进行 OCR
+    // Qwen2.5-VL-32B 专门优化用于视觉分析，价格便宜且效果好
+    const response = await fetch(
+      'https://openrouter.ai/api/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          'HTTP-Referer':
+            process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+          'X-Title': 'StudyHacks AI PPT Generator',
+        },
+        body: JSON.stringify({
+          model: 'qwen/qwen2.5-vl-32b-instruct', // 使用 Qwen2.5 VL 32B Instruct 模型
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Extract all text content from this image. Preserve the original text structure, formatting, and language. Output only the extracted text without any additional comments, explanations, or formatting.',
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: imageDataUrl,
+                  },
+                },
+              ],
+            },
+          ],
+          temperature: 0.1, // 低温度确保准确性
+          max_tokens: 4000,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[OCR] OpenRouter API Error:', response.status, errorText);
+
+      // 提供更详细的错误信息
+      if (response.status === 401) {
+        throw new Error('API 密钥无效或未授权');
+      } else if (response.status === 429) {
+        throw new Error('API 请求频率限制，请稍后重试');
+      } else {
+        throw new Error(`API 调用失败 (${response.status})`);
+      }
+    }
+
+    const data = await response.json();
+
+    // 检查响应格式
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('[OCR] 无效的 API 响应:', data);
+      throw new Error('API 返回了无效的响应格式');
+    }
+
+    const extractedText = data.choices[0].message.content;
+
+    if (!extractedText || extractedText.trim().length === 0) {
+      console.warn('[OCR] 图片中未识别到文字');
+      return '（未识别到文字内容）';
+    }
+
+    console.log(
+      '[OCR] 图片文字识别成功，提取了',
+      extractedText.length,
+      '个字符'
+    );
+
+    return extractedText.trim();
+  } catch (error: any) {
+    console.error('[OCR] 图片解析错误:', error);
+
+    // 提供更友好的错误信息
+    if (error.message.includes('API 密钥')) {
+      throw new Error('API 密钥配置错误，请检查 OPENROUTER_API_KEY 环境变量');
+    } else if (error.message.includes('网络')) {
+      throw new Error('网络连接失败，请检查网络连接后重试');
+    } else {
+      throw new Error('图片文字识别失败：' + (error.message || '未知错误'));
+    }
+  }
+}
+
+/**
+ * Parse Multiple Images to Text (Batch OCR)
+ * 非程序员解释：
+ * - 这个函数支持批量识别多张图片中的文字
+ * - 并行处理多张图片，提高效率
+ * - 自动合并所有识别结果
+ */
+export async function parseMultipleImagesAction(
+  formData: FormData
+): Promise<string> {
+  const files = formData.getAll('files') as File[];
+  if (!files || files.length === 0) {
+    throw new Error('No files uploaded');
+  }
+
+  console.log(`[Batch OCR] 开始批量识别 ${files.length} 张图片...`);
+
+  try {
+    // 并行处理所有图片
+    const results = await Promise.all(
+      files.map(async (file, index) => {
+        try {
+          console.log(
+            `[Batch OCR] 正在识别第 ${index + 1}/${files.length} 张图片: ${file.name}`
+          );
+
+          // 为每个文件创建单独的 FormData
+          const singleFormData = new FormData();
+          singleFormData.append('file', file);
+
+          // 调用单图片 OCR
+          const text = await parseImageAction(singleFormData);
+
+          console.log(
+            `[Batch OCR] 第 ${index + 1} 张图片识别成功，提取了 ${text.length} 个字符`
+          );
+
+          return {
+            success: true,
+            fileName: file.name,
+            text: text,
+            index: index,
+          };
+        } catch (error: any) {
+          console.error(
+            `[Batch OCR] 第 ${index + 1} 张图片识别失败:`,
+            error.message
+          );
+          return {
+            success: false,
+            fileName: file.name,
+            error: error.message,
+            index: index,
+          };
+        }
+      })
+    );
+
+    // 统计成功和失败数量
+    const successCount = results.filter((r) => r.success).length;
+    const failedCount = results.filter((r) => !r.success).length;
+
+    console.log(
+      `[Batch OCR] 批量识别完成: 成功 ${successCount}/${files.length}, 失败 ${failedCount}`
+    );
+
+    // 如果所有图片都失败了，提供详细的错误信息
+    if (successCount === 0) {
+      const failedDetails = results
+        .filter((r) => !r.success)
+        .map((r) => `${r.fileName}: ${r.error}`)
+        .join('\n');
+
+      console.error('[Batch OCR] 所有图片识别失败，详细信息:');
+      console.error(failedDetails);
+
+      // 检查常见错误类型
+      const hasApiKeyError = results.some(
+        (r) => r.error && r.error.includes('API 密钥')
+      );
+      const hasNetworkError = results.some(
+        (r) =>
+          r.error && (r.error.includes('网络') || r.error.includes('fetch'))
+      );
+
+      if (hasApiKeyError) {
+        throw new Error(
+          '图片识别失败：OpenRouter API 密钥未配置或无效。请检查环境变量 OPENROUTER_API_KEY'
+        );
+      } else if (hasNetworkError) {
+        throw new Error('图片识别失败：网络连接错误。请检查网络连接或稍后重试');
+      } else {
+        throw new Error(
+          `所有图片识别都失败了。常见原因：\n1. API 密钥未配置\n2. 图片格式不支持\n3. 图片过大或损坏\n4. 网络问题\n\n详细错误：${results[0].error}`
+        );
+      }
+    }
+
+    // 合并所有成功识别的文字
+    const combinedText = results
+      .filter((r) => r.success)
+      .map((r, idx) => {
+        // 为每张图片的内容添加分隔符
+        const separator = idx === 0 ? '' : '\n\n---\n\n';
+        return `${separator}[图片 ${r.index + 1}: ${r.fileName}]\n${r.text}`;
+      })
+      .join('');
+
+    // 如果有失败的，在结果中提示
+    if (failedCount > 0) {
+      const failedFiles = results
+        .filter((r) => !r.success)
+        .map((r) => r.fileName)
+        .join(', ');
+      console.warn(`[Batch OCR] 以下图片识别失败: ${failedFiles}`);
+
+      // 在合并的文本末尾添加提示
+      return (
+        combinedText.trim() +
+        `\n\n[注意：${failedCount} 张图片识别失败: ${failedFiles}]`
+      );
+    }
+
+    return combinedText.trim();
+  } catch (error: any) {
+    console.error('[Batch OCR] 批量识别错误:', error);
+    throw error; // 直接抛出错误，保留详细信息
+  }
+}
+
+/**
+ * Parse File (PDF/DOCX/TXT/Image) to Text
+ * 非程序员解释：
+ * - 这个函数现在支持更多文件格式，包括图片
+ * - 会自动识别文件类型并使用对应的解析方法
+ * - 图片文件会使用 AI 视觉模型进行 OCR 识别
  */
 export async function parseFileAction(formData: FormData) {
   const file = formData.get('file') as File;
@@ -58,7 +312,20 @@ export async function parseFileAction(formData: FormData) {
 
     let extractedText = '';
 
-    if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
+    // 检查是否为图片文件
+    const isImage =
+      fileType.startsWith('image/') ||
+      fileName.endsWith('.jpg') ||
+      fileName.endsWith('.jpeg') ||
+      fileName.endsWith('.png') ||
+      fileName.endsWith('.webp') ||
+      fileName.endsWith('.gif');
+
+    if (isImage) {
+      // 使用 AI OCR 识别图片中的文字
+      console.log('[Parse] 检测到图片文件，使用 OCR 识别...');
+      extractedText = await parseImageAction(formData);
+    } else if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
       const data = await pdf(buffer);
       extractedText = data.text;
     } else if (
@@ -75,7 +342,9 @@ export async function parseFileAction(formData: FormData) {
     ) {
       extractedText = buffer.toString('utf-8');
     } else {
-      throw new Error('Unsupported file type');
+      throw new Error(
+        'Unsupported file type. Please upload PDF, DOCX, TXT, or Image files.'
+      );
     }
 
     // Basic cleaning
@@ -103,12 +372,12 @@ The output must be a valid JSON object with the following structure:
 {
   "title": "Presentation Title",
   "slides": [
-    {
-      "title": "Slide Title",
+  {
+    "title": "Slide Title",
       "content": "Key bullet points (max 50 words)",
       "visualDescription": "Description of the visual/image for this slide"
-    }
-  ]
+  }
+]
 }
 Generate exactly ${slideCount} slides.
 Ensure the content is concise, professional, and suitable for a presentation.
@@ -295,12 +564,12 @@ export async function queryKieTaskAction(taskId: string) {
 }
 
 /**
- * Create Image Generation Task with Fallback (KIE → Replicate)
+ * Create Image Generation Task with Load Balancing (真正的负载均衡)
  *
  * 非程序员解释：
- * - 这个函数实现了托底逻辑：首先尝试用KIE生成PPT图片
- * - 如果KIE失败，自动切换到Replicate
- * - 返回结果中包含使用的提供商信息
+ * - 这个函数实现了真正的负载均衡：强制使用指定的提供商
+ * - 只有在指定提供商失败时，才会自动切换到备用提供商
+ * - 这样可以实现 50% 任务给 Replicate，50% 任务给 KIE
  */
 export async function createKieTaskWithFallbackAction(params: {
   prompt: string;
@@ -308,22 +577,45 @@ export async function createKieTaskWithFallbackAction(params: {
   aspectRatio?: string;
   imageSize?: string;
   customImages?: string[];
+  preferredProvider?: 'Replicate' | 'KIE'; // 首选提供商（强制优先使用）
 }) {
-  console.log('\n🎯 PPT生成 - 开始尝试多提供商生成');
+  const { preferredProvider = 'Replicate', ...taskParams } = params;
 
   // 预处理图片 URL，确保对所有提供商都是公网可访问的
   const processedParams = {
-    ...params,
-    customImages: (params.customImages || []).map(resolveImageUrl),
+    ...taskParams,
+    customImages: (taskParams.customImages || []).map(resolveImageUrl),
   };
 
-  // 第一步：尝试使用KIE
-  if (KIE_API_KEY) {
-    try {
-      console.log('🔄 尝试使用 KIE (nano-banana-pro)...');
-      // 注意：createKieTaskAction 内部也会处理 URL，但这里为了日志清晰，我们可以认为它已经接收到了处理过的参数
-      // 但为了兼容性，createKieTaskAction 内部保留了 URL 处理逻辑
-      const result = await createKieTaskAction(params);
+  // 🎯 强制使用指定提供商（实现真正的负载均衡）
+  const primaryProvider = preferredProvider;
+  const fallbackProvider =
+    preferredProvider === 'Replicate' ? 'KIE' : 'Replicate';
+
+  console.log(
+    `\n🎯 负载均衡 - 强制使用: ${primaryProvider}，备用: ${fallbackProvider}`
+  );
+
+  // 1️⃣ 先尝试强制使用指定的提供商
+  try {
+    if (primaryProvider === 'Replicate') {
+      if (!REPLICATE_API_TOKEN) {
+        throw new Error('Replicate API Token 未配置');
+      }
+      console.log(`🔄 [负载均衡] 使用 Replicate (google/nano-banana-pro)...`);
+      const result = await createReplicateTaskAction(processedParams);
+      console.log('✅ Replicate 任务创建成功');
+      return {
+        ...result,
+        fallbackUsed: false,
+      };
+    } else {
+      // KIE
+      if (!KIE_API_KEY) {
+        throw new Error('KIE API Key 未配置');
+      }
+      console.log(`🔄 [负载均衡] 使用 KIE (nano-banana-pro)...`);
+      const result = await createKieTaskAction(processedParams);
       console.log('✅ KIE 任务创建成功:', result.task_id);
       return {
         success: true,
@@ -331,109 +623,310 @@ export async function createKieTaskWithFallbackAction(params: {
         provider: 'KIE',
         fallbackUsed: false,
       };
-    } catch (error: any) {
-      console.warn('⚠️ KIE 失败:', error.message);
-      console.log('🔄 准备切换到 Replicate 托底服务...');
     }
-  } else {
-    console.log('⏭️ 跳过 KIE（未配置API Key）');
-  }
+  } catch (primaryError: any) {
+    console.warn(`⚠️ ${primaryProvider} 失败:`, primaryError.message);
+    console.log(`🔄 自动切换到备用提供商 ${fallbackProvider}...`);
 
-  // 第二步：使用Replicate托底
-  if (REPLICATE_API_TOKEN) {
+    // 2️⃣ 如果指定提供商失败，才使用备用提供商
     try {
-      console.log('🔄 尝试使用 Replicate (FLUX)...');
-
-      // 处理样式
-      let styleSuffix = '';
-      if (params.styleId) {
-        const style = PPT_STYLES.find((s) => s.id === params.styleId);
-        if (style) {
-          styleSuffix = style.suffix;
+      if (fallbackProvider === 'Replicate') {
+        if (!REPLICATE_API_TOKEN) {
+          throw new Error('Replicate API Token 未配置');
         }
-      }
-
-      let finalPrompt = params.prompt + ' ' + styleSuffix;
-
-      // 如果有参考图片，添加风格指导
-      const referenceImages = processedParams.customImages;
-      if (referenceImages && referenceImages.length > 0) {
-        finalPrompt +=
-          ' (Style Reference: Strictly follow the visual style, color palette, and composition from the provided input image)';
-        console.log(
-          `[Replicate] 使用 ${referenceImages.length} 张参考图:`,
-          referenceImages
-        );
-      }
-
-      // 解析分辨率
-      const imageSize = params.imageSize || '4K';
-      let width = 1024;
-      let height = 1024;
-
-      if (params.aspectRatio) {
-        const [w, h] = params.aspectRatio.split(':').map(Number);
-        if (imageSize === '4K') {
-          const scale = 4096 / Math.max(w, h);
-          width = Math.round(w * scale);
-          height = Math.round(h * scale);
-        } else if (imageSize === '2K') {
-          const scale = 2048 / Math.max(w, h);
-          width = Math.round(w * scale);
-          height = Math.round(h * scale);
-        } else {
-          const scale = 1024 / Math.max(w, h);
-          width = Math.round(w * scale);
-          height = Math.round(h * scale);
+        console.log(`🔄 [托底] 使用 Replicate (google/nano-banana-pro)...`);
+        const result = await createReplicateTaskAction(processedParams);
+        console.log('✅ Replicate 托底成功');
+        return {
+          ...result,
+          fallbackUsed: true, // 标记使用了托底
+        };
+      } else {
+        // KIE
+        if (!KIE_API_KEY) {
+          throw new Error('KIE API Key 未配置');
         }
+        console.log(`🔄 [托底] 使用 KIE (nano-banana-pro)...`);
+        const result = await createKieTaskAction(processedParams);
+        console.log('✅ KIE 托底成功:', result.task_id);
+        return {
+          success: true,
+          task_id: result.task_id,
+          provider: 'KIE',
+          fallbackUsed: true, // 标记使用了托底
+        };
       }
-
-      // 调用Replicate API
-      const Replicate = require('replicate').default;
-      const replicate = new Replicate({ auth: REPLICATE_API_TOKEN });
-
-      // Replicate 的输入参数可能不支持 image_input 数组，通常支持 image (单张) 或其他特定参数
-      // FLUX 模型通常主要依赖 prompt。如果必须使用参考图，需要确认模型是否支持 image-to-image 或 controlnet
-      // black-forest-labs/flux-schnell 主要是 text-to-image。
-      // 为了安全起见，我们主要依赖 prompt，但如果模型支持图片输入，我们可以尝试传入第一张
-      // 这里我们主要依赖详细的 prompt 来控制风格
-
-      const input: any = {
-        prompt: finalPrompt,
-        width,
-        height,
-        num_outputs: 1,
-        // disable_safety_checker: true,
-      };
-
-      // 只有当模型明确支持参考图时才传入。目前 flux-schnell 主要是文生图。
-      // 如果需要图生图，可能需要切换模型。暂时只用 prompt。
-
-      const output = await replicate.run('black-forest-labs/flux-schnell', {
-        input,
-      });
-
-      const imageUrl = Array.isArray(output) ? output[0] : output;
-
-      console.log('✅ Replicate 生成成功');
-
-      // 返回类似KIE的格式，但标记为同步结果
-      return {
-        success: true,
-        task_id: `replicate-${Date.now()}`,
-        provider: 'Replicate',
-        fallbackUsed: true,
-        imageUrl, // 直接返回图片URL（同步结果）
-      };
-    } catch (error: any) {
-      console.error('❌ Replicate 失败:', error.message);
+    } catch (fallbackError: any) {
+      console.error(
+        `❌ 备用提供商 ${fallbackProvider} 也失败:`,
+        fallbackError.message
+      );
+      throw new Error(
+        `所有图片生成服务都暂时不可用: ${primaryProvider} 和 ${fallbackProvider} 均失败`
+      );
     }
-  } else {
+  }
+}
+
+/**
+ * Force Create Replicate Task (使用 google/nano-banana-pro)
+ *
+ * 非程序员解释：
+ * - 这个函数强制使用 Replicate 的 google/nano-banana-pro 模型生成图片
+ * - 支持 1K/2K/4K 分辨率和多图参考（最多8张）
+ * - 用于主力生成或 KIE 超时/失败时的直接调用
+ */
+export async function createReplicateTaskAction(params: {
+  prompt: string;
+  styleId?: string;
+  aspectRatio?: string;
+  imageSize?: string;
+  customImages?: string[];
+}) {
+  if (!REPLICATE_API_TOKEN) {
     console.log('⏭️ 跳过 Replicate（未配置API Token）');
+    throw new Error('Replicate API Token 未配置');
   }
 
-  // 所有服务都失败
-  throw new Error('所有图片生成服务都暂时不可用，请稍后重试');
+  try {
+    console.log('🔄 尝试使用 Replicate (google/nano-banana-pro)...');
+
+    // 预处理图片 URL
+    const processedParams = {
+      ...params,
+      customImages: (params.customImages || []).map(resolveImageUrl),
+    };
+
+    // 处理样式
+    let styleSuffix = '';
+    if (params.styleId) {
+      const style = PPT_STYLES.find((s) => s.id === params.styleId);
+      if (style) {
+        styleSuffix = style.suffix;
+      }
+    }
+
+    let finalPrompt = params.prompt + ' ' + styleSuffix;
+
+    // 处理参考图片
+    const referenceImages = processedParams.customImages || [];
+    if (referenceImages.length > 0) {
+      // nano-banana-pro 支持多图融合，最多8张
+      const limitedImages = referenceImages.slice(0, 8);
+      finalPrompt +=
+        ' (Style Reference: Strictly follow the visual style, color palette, and composition from the provided input images)';
+      console.log(
+        `[Replicate] 使用 ${limitedImages.length} 张参考图:`,
+        limitedImages
+      );
+    }
+
+    // 调用 Replicate API
+    const Replicate = require('replicate');
+    const replicate = new Replicate({ auth: REPLICATE_API_TOKEN });
+
+    // google/nano-banana-pro 的参数结构（与 KIE 类似）
+    const input: any = {
+      prompt: finalPrompt,
+      aspect_ratio: params.aspectRatio || '16:9',
+      resolution: params.imageSize || '4K', // 1K/2K/4K
+      output_format: 'png',
+    };
+
+    // 如果有参考图，传入 image_input（nano-banana-pro 支持多图融合）
+    if (referenceImages.length > 0) {
+      input.image_input = referenceImages.slice(0, 8); // 最多8张
+    }
+
+    console.log('[Replicate] 请求参数:', {
+      model: 'google/nano-banana-pro',
+      input: {
+        ...input,
+        prompt: input.prompt.substring(0, 100) + '...', // 只显示部分prompt
+      },
+    });
+
+    // 使用 run() 并等待完成
+    // run() 会自动处理轮询，直到任务完成
+    console.log('[Replicate] 开始调用 API...');
+
+    const startTime = Date.now();
+    let output = await replicate.run('google/nano-banana-pro', {
+      input,
+      wait: { interval: 2000 }, // 每 2 秒检查一次状态
+    });
+
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    console.log(`[Replicate] API 调用完成，耗时: ${elapsed}s`);
+    console.log('[Replicate] 原始输出类型:', typeof output);
+    console.log(
+      '[Replicate] 原始输出:',
+      typeof output === 'string'
+        ? output
+        : JSON.stringify(output).substring(0, 200)
+    );
+
+    // 处理各种可能的输出格式
+    let imageUrl: string;
+
+    if (typeof output === 'string') {
+      console.log('[Replicate] ✓ 输出是字符串类型，长度:', output.length);
+      imageUrl = output;
+    } else if (Array.isArray(output)) {
+      console.log(
+        '[Replicate] ✓ 输出是数组，长度:',
+        output.length,
+        ', 第一项类型:',
+        typeof output[0]
+      );
+
+      const firstItem = output[0];
+
+      // 如果数组第一项是对象且有 url 属性（FileOutput）
+      if (firstItem && typeof firstItem === 'object' && 'url' in firstItem) {
+        const urlValue = (firstItem as any).url;
+        console.log('[Replicate] 数组第一项.url 类型:', typeof urlValue);
+
+        if (typeof urlValue === 'function') {
+          console.log('[Replicate] url 是函数，正在调用...');
+          const result = await urlValue();
+          console.log('[Replicate] 函数返回值类型:', typeof result);
+          console.log('[Replicate] 函数返回值:', result);
+
+          // 如果返回的是 URL 对象，需要转换为字符串
+          if (result && typeof result === 'object' && 'href' in result) {
+            imageUrl = result.href; // URL 对象的 href 属性是字符串
+            console.log('[Replicate] 从 URL 对象提取 href:', imageUrl);
+          } else if (typeof result === 'string') {
+            imageUrl = result;
+          } else {
+            imageUrl = String(result); // 强制转换为字符串
+          }
+        } else {
+          imageUrl = urlValue;
+        }
+      } else {
+        // 直接使用第一项（假设是字符串）
+        imageUrl = firstItem;
+      }
+    } else if (output && typeof output === 'object') {
+      console.log(
+        '[Replicate] ✓ 输出是对象，属性:',
+        Object.keys(output).slice(0, 10)
+      );
+      console.log('[Replicate] ✓ Constructor name:', output.constructor?.name);
+
+      // 如果是 ReadableStream，需要读取内容
+      if (
+        'readable' in output ||
+        output.constructor?.name === 'ReadableStream'
+      ) {
+        console.log('[Replicate] 检测到 ReadableStream，正在读取...');
+        const reader = (output as any).getReader();
+        const chunks: any[] = [];
+        let chunkCount = 0;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            console.log(`[Replicate] Stream 读取完成，共 ${chunkCount} 块数据`);
+            break;
+          }
+          chunks.push(value);
+          chunkCount++;
+          if (chunkCount % 10 === 0) {
+            console.log(`[Replicate] 已读取 ${chunkCount} 块...`);
+          }
+        }
+
+        // 将 chunks 合并并转换为字符串
+        const blob = new Blob(chunks as BlobPart[]);
+        const text = await blob.text();
+
+        console.log(
+          `[Replicate] Stream 内容长度: ${text.length}, 前100字符:`,
+          text.substring(0, 100)
+        );
+
+        try {
+          // 尝试解析为 JSON
+          const parsed = JSON.parse(text);
+          console.log('[Replicate] JSON 解析成功:', typeof parsed);
+          imageUrl = Array.isArray(parsed) ? parsed[0] : parsed.url || parsed;
+        } catch (e) {
+          // 如果不是 JSON，直接使用文本
+          console.log('[Replicate] 不是 JSON，直接使用文本');
+          imageUrl = text.trim();
+        }
+      } else if ('url' in output) {
+        console.log('[Replicate] ✓ 对象包含 url 属性');
+        const urlValue = (output as any).url;
+        console.log('[Replicate] url 类型:', typeof urlValue);
+
+        // Replicate SDK 的 FileOutput 类型，url 可能是函数
+        if (typeof urlValue === 'function') {
+          console.log('[Replicate] url 是函数，正在调用...');
+          const result = await urlValue(); // 调用函数获取实际 URL
+          console.log('[Replicate] 函数返回值类型:', typeof result);
+          console.log('[Replicate] 函数返回值:', result);
+
+          // 如果返回的是 URL 对象，需要转换为字符串
+          if (result && typeof result === 'object' && 'href' in result) {
+            imageUrl = result.href; // URL 对象的 href 属性是字符串
+            console.log('[Replicate] 从 URL 对象提取 href:', imageUrl);
+          } else if (typeof result === 'string') {
+            imageUrl = result;
+          } else {
+            imageUrl = String(result); // 强制转换为字符串
+            console.log('[Replicate] 强制转换为字符串:', imageUrl);
+          }
+        } else {
+          imageUrl = urlValue;
+        }
+      } else if ('output' in output) {
+        console.log('[Replicate] ✓ 对象包含 output 属性');
+        const innerOutput = (output as any).output;
+        imageUrl = Array.isArray(innerOutput) ? innerOutput[0] : innerOutput;
+      } else {
+        console.warn('[Replicate] ⚠ 未识别的对象格式，转为字符串');
+        imageUrl = String(output);
+      }
+    } else {
+      console.error('[Replicate] ✗ 完全无法解析的输出类型');
+      throw new Error('Replicate 返回了无法解析的结果格式');
+    }
+
+    if (
+      !imageUrl ||
+      typeof imageUrl !== 'string' ||
+      !imageUrl.startsWith('http')
+    ) {
+      console.error('[Replicate] ✗ 无效的图片 URL:', imageUrl);
+      console.error('[Replicate] ✗ imageUrl 类型:', typeof imageUrl);
+      throw new Error('Replicate 返回了无效的图片 URL');
+    }
+
+    console.log('✅ Replicate 生成成功，URL:', imageUrl);
+
+    // 返回类似KIE的格式，但标记为同步结果
+    const result = {
+      success: true,
+      task_id: `replicate-${Date.now()}`,
+      provider: 'Replicate',
+      fallbackUsed: false, // 如果是主力调用，这里应该是 false
+      imageUrl, // 直接返回图片URL（同步结果）
+    };
+
+    console.log('[Replicate] 返回值:', {
+      ...result,
+      imageUrl: result.imageUrl.substring(0, 80) + '...',
+    });
+
+    return result;
+  } catch (error: any) {
+    console.error('❌ Replicate 失败:', error.message);
+    throw error;
+  }
 }
 
 /**
