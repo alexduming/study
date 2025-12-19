@@ -317,7 +317,9 @@ const InfographicPage = () => {
    * - 新增：支持多提供商查询（KIE、Replicate、Together AI、Novita AI）
    */
   const pollInfographicResult = async (taskId: string, provider?: string) => {
-    const maxAttempts = 20; // 最多轮询 20 次（例如每 3 秒一次，大约 1 分钟）
+    // KIE 生成 2K/4K 图片可能需要较长时间（200-300秒），因此大大延长轮询时间
+    // 3秒/次 * 120次 = 360秒 (6分钟)
+    const maxAttempts = 120;
     const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -357,10 +359,17 @@ const InfographicPage = () => {
       }
 
       // 等待一段时间再继续下一次查询
-      await delay(3000);
+      // 如果等待时间较长（超过20次，即1分钟），稍微减慢轮询频率到5秒
+      const waitTime = attempt > 20 ? 5000 : 3000;
+      await delay(waitTime);
     }
 
-    setError(t('errors.timeout'));
+    setError(
+      t('errors.timeout', {
+        defaultMessage:
+          'Generation timed out. The model is taking longer than expected. Please check "My Generations" later.',
+      })
+    );
   };
 
   return (

@@ -1,6 +1,6 @@
 {
   "title": "AI Infographic Generator",
-  "subtitle": "Upload your course materials, notes, or text and instantly generate clear flat-vector educational infographics.",
+  "subtitle": "Upload your notes，pictures or text and instantly generate clear infographics.",
   "form": {
     "input_title": "Input learning content",
     "textarea_placeholder": "Paste your study notes, key points or course content here.",
