@@ -32,6 +32,8 @@
     "rbac:init": "npx tsx scripts/init-rbac.ts",
     "rbac:assign": "npx tsx scripts/assign-role.ts",
     "migrate:invitation": "npx tsx scripts/run-invitation-migration.ts",
+    "payment:clear-stripe": "npx tsx scripts/clear-stripe-from-db.ts",
+    "payment:verify": "npx tsx scripts/verify-production-keys.ts",
     "postinstall": "fumadocs-mdx",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
