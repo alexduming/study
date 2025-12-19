@@ -73,6 +73,13 @@ export function EmailVerificationSignUp({ configs, callbackUrl = '/' }: Props) {
     setLoading(true);
 
     try {
+      // 获取保存的邀请码
+      const inviteCode = typeof window !== 'undefined' 
+        ? sessionStorage.getItem('invite_code') 
+        : null;
+
+      console.log('📧 发送验证邮件:', { email: email.trim(), inviteCode: inviteCode || '无' });
+
       const response = await fetch('/api/auth/send-verification', {
         method: 'POST',
         headers: {
@@ -81,6 +88,7 @@ export function EmailVerificationSignUp({ configs, callbackUrl = '/' }: Props) {
         body: JSON.stringify({
           email: email.trim(),
           type: 'registration',
+          inviteCode: inviteCode || undefined, // 传递邀请码给后端
         }),
       });
 

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNull, or } from 'drizzle-orm';
+import { and, count, desc, eq, isNull } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 
 import { db } from '@/core/db';
@@ -73,12 +73,8 @@ export async function getInvitationByCode(code: string): Promise<Invitation | nu
     .where(
       and(
         eq(invitation.code, code.toUpperCase()),
-        eq(invitation.status, InvitationStatus.PENDING),
-        // 检查是否过期：如果没有设置过期时间，或者还没到过期时间
-        or(
-          isNull(invitation.expiresAt),
-          // gt(invitation.expiresAt, now) // 暂时不检查过期，简化逻辑
-        )
+        eq(invitation.status, InvitationStatus.PENDING)
+        // 邀请码永久有效，不检查过期时间
       )
     )
     .limit(1);
