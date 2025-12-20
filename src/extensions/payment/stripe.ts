@@ -139,10 +139,10 @@ export class StripeProvider implements PaymentProvider {
             client: 'web',
           };
         }
-        if (allowedPaymentMethods.includes('alipay')) {
-          sessionParams.payment_method_types.push('alipay');
-          sessionParams.payment_method_options.alipay = {};
-        }
+        // if (allowedPaymentMethods.includes('alipay')) {
+        //   sessionParams.payment_method_types.push('alipay');
+        //   sessionParams.payment_method_options.alipay = {};
+        // }
 
         if (allowedPaymentMethods.length === 0) {
           // not set allowed payment methods, use default payment methods

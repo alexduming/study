@@ -1,9 +1,9 @@
 {
   "title": "AI PPT 生成器",
   "steps": {
-    "input": "内容输入",
-    "outline": "大纲编辑",
-    "style": "风格选择",
+    "input": "分析内容",
+    "outline": "编辑大纲",
+    "style": "选择风格",
     "result": "生成结果"
   },
   "input_step": {

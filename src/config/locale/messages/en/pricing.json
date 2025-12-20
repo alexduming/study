@@ -246,7 +246,7 @@
   "page": {
     "current_plan": "Current Plan",
     "processing": "Processing",
-    "or_pay_with": "CNY Pay 👉",
-    "wechat_alipay": "Alipay / WeChat"
+    "or_pay_with": "WeChat Pay 👉",
+    "wechat_alipay": "WeChat Pay"
   }
 }

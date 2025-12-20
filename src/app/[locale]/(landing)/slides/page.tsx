@@ -136,7 +136,7 @@ export default function AIPPTPage() {
   const [customImages, setCustomImages] = useState<string[]>([]); // Base64 for preview
   const [customImageFiles, setCustomImageFiles] = useState<File[]>([]); // Actual files for upload
   const [aspectRatio, setAspectRatio] = useState('16:9');
-  const [resolution, setResolution] = useState('2K');
+  const [resolution, setResolution] = useState('1K');
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Result State

@@ -469,10 +469,10 @@ export function Pricing({
                             name="RiWechatPayFill"
                             className="size-5 text-[#09B83E]"
                           />
-                          <SmartIcon
+                          {/* <SmartIcon
                             name="RiAlipayFill"
                             className="size-5 text-[#1678FF]"
-                          />
+                          /> */}
                         </div>
                       </div>
                     </div>

@@ -82,7 +82,7 @@
           "url": "/#pricing",
           "icon": "RiFlashlightFill"
         },
-        "product_id": "student",
+        "product_id": "plus-monthly",
         "product_name": "StudyHacks 学生方案",
         "credits": 500,
         "valid_days": 30,
@@ -125,7 +125,7 @@
           "url": "/#pricing",
           "icon": "RiFlashlightFill"
         },
-        "product_id": "pro",
+        "product_id": "pro-monthly",
         "product_name": "StudyHacks 专业方案",
         "credits": 9999,
         "valid_days": 30,
@@ -201,7 +201,7 @@
           "url": "/#pricing",
           "icon": "RiFlashlightFill"
         },
-        "product_id": "student-yearly",
+        "product_id": "plus-yearly",
         "product_name": "StudyHacks 学生方案年度",
         "credits": 6000,
         "valid_days": 365,
@@ -247,7 +247,7 @@
   "page": {
     "current_plan": "当前方案",
     "processing": "处理中",
-    "or_pay_with": "人民币支付 👉",
-    "wechat_alipay": "支付宝 / 微信"
+    "or_pay_with": "微信支付 👉",
+    "wechat_alipay": "微信支付"
   }
 }
