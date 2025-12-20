@@ -10,7 +10,7 @@ export interface EmailOptions {
 export class EmailService {
   private static fromEmail =
     process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-  private static fromName = process.env.RESEND_FROM_NAME || 'Study';
+  private static fromName = process.env.RESEND_FROM_NAME || 'StudyHacks';
 
   private static getClient() {
     const apiKey = process.env.RESEND_API_KEY;
