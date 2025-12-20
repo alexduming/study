@@ -75,7 +75,7 @@ async function findUsersNeedingCompensation(): Promise<CompensationRecord[]> {
     const hasInvitationReward = userCredits.some(
       c => c.transactionScene === 'award' && 
            (c.description?.includes('Invitation reward') || 
-            c.metadata?.includes(verification.inviteCode))
+            (verification.inviteCode && c.metadata?.includes(verification.inviteCode)))
     );
 
     if (hasInvitationReward) {

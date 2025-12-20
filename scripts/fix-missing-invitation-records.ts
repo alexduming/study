@@ -1,13 +1,14 @@
 /**
  * 修复缺失的 invitation 记录
- * 
+ *
  * 功能：
  * 为已经补发了积分但缺少 invitation 记录的用户创建记录
  */
 
+import { and, eq } from 'drizzle-orm';
+
 import { db } from '@/core/db';
 import { credit, invitation, user } from '@/config/db/schema';
-import { eq, and } from 'drizzle-orm';
 import { getUuid } from '@/shared/lib/hash';
 import { createInvitation, InvitationStatus } from '@/shared/models/invitation';
 
@@ -124,7 +125,7 @@ async function fixMissingInvitationRecords() {
       // 创建 invitation 记录
       const now = new Date();
       const newInvitationId = getUuid();
-      
+
       try {
         await createInvitation({
           id: newInvitationId,
@@ -142,7 +143,9 @@ async function fixMissingInvitationRecords() {
           note: '补充创建（历史数据补偿）',
         });
 
-        console.log(`✅ 已创建 invitation 记录: ${inviteeUser.email} (邀请码: ${inviteCode})`);
+        console.log(
+          `✅ 已创建 invitation 记录: ${inviteeUser.email} (邀请码: ${inviteCode})`
+        );
         fixedCount++;
       } catch (error: any) {
         console.error(`❌ 创建失败: ${inviteeUser.email}`, error.message);
@@ -152,7 +155,6 @@ async function fixMissingInvitationRecords() {
     console.log(`\n📊 修复完成：`);
     console.log(`  - 已创建: ${fixedCount} 条记录`);
     console.log(`  - 已存在: ${skippedCount} 条记录`);
-
   } catch (error) {
     console.error('\n❌ 修复失败:', error);
     throw error;
@@ -169,4 +171,3 @@ fixMissingInvitationRecords()
     console.error('\n💥 修复脚本执行失败:', error);
     process.exit(1);
   });
-
