@@ -46,7 +46,11 @@
     "loading": "AI 正在生成信息图，请稍候...",
     "image_title": "信息图 {index}",
     "download": "下载图片",
-    "click_to_enlarge": "点击图片可放大查看"
+    "click_to_enlarge": "点击图片可放大查看",
+    "generating": "正在生成...",
+    "status_preparing": "准备资源中...",
+    "status_drawing": "AI 正在绘制...",
+    "status_refining": "正在优化细节..."
   },
   "modal": {
     "image_alt": "放大查看的信息图"

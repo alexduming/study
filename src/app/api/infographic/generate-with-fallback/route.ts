@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+// @ts-ignore
+import { fal } from '@fal-ai/client';
 
 import { AIMediaType, AITaskStatus } from '@/extensions/ai';
 import { createAITaskRecordOnly } from '@/shared/models/ai_task';
@@ -29,6 +31,125 @@ interface GenerateParams {
   aspectRatio?: string;
   resolution?: string;
   outputFormat?: string;
+}
+
+/**
+ * 尝试使用FAL生成（nano-banana-pro）
+ */
+async function tryGenerateWithFal(
+  params: GenerateParams,
+  apiKey: string
+): Promise<{
+  success: boolean;
+  taskId?: string;
+  imageUrls?: string[];
+  error?: string;
+}> {
+  try {
+    console.log('🔄 尝试使用 FAL (nano-banana-pro) 生成...');
+
+    // 配置 FAL Client
+    fal.config({
+      credentials: apiKey,
+    });
+
+    const prompt = `Create an educational infographic explaining the provided file or text. You select some typical visual elements. Style: Flat vector. Labels in the language the same as provided information.\n\nContent:\n${params.content}`;
+
+    const input = {
+      prompt,
+      num_images: 1,
+      aspect_ratio: params.aspectRatio === '16:9' ? '16:9' : 'square', // FAL expects 'square', '16:9', '9:16', or 'landscape'/'portrait'
+      output_format: 'png',
+      resolution: params.resolution || '2K', // 支持 1K, 2K, 4K
+    };
+
+    // Map aspect ratio to FAL expected values
+    if (params.aspectRatio === '1:1') input.aspect_ratio = 'square';
+    else if (params.aspectRatio === '9:16') input.aspect_ratio = '9:16';
+    else if (params.aspectRatio === '16:9') input.aspect_ratio = '16:9';
+    else if (params.aspectRatio === '4:3') input.aspect_ratio = 'landscape';
+    else if (params.aspectRatio === '3:4') input.aspect_ratio = 'portrait';
+
+    console.log('[FAL] 请求参数:', {
+      model: 'fal-ai/nano-banana-pro',
+      prompt: input.prompt.substring(0, 100) + '...',
+    });
+
+    const startTime = Date.now();
+
+    // 使用 subscribe 等待结果
+    const result: any = await fal.subscribe('fal-ai/nano-banana-pro', {
+      input,
+      logs: true,
+      onQueueUpdate: (update: any) => {
+        if (update.status === 'IN_PROGRESS') {
+          // console.log(update.logs.map((log: any) => log.message));
+        }
+      },
+    });
+
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    console.log(`[FAL] API 调用完成，耗时: ${elapsed}s`);
+
+    if (
+      !result.data ||
+      !result.data.images ||
+      result.data.images.length === 0
+    ) {
+      throw new Error('FAL 未返回图片');
+    }
+
+    const imageUrl = result.data.images[0].url;
+    console.log('✅ FAL 生成成功，URL:', imageUrl);
+
+    // 自动保存到 R2
+    let finalImageUrl = imageUrl;
+    try {
+      // 动态导入以避免循环依赖或在某些环境中出错
+      const { getStorageServiceWithConfigs } = await import(
+        '@/shared/services/storage'
+      );
+      const { getAllConfigs } = await import('@/shared/models/config');
+      const { getUserInfo } = await import('@/shared/models/user');
+      const { nanoid } = await import('nanoid');
+
+      const user = await getUserInfo();
+      const configs = await getAllConfigs();
+
+      if (user && configs.r2_bucket_name && configs.r2_access_key) {
+        console.log('[FAL] 开始保存图片到 R2...');
+        const storageService = getStorageServiceWithConfigs(configs);
+        const timestamp = Date.now();
+        const randomId = nanoid(8);
+        const fileExtension = imageUrl.includes('.jpg') ? 'jpg' : 'png';
+        const fileName = `${timestamp}_${randomId}.${fileExtension}`;
+        const storageKey = `infographic/${user.id}/${fileName}`;
+
+        const uploadResult = await storageService.downloadAndUpload({
+          url: imageUrl,
+          key: storageKey,
+          contentType: `image/${fileExtension}`,
+          disposition: 'inline',
+        });
+
+        if (uploadResult.success && uploadResult.url) {
+          console.log(`[FAL] ✅ 图片保存成功: ${uploadResult.url}`);
+          finalImageUrl = uploadResult.url;
+        }
+      }
+    } catch (saveError) {
+      console.error('[FAL] 保存图片异常:', saveError);
+    }
+
+    return {
+      success: true,
+      taskId: `fal-${result.requestId || Date.now()}`,
+      imageUrls: [finalImageUrl],
+    };
+  } catch (error: any) {
+    console.warn('⚠️ FAL 异常:', error.message);
+    return { success: false, error: error.message };
+  }
 }
 
 /**
@@ -385,8 +506,14 @@ export async function POST(request: NextRequest) {
       outputFormat,
     };
 
-    // 降级策略：依次尝试各个提供商（KIE 主力 → Replicate 托底）
+    // 降级策略：依次尝试各个提供商（FAL 主力 → KIE 托底 → Replicate 最终托底）
     const providers = [
+      {
+        name: 'FAL',
+        key: configs.fal_key, // 优先从数据库配置获取
+        envKey: process.env.FAL_KEY, // 回退到环境变量
+        fn: tryGenerateWithFal,
+      },
       {
         name: 'KIE',
         key: configs.kie_api_key,

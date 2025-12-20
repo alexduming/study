@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import { CreditsCost } from '@/shared/components/ai-elements/credits-display';
 import { Button } from '@/shared/components/ui/button';
 import { Dialog, DialogContent } from '@/shared/components/ui/dialog';
+import { Progress } from '@/shared/components/ui/progress';
 import { ScrollAnimation } from '@/shared/components/ui/scroll-animation';
 import { readLearningFileContent } from '@/shared/lib/file-reader';
 
@@ -69,6 +70,11 @@ const InfographicPage = () => {
   const [provider, setProvider] = useState<string | null>(null);
   const [fallbackUsed, setFallbackUsed] = useState<boolean>(false);
 
+  // 进度条状态
+  const [progress, setProgress] = useState(0);
+  // 进度条定时器引用
+  const progressInterval = useRef<NodeJS.Timeout | null>(null);
+
   // 新增：支持批量文件上传（参考 /slides 页面）
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -78,6 +84,58 @@ const InfographicPage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // 新的文件上传处理逻辑：支持批量上传任意类型的文件（参考 /slides 页面）
+  /**
+   * 启动进度条模拟
+   * @param duration 预计总耗时（毫秒）
+   * @param startValue 起始进度值
+   * @param targetValue 目标进度值（不建议设为100，留给完成时跳转）
+   */
+  const startProgressSimulation = (
+    duration: number = 30000,
+    startValue: number = 0,
+    targetValue: number = 90
+  ) => {
+    // 先清除旧的定时器
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
+    }
+
+    setProgress(startValue);
+
+    const startTime = Date.now();
+    const updateInterval = 100; // 每100ms更新一次
+
+    progressInterval.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      // 使用缓动函数让进度看起来更自然 (ease-out)
+      // progress = start + (target - start) * (1 - e^(-5 * elapsed / duration))
+      // 这里的公式是一个简单的渐进公式，随着时间推移越来越慢地接近 targetValue
+      const ratio = Math.min(elapsed / duration, 1);
+
+      // 简单的线性插值可能不够自然，这里用一个减速曲线
+      // 当 ratio=0 时，value=0
+      // 当 ratio=1 时，value=1
+      // 曲线：1 - (1-x)^2 (ease out quad) 或类似
+      // 这里简单点：
+      const currentProgress =
+        startValue + (targetValue - startValue) * (1 - Math.pow(1 - ratio, 2));
+
+      if (currentProgress >= targetValue) {
+        setProgress(targetValue);
+        // 不自动清除，保持在 targetValue 等待
+      } else {
+        setProgress(currentProgress);
+      }
+    }, updateInterval);
+  };
+
+  const stopProgressSimulation = () => {
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
+      progressInterval.current = null;
+    }
+  };
+
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -157,6 +215,7 @@ const InfographicPage = () => {
     setError('');
     setTaskId(null);
     setImageUrls([]);
+    setProgress(0); // 重置进度
 
     try {
       let contentToGenerate = sourceContent;
@@ -164,6 +223,8 @@ const InfographicPage = () => {
       // 处理批量文件上传（支持图片、PDF、DOCX等多种类型）
       if (uploadedFiles.length > 0) {
         setIsParsingFiles(true);
+        // 解析文件时，给一点虚假进度 (0-10%)
+        setProgress(5);
         setParsingProgress(
           t('upload.processing_files', { count: uploadedFiles.length })
         );
@@ -256,6 +317,11 @@ const InfographicPage = () => {
         }
       }
 
+      // 开始生成阶段 - 启动第一阶段进度 (10% -> 90%)
+      // 假设请求 API 需要 10-15 秒（如果是同步生成如 FAL）
+      // 如果是异步，这个请求会很快返回，然后我们会跳转进度
+      startProgressSimulation(90000, 10, 90);
+
       // 使用带托底的新API
       const resp = await fetch('/api/infographic/generate-with-fallback', {
         method: 'POST',
@@ -290,20 +356,32 @@ const InfographicPage = () => {
 
       // 如果返回了imageUrls（同步API如Replicate/Together AI），直接显示
       if (data.imageUrls && data.imageUrls.length > 0) {
+        // 成功！直接冲到 100%
+        stopProgressSimulation();
+        setProgress(100);
+
         setImageUrls(data.imageUrls);
         setIsGenerating(false);
         return;
       }
 
       // 否则开始轮询查询任务结果（异步API如KIE/Novita）
+      // 进入第二阶段进度 (90% -> 99%)
+      // KIE 生成可能需要 1-3 分钟，我们设定一个较慢的增长
+      startProgressSimulation(60000, 90, 99);
+
       await pollInfographicResult(data.taskId, data.provider);
     } catch (err: any) {
       console.error('Generate infographic error:', err);
       setError(err instanceof Error ? err.message : t('errors.unknown'));
+      stopProgressSimulation();
+      setProgress(0);
     } finally {
       setIsGenerating(false);
       setIsParsingFiles(false);
       setParsingProgress('');
+      // 确保清除定时器
+      stopProgressSimulation();
     }
   };
 
@@ -345,6 +423,8 @@ const InfographicPage = () => {
         const urls = (data.results || data.resultUrls || []) as string[];
 
         if (status === 'SUCCESS' && urls.length > 0) {
+          // 成功！冲刺到 100%
+          setProgress(100);
           setImageUrls(urls);
           return;
         }
@@ -666,7 +746,7 @@ const InfographicPage = () => {
                 {t('result.title')}
               </h2>
 
-              {!taskId && imageUrls.length === 0 && !error && (
+              {!taskId && imageUrls.length === 0 && !error && !isGenerating && (
                 <div className="flex h-full flex-col items-center justify-center gap-4 text-center text-sm text-gray-400">
                   <FileImage className="text-primary h-10 w-10" />
                   <p>{t('result.empty_desc')}</p>
@@ -677,9 +757,26 @@ const InfographicPage = () => {
               )}
 
               {isGenerating && (
-                <div className="flex h-full flex-col items-center justify-center gap-4 text-center text-sm text-gray-400">
-                  <Loader2 className="text-primary h-8 w-8 animate-spin" />
-                  <p>{t('result.loading')}</p>
+                <div className="flex h-full flex-col items-center justify-center gap-6 p-8 text-center">
+                  <div className="relative">
+                    <Loader2 className="text-primary h-12 w-12 animate-spin" />
+                    <div className="bg-primary absolute top-1/2 left-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-xl"></div>
+                  </div>
+
+                  <div className="w-full max-w-xs space-y-2">
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>{t('result.generating')}</span>
+                      <span>{Math.round(progress)}%</span>
+                    </div>
+                    <Progress value={progress} className="h-2" />
+                    <p className="animate-pulse text-xs text-gray-500">
+                      {progress < 30
+                        ? t('result.status_preparing')
+                        : progress < 60
+                          ? t('result.status_drawing')
+                          : t('result.status_refining')}
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -710,6 +807,21 @@ const InfographicPage = () => {
                         className="h-auto w-full cursor-pointer bg-black/40 object-contain transition-opacity hover:opacity-90"
                         onClick={() => setEnlargedImageUrl(url)}
                         title={t('result.click_to_enlarge')}
+                        onError={(e) => {
+                          // 图片加载失败时显示占位图或重试
+                          console.error('Image load failed:', url);
+                          const img = e.currentTarget;
+                          img.style.display = 'none'; // 临时隐藏
+                          // 可以添加重试逻辑或显示错误占位符
+                          toast.error(
+                            t('errors.image_load_failed', {
+                              defaultMessage: 'Failed to load image',
+                            })
+                          );
+                        }}
+                        onLoad={() => {
+                          console.log('Image loaded successfully:', url);
+                        }}
                       />
                     </div>
                   ))}

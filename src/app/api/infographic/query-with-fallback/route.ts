@@ -209,8 +209,9 @@ export async function GET(request: NextRequest) {
     // 根据provider或taskId前缀判断使用哪个提供商
     let result: any;
 
-    if (provider === 'Together AI' || (!provider && taskId.startsWith('together-'))) {
-      // Together AI是同步API，不需要查询
+    if (provider === 'Together AI' || (!provider && taskId.startsWith('together-')) ||
+        provider === 'FAL' || (!provider && taskId.startsWith('fal-'))) {
+      // Together AI 和 FAL 是同步API，不需要查询
       return NextResponse.json({
         success: true,
         status: 'SUCCESS',

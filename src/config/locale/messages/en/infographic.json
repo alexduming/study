@@ -46,7 +46,11 @@
     "loading": "AI is generating the infographic, please wait...",
     "image_title": "Infographic {index}",
     "download": "Download image",
-    "click_to_enlarge": "Click the image to view it in large size"
+    "click_to_enlarge": "Click the image to view it in large size",
+    "generating": "Generating...",
+    "status_preparing": "Preparing resources...",
+    "status_drawing": "AI is drawing...",
+    "status_refining": "Refining details..."
   },
   "modal": {
     "image_alt": "Enlarged infographic preview"
