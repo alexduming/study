@@ -36,6 +36,9 @@ importers:
       '@dnd-kit/utilities':
         specifier: ^3.2.2
         version: 3.2.2(react@19.2.0)
+      '@fal-ai/client':
+        specifier: ^1.8.0
+        version: 1.8.0
       '@fal-ai/serverless-client':
         specifier: ^0.15.0
         version: 0.15.0
@@ -1197,6 +1200,10 @@ packages:
   '@eslint/plugin-kit@0.4.0':
     resolution: {integrity: sha512-sB5uyeq+dwCWyPi31B2gQlVlo+j5brPlWx4yZBrEaRo/nhdDE8Xke1gsGgtiBdaBTxuTkceLVuVt/pclrasb0A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@fal-ai/client@1.8.0':
+    resolution: {integrity: sha512-9aCSZpuO3MXOCwGaq3xLkWdIHFtvkyT7kMXRDsjqpBQapTNCYLU+93kPQ+4K0KQEp16dcc2ZplFRRD3H4j+hrg==}
+    engines: {node: '>=22.0.0'}
 
   '@fal-ai/serverless-client@0.15.0':
     resolution: {integrity: sha512-4Vuocu0342OijAN6xO/lwohDV7h90LbkTnOAEwH+pYvMFVC6RYmHS4GILc/wnOWBTw+iFlZFEKlljEVolkjVfg==}
@@ -6975,6 +6982,12 @@ snapshots:
     dependencies:
       '@eslint/core': 0.16.0
       levn: 0.4.1
+
+  '@fal-ai/client@1.8.0':
+    dependencies:
+      '@msgpack/msgpack': 3.1.2
+      eventsource-parser: 1.1.2
+      robot3: 0.4.1
 
   '@fal-ai/serverless-client@0.15.0':
     dependencies:

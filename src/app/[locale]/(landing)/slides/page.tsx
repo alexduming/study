@@ -1022,23 +1022,23 @@ export default function AIPPTPage() {
           // This ensures the generated image text aligns with user content
           const finalPrompt = `Slide Title: "${slide.title}"\n\nKey Content:\n${slide.content}`;
 
-          // 🎯 统一使用 KIE 作为首选提供商（取消负载均衡）
-          const preferredProvider = 'KIE';
+          // 🎯 统一使用 FAL 作为首选提供商
+          const preferredProvider = 'FAL';
 
           console.log(`\n📸 ============================================`);
           console.log(
-            `📸 Slide ${index + 1}/${slides.length}: 开始生成 (KIE优先)`
+            `📸 Slide ${index + 1}/${slides.length}: 开始生成 (FAL优先)`
           );
           console.log(`📸 ============================================\n`);
 
-          // 使用带托底的Action，优先尝试 KIE
+          // 使用带托底的Action，优先尝试 FAL
           const taskData = await createKieTaskWithFallbackAction({
             prompt: finalPrompt,
             styleId: selectedStyleId || undefined,
             aspectRatio,
             imageSize: resolution,
             customImages: styleImageUrls, // Pass public URLs
-            preferredProvider: 'KIE', // 强制优先使用 KIE
+            preferredProvider: 'FAL', // 强制优先使用 FAL
           });
 
           if (!taskData.task_id) throw new Error(t('errors.no_task_id'));

@@ -1,5 +1,7 @@
 'use server';
 
+// @ts-ignore
+import { fal } from '@fal-ai/client';
 import mammoth from 'mammoth';
 import pdf from 'pdf-parse';
 
@@ -10,6 +12,7 @@ import { getSignUser } from '@/shared/models/user';
 // 移除硬编码的 API Key，强制使用环境变量
 const KIE_API_KEY = process.env.KIE_NANO_BANANA_PRO_KEY || '';
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN || '';
+const FAL_KEY = process.env.FAL_KEY || '';
 // 使用 DeepSeek 官方 Key（从环境变量读取，避免明文暴露）
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 // 使用 OpenRouter API Key（用于视觉 OCR）
@@ -597,12 +600,13 @@ export async function queryKieTaskAction(taskId: string) {
 }
 
 /**
- * Create Image Generation Task with Load Balancing (真正的负载均衡)
+ * Create Image Generation Task with Load Balancing (三级机制)
  *
  * 非程序员解释：
- * - 这个函数实现了真正的负载均衡：强制使用指定的提供商
- * - 只有在指定提供商失败时，才会自动切换到备用提供商
- * - 这样可以实现 50% 任务给 Replicate，50% 任务给 KIE
+ * - 实现了 FAL -> KIE -> Replicate 的三级降级策略
+ * - 1. 主力: FAL (nano-banana-pro)
+ * - 2. 托底: KIE
+ * - 3. 最终托底: Replicate
  */
 export async function createKieTaskWithFallbackAction(params: {
   prompt: string;
@@ -610,9 +614,9 @@ export async function createKieTaskWithFallbackAction(params: {
   aspectRatio?: string;
   imageSize?: string;
   customImages?: string[];
-  preferredProvider?: 'Replicate' | 'KIE'; // 首选提供商（强制优先使用）
+  preferredProvider?: 'FAL' | 'Replicate' | 'KIE'; // 首选提供商
 }) {
-  const { preferredProvider = 'KIE', ...taskParams } = params;
+  const { preferredProvider = 'FAL', ...taskParams } = params;
 
   // 预处理图片 URL，确保对所有提供商都是公网可访问的
   const processedParams = {
@@ -620,84 +624,219 @@ export async function createKieTaskWithFallbackAction(params: {
     customImages: (taskParams.customImages || []).map(resolveImageUrl),
   };
 
-  // 🎯 指定提供商或使用默认值（默认 KIE 优先）
-  const primaryProvider = preferredProvider;
-  const fallbackProvider =
-    preferredProvider === 'Replicate' ? 'KIE' : 'Replicate';
+  // 定义优先级顺序
+  // 如果指定了 provider，则它排第一，其他的按默认顺序排
+  let providerChain = ['FAL', 'KIE', 'Replicate'];
 
-  console.log(
-    `\n🎯 生成任务 - 优先使用: ${primaryProvider}，备用: ${fallbackProvider}`
-  );
+  if (preferredProvider && providerChain.includes(preferredProvider)) {
+    // 将首选 provider 移到第一位
+    providerChain = [
+      preferredProvider,
+      ...providerChain.filter((p) => p !== preferredProvider),
+    ];
+  }
 
-  // 1️⃣ 先尝试优先使用的提供商
-  try {
-    if (primaryProvider === 'Replicate') {
-      if (!REPLICATE_API_TOKEN) {
-        throw new Error('Replicate API Token 未配置');
-      }
-      console.log(`🔄 [优先] 使用 Replicate (google/nano-banana-pro)...`);
-      const result = await createReplicateTaskAction(processedParams);
-      console.log('✅ Replicate 任务创建成功');
-      return {
-        ...result,
-        fallbackUsed: false,
-      };
-    } else {
-      // KIE
-      if (!KIE_API_KEY) {
-        throw new Error('KIE API Key 未配置');
-      }
-      console.log(`🔄 [优先] 使用 KIE (nano-banana-pro)...`);
-      const result = await createKieTaskAction(processedParams);
-      console.log('✅ KIE 任务创建成功:', result.task_id);
-      return {
-        success: true,
-        task_id: result.task_id,
-        provider: 'KIE',
-        fallbackUsed: false,
-      };
-    }
-  } catch (primaryError: any) {
-    console.warn(`⚠️ ${primaryProvider} 失败:`, primaryError.message);
-    console.log(`🔄 自动切换到备用提供商 ${fallbackProvider}...`);
+  console.log(`\n🎯 生成任务 - 优先级顺序: ${providerChain.join(' -> ')}`);
 
-    // 2️⃣ 如果指定提供商失败，才使用备用提供商
+  let lastError: any = null;
+
+  for (const provider of providerChain) {
     try {
-      if (fallbackProvider === 'Replicate') {
-        if (!REPLICATE_API_TOKEN) {
-          throw new Error('Replicate API Token 未配置');
+      if (provider === 'FAL') {
+        if (!FAL_KEY) {
+          console.warn('⚠️ FAL Key 未配置，跳过');
+          continue;
         }
-        console.log(`🔄 [托底] 使用 Replicate (google/nano-banana-pro)...`);
-        const result = await createReplicateTaskAction(processedParams);
-        console.log('✅ Replicate 托底成功');
+        console.log(
+          `🔄 [${provider === preferredProvider ? '主力' : '托底'}] 使用 FAL (nano-banana-pro)...`
+        );
+        const result = await createFalTaskAction(processedParams);
+        console.log('✅ FAL 任务成功');
         return {
           ...result,
-          fallbackUsed: true, // 标记使用了托底
+          fallbackUsed: provider !== preferredProvider,
         };
-      } else {
-        // KIE
+      } else if (provider === 'KIE') {
         if (!KIE_API_KEY) {
-          throw new Error('KIE API Key 未配置');
+          console.warn('⚠️ KIE Key 未配置，跳过');
+          continue;
         }
-        console.log(`🔄 [托底] 使用 KIE (nano-banana-pro)...`);
+        console.log(
+          `🔄 [${provider === preferredProvider ? '主力' : '托底'}] 使用 KIE (nano-banana-pro)...`
+        );
         const result = await createKieTaskAction(processedParams);
-        console.log('✅ KIE 托底成功:', result.task_id);
+        console.log('✅ KIE 任务创建成功:', result.task_id);
         return {
           success: true,
           task_id: result.task_id,
           provider: 'KIE',
-          fallbackUsed: true, // 标记使用了托底
+          fallbackUsed: provider !== preferredProvider,
+        };
+      } else if (provider === 'Replicate') {
+        if (!REPLICATE_API_TOKEN) {
+          console.warn('⚠️ Replicate Token 未配置，跳过');
+          continue;
+        }
+        console.log(
+          `🔄 [${provider === preferredProvider ? '主力' : '托底'}] 使用 Replicate (nano-banana-pro)...`
+        );
+        const result = await createReplicateTaskAction(processedParams);
+        console.log('✅ Replicate 任务成功');
+        return {
+          ...result,
+          fallbackUsed: provider !== preferredProvider,
         };
       }
-    } catch (fallbackError: any) {
-      console.error(
-        `❌ 备用提供商 ${fallbackProvider} 也失败:`,
-        fallbackError.message
-      );
-      throw new Error(
-        `所有图片生成服务都暂时不可用: ${primaryProvider} 和 ${fallbackProvider} 均失败`
-      );
+    } catch (error: any) {
+      console.warn(`⚠️ ${provider} 失败:`, error.message);
+      lastError = error;
+      // 继续下一个 loop
     }
+  }
+
+  // 如果所有都失败了
+  console.error(`❌ 所有图片生成服务都失败`);
+  throw new Error(
+    `所有图片生成服务都暂时不可用: ${lastError?.message || '未知错误'}`
+  );
+}
+
+/**
+ * Force Create FAL Task (使用 fal-ai/nano-banana-pro/edit)
+ */
+export async function createFalTaskAction(params: {
+  prompt: string;
+  styleId?: string;
+  aspectRatio?: string;
+  imageSize?: string;
+  customImages?: string[];
+}) {
+  if (!FAL_KEY) {
+    throw new Error('FAL API Key 未配置');
+  }
+
+  try {
+    // 配置 FAL Client
+    fal.config({
+      credentials: FAL_KEY,
+    });
+
+    // 处理样式
+    let styleSuffix = '';
+    if (params.styleId) {
+      const style = PPT_STYLES.find((s) => s.id === params.styleId);
+      if (style) {
+        styleSuffix = style.suffix;
+      }
+    }
+
+    let finalPrompt = params.prompt + ' ' + styleSuffix;
+
+    // 处理参考图片
+    const referenceImages = (params.customImages || []).map(resolveImageUrl);
+    if (referenceImages.length > 0) {
+      // 限制最多 4 张 (FAL 示例是 2 张，KIE 是多张，Replicate 也是多张，nano-banana通常支持多张)
+      // 保持一致性，取前几张
+      const limitedImages = referenceImages.slice(0, 4);
+      finalPrompt +=
+        ' (Style Reference: Strictly follow the visual style, color palette, and composition from the provided input images)';
+      console.log(`[FAL] 使用 ${limitedImages.length} 张参考图`);
+    }
+
+    const input: any = {
+      prompt: finalPrompt,
+      num_images: 1,
+      aspect_ratio: params.aspectRatio === '16:9' ? '16:9' : 'auto',
+      output_format: 'png',
+      resolution: params.imageSize || '2K', // 支持 1K, 2K, 4K
+    };
+
+    if (referenceImages.length > 0) {
+      input.image_urls = referenceImages;
+    }
+
+    console.log('[FAL] 请求参数:', {
+      model: 'fal-ai/nano-banana-pro/edit',
+      prompt: input.prompt.substring(0, 100) + '...',
+    });
+
+    const startTime = Date.now();
+
+    // 使用 subscribe 等待结果
+    const result: any = await fal.subscribe('fal-ai/nano-banana-pro/edit', {
+      input,
+      logs: true,
+      onQueueUpdate: (update: any) => {
+        if (update.status === 'IN_PROGRESS') {
+          // update.logs.map((log) => log.message).forEach(console.log);
+        }
+      },
+    });
+
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    console.log(`[FAL] API 调用完成，耗时: ${elapsed}s`);
+
+    // 解析结果
+    // Output: { images: [ { url: ... } ] }
+    if (
+      !result.data ||
+      !result.data.images ||
+      result.data.images.length === 0
+    ) {
+      throw new Error('FAL 未返回图片');
+    }
+
+    const imageUrl = result.data.images[0].url;
+    console.log('✅ FAL 生成成功，URL:', imageUrl);
+
+    // 自动保存到 R2 (复用逻辑)
+    let finalImageUrl = imageUrl;
+    try {
+      const { getStorageServiceWithConfigs } = await import(
+        '@/shared/services/storage'
+      );
+      const { getAllConfigs } = await import('@/shared/models/config');
+      const { getUserInfo } = await import('@/shared/models/user');
+      const { nanoid } = await import('nanoid');
+
+      const user = await getUserInfo();
+      const configs = await getAllConfigs();
+
+      if (user && configs.r2_bucket_name && configs.r2_access_key) {
+        console.log('[FAL] 开始保存图片到 R2...');
+        const storageService = getStorageServiceWithConfigs(configs);
+        const timestamp = Date.now();
+        const randomId = nanoid(8);
+        const fileExtension = imageUrl.includes('.jpg') ? 'jpg' : 'png';
+        const fileName = `${timestamp}_${randomId}.${fileExtension}`;
+        const storageKey = `slides/${user.id}/${fileName}`;
+
+        const uploadResult = await storageService.downloadAndUpload({
+          url: imageUrl,
+          key: storageKey,
+          contentType: `image/${fileExtension}`,
+          disposition: 'inline',
+        });
+
+        if (uploadResult.success && uploadResult.url) {
+          console.log(`[FAL] ✅ 图片保存成功: ${uploadResult.url}`);
+          finalImageUrl = uploadResult.url;
+        }
+      }
+    } catch (saveError) {
+      console.error('[FAL] 保存图片异常:', saveError);
+    }
+
+    return {
+      success: true,
+      task_id: `fal-${result.requestId || Date.now()}`,
+      provider: 'FAL',
+      fallbackUsed: false,
+      imageUrl: finalImageUrl,
+    };
+  } catch (error: any) {
+    console.error('❌ FAL 失败:', error.message);
+    throw error;
   }
 }
 
@@ -1014,8 +1153,8 @@ export async function createReplicateTaskAction(params: {
  * Query Task Status with Fallback Support
  *
  * 非程序员解释：
- * - 这个函数查询任务状态，支持KIE和Replicate
- * - 对于Replicate的同步结果，直接返回成功状态
+ * - 这个函数查询任务状态，支持KIE和Replicate和FAL
+ * - 对于Replicate和FAL的同步结果，直接返回成功状态
  * - ✅ 新增：任务成功后自动保存图片到 R2
  */
 export async function queryKieTaskWithFallbackAction(
@@ -1027,8 +1166,13 @@ export async function queryKieTaskWithFallbackAction(
     presentationId?: string;
   }
 ) {
-  // 如果是Replicate的任务（同步API），直接返回成功
-  if (provider === 'Replicate' || taskId.startsWith('replicate-')) {
+  // 如果是Replicate或FAL的任务（同步API），直接返回成功
+  if (
+    provider === 'Replicate' ||
+    taskId.startsWith('replicate-') ||
+    provider === 'FAL' ||
+    taskId.startsWith('fal-')
+  ) {
     return {
       data: {
         status: 'SUCCESS',

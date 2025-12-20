@@ -268,7 +268,7 @@ export function Pricing({
       if (response.status === 401) {
         setIsLoading(false);
         setProductId(null);
-        setPricingItem(null);
+        // setPricingItem(null); // Fix: Removed undefined function call
         setIsShowSignModal(true);
         return;
       }
