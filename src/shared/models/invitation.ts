@@ -58,25 +58,25 @@ export async function createInvitation(newInvitation: NewInvitation): Promise<In
 }
 
 /**
- * 根据邀请码查询邀请信息
+ * 根据邀请码查询邀请信息（用于获取邀请人信息）
  * 
  * 非程序员解释：
  * - 在注册时，需要验证用户输入的邀请码是否有效
- * - 只返回有效的邀请码（状态为 pending 且未过期）
+ * - 查询邀请码对应的邀请人信息（不限制状态，允许邀请码被多人使用）
+ * - 这样设计是为了让一个邀请码可以像推广码一样被多人使用
+ * 
+ * 修复说明（2025-12-20）：
+ * - 移除了 status='pending' 的限制
+ * - 现在一个邀请码可以被多个用户使用
+ * - 每次使用时会创建新的 invitation 记录
  */
 export async function getInvitationByCode(code: string): Promise<Invitation | null> {
-  const now = new Date();
-  
+  // 查询该邀请码对应的邀请人信息
+  // 只需要获取邀请人ID和邮箱，用于发放奖励
   const [result] = await db()
     .select()
     .from(invitation)
-    .where(
-      and(
-        eq(invitation.code, code.toUpperCase()),
-        eq(invitation.status, InvitationStatus.PENDING)
-        // 邀请码永久有效，不检查过期时间
-      )
-    )
+    .where(eq(invitation.code, code.toUpperCase()))
     .limit(1);
 
   return result || null;

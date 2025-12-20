@@ -12,6 +12,7 @@ import {
   CreditTransactionType,
 } from '@/shared/models/credit';
 import {
+  createInvitation,
   getInvitationByCode,
   InvitationStatus,
   updateInvitation,
@@ -293,24 +294,29 @@ export async function POST(request: NextRequest) {
          *
          * 非程序员解释：
          * - 如果用户使用邀请码注册，需要给邀请方和被邀请方都发放积分奖励
-         * - 邀请方获得100积分（可累计）
+         * - 邀请方获得100积分（可累计，每邀请一人奖励一次）
          * - 被邀请方获得100积分（一次性）
          * - 积分有效期为1个月
+         * 
+         * 修复说明（2025-12-20）：
+         * - 改变设计：一个邀请码可以被多人使用（类似推广码）
+         * - 为每个新用户创建独立的 invitation 记录
+         * - 不再更新原有记录的状态，而是创建新记录
          */
         if (finalInviteCode) {
           try {
             console.log(`🎁 处理邀请码: ${finalInviteCode}`);
 
-            // 查询邀请码是否有效
-            const invitation = await getInvitationByCode(finalInviteCode);
+            // 查询邀请码对应的邀请人信息
+            const inviterInfo = await getInvitationByCode(finalInviteCode);
 
-            if (invitation) {
+            if (inviterInfo) {
               // 确保不是自己邀请自己
-              if (invitation.inviterId === userId) {
+              if (inviterInfo.inviterId === userId) {
                 console.log(`⚠️ 用户尝试使用自己的邀请码注册`);
               } else {
                 console.log(
-                  `✅ 找到有效邀请码，邀请人: ${invitation.inviterEmail}`
+                  `✅ 找到有效邀请码，邀请人: ${inviterInfo.inviterEmail}`
                 );
 
                 // 计算积分过期时间（1个月后）
@@ -329,11 +335,11 @@ export async function POST(request: NextRequest) {
                   transactionScene: CreditTransactionScene.AWARD, // 使用AWARD场景表示邀请奖励
                   credits: 100,
                   remainingCredits: 100,
-                  description: `Invitation reward for new user (invited by ${invitation.inviterEmail})`,
+                  description: `Invitation reward for new user (invited by ${inviterInfo.inviterEmail})`,
                   expiresAt: creditExpiresAt,
                   status: CreditStatus.ACTIVE,
                   metadata: JSON.stringify({
-                    invitationId: invitation.id,
+                    inviteCode: finalInviteCode,
                     role: 'invitee',
                   }),
                 });
@@ -343,8 +349,8 @@ export async function POST(request: NextRequest) {
                 const inviterCreditId = getUuid();
                 await createCredit({
                   id: inviterCreditId,
-                  userId: invitation.inviterId,
-                  userEmail: invitation.inviterEmail,
+                  userId: inviterInfo.inviterId,
+                  userEmail: inviterInfo.inviterEmail,
                   transactionNo: getSnowId(),
                   transactionType: CreditTransactionType.GRANT,
                   transactionScene: CreditTransactionScene.AWARD,
@@ -354,27 +360,33 @@ export async function POST(request: NextRequest) {
                   expiresAt: creditExpiresAt,
                   status: CreditStatus.ACTIVE,
                   metadata: JSON.stringify({
-                    invitationId: invitation.id,
+                    inviteCode: finalInviteCode,
                     role: 'inviter',
                   }),
                 });
                 console.log(
-                  `✅ 为邀请人 ${invitation.inviterEmail} 发放100积分`
+                  `✅ 为邀请人 ${inviterInfo.inviterEmail} 发放100积分`
                 );
 
-                // 3. 更新邀请记录状态
-                await updateInvitation(invitation.id, {
-                  status: InvitationStatus.ACCEPTED,
+                // 3. 创建新的邀请记录（不再更新原有记录）
+                // 这样设计允许一个邀请码被多人使用
+                const newInvitationId = getUuid();
+                await createInvitation({
+                  id: newInvitationId,
+                  inviterId: inviterInfo.inviterId,
+                  inviterEmail: inviterInfo.inviterEmail,
                   inviteeId: userId,
                   inviteeEmail: email,
+                  code: finalInviteCode,
+                  status: InvitationStatus.ACCEPTED,
                   acceptedAt: now,
                   inviterCreditId: inviterCreditId,
                   inviteeCreditId: inviteeCreditId,
                 });
-                console.log(`✅ 更新邀请记录状态为已接受`);
+                console.log(`✅ 创建新的邀请记录，ID: ${newInvitationId}`);
               }
             } else {
-              console.log(`⚠️ 邀请码 ${finalInviteCode} 无效或已被使用`);
+              console.log(`⚠️ 邀请码 ${finalInviteCode} 不存在`);
             }
           } catch (inviteError: any) {
             // 邀请码处理失败不应该影响注册流程

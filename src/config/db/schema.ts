@@ -5,6 +5,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable(
@@ -552,7 +553,7 @@ export const invitation = pgTable(
     inviterEmail: text('inviter_email'),
     inviteeId: text('invitee_id').references(() => user.id, { onDelete: 'set null' }),
     inviteeEmail: text('invitee_email'),
-    code: text('code').notNull().unique(),
+    code: text('code').notNull(), // 移除 .unique()，允许同一个邀请码被多人使用
     status: text('status').notNull().default('pending'), // pending, accepted, expired
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
@@ -573,6 +574,9 @@ export const invitation = pgTable(
     index('idx_invitation_invitee_id').on(table.inviteeId),
     // Order invitations by creation time
     index('idx_invitation_created_at').on(table.createdAt),
+    // Ensure one user can only use the same invite code once
+    // 确保同一个用户不能重复使用同一个邀请码
+    uniqueIndex('idx_invitation_code_invitee').on(table.code, table.inviteeId),
   ]
 );
 
