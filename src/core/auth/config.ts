@@ -21,6 +21,9 @@ export const authOptions = {
   },
   emailAndPassword: {
     enabled: true,
+    // 禁用自动注册，强制使用我们的自定义 API
+    autoSignIn: false,
+    sendVerificationEmail: false,
   },
   logger: {
     verboseLogging: false,
@@ -93,6 +96,9 @@ export async function getAuthOptions() {
     database: databaseAdapter,
     emailAndPassword: {
       enabled: configs.email_auth_enabled !== 'false',
+      // 禁用自动注册，强制使用我们的自定义 API
+      autoSignIn: false,
+      sendVerificationEmail: false,
     },
     socialProviders,
     plugins,

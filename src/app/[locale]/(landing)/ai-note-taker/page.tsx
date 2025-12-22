@@ -116,10 +116,10 @@ const AINoteTaker = ({
    * - 这样用户可以实时看到自己还剩多少积分
    */
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       fetchUserCredits();
     }
-  }, [user]);
+  }, [user?.id]);
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -176,7 +176,10 @@ const AINoteTaker = ({
           // 积分不足的特殊处理
           if (result.insufficientCredits) {
             toast.error(
-              `积分不足！需要 ${result.requiredCredits} 积分，当前仅有 ${result.remainingCredits} 积分`
+              t('errors.insufficient_credits', {
+                required: result.requiredCredits,
+                remaining: result.remainingCredits,
+              })
             );
           } else {
             toast.error(result.error || t('errors.generation_failed'));
@@ -347,7 +350,7 @@ const AINoteTaker = ({
         // 检查是否是升级维护提示
         if (result.upgrading) {
           setDialogOpen(false);
-          toast.error('Podcast功能正在升级维护中，请稍后再试');
+          toast.error(t('errors.podcast_upgrading'));
         } else {
           setDialogError(result.error || t('notes.dialog.error'));
         }
@@ -577,7 +580,7 @@ const AINoteTaker = ({
                     {/* 主题色选择器 */}
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-gray-300">
-                        Theme Color:
+                        {t('upload.theme_color')}:
                       </span>
                       <div className="flex gap-2">
                         {presetColors.map((preset) => (
@@ -667,12 +670,12 @@ const AINoteTaker = ({
                       {
                         icon: FileAudio,
                         label: t('upload.audio_files'),
-                        desc: 'MP3, WAV, M4A',
+                        desc: t('upload.audio_formats'),
                       },
                       {
                         icon: FileVideo,
                         label: t('upload.video_files'),
-                        desc: 'MP4, MOV, AVI',
+                        desc: t('upload.video_formats'),
                       },
                       {
                         icon: FileText,
@@ -682,7 +685,7 @@ const AINoteTaker = ({
                       {
                         icon: FileText,
                         label: t('upload.text_docs'),
-                        desc: 'DOC, TXT, MD',
+                        desc: t('upload.text_formats'),
                       },
                     ].map((type, idx) => {
                       const Icon = type.icon;
@@ -720,9 +723,7 @@ const AINoteTaker = ({
                   <p className="mb-8 text-gray-400">{t('record.subtitle')}</p>
 
                   <Button
-                    onClick={() =>
-                      toast.error('录音功能正在升级维护中，请稍后再试')
-                    }
+                    onClick={() => toast.error(t('record.upgrading_message'))}
                     className="from-primary hover:from-primary/90 to-primary/70 hover:to-primary/80 bg-gradient-to-r px-8 py-4 text-lg text-white"
                   >
                     <Mic className="mr-2 h-5 w-5" />
@@ -730,8 +731,8 @@ const AINoteTaker = ({
                   </Button>
 
                   <div className="mt-8 text-sm text-gray-500">
-                    <p>支持最长60分钟的连续录音</p>
-                    <p>自动降噪和语音识别优化</p>
+                    <p>{t('record.max_duration')}</p>
+                    <p>{t('record.features')}</p>
                   </div>
                 </div>
               </motion.div>

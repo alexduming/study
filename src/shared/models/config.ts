@@ -201,6 +201,107 @@ export async function getAllConfigs(): Promise<Configs> {
     configs.auth_url = envValue;
   }
 
+  // ====== 社交登录配置强制使用环境变量 ======
+  // Google
+  if (process.env.GOOGLE_AUTH_ENABLED) {
+    configs.google_auth_enabled = process.env.GOOGLE_AUTH_ENABLED;
+  }
+  if (process.env.GOOGLE_CLIENT_ID) {
+    configs.google_client_id = process.env.GOOGLE_CLIENT_ID;
+  }
+  if (process.env.GOOGLE_CLIENT_SECRET) {
+    configs.google_client_secret = process.env.GOOGLE_CLIENT_SECRET;
+  }
+  if (process.env.GOOGLE_ONE_TAP_ENABLED) {
+    configs.google_one_tap_enabled = process.env.GOOGLE_ONE_TAP_ENABLED;
+  }
+
+  // Github
+  if (process.env.GITHUB_AUTH_ENABLED) {
+    configs.github_auth_enabled = process.env.GITHUB_AUTH_ENABLED;
+  }
+  if (process.env.GITHUB_CLIENT_ID) {
+    configs.github_client_id = process.env.GITHUB_CLIENT_ID;
+  }
+  if (process.env.GITHUB_CLIENT_SECRET) {
+    configs.github_client_secret = process.env.GITHUB_CLIENT_SECRET;
+  }
+
+  // ====== 支付配置强制使用环境变量（防止测试密钥泄露到生产环境） ======
+  // 原因：Stripe、PayPal、Creem 的生产密钥通常在 Vercel 等平台设置为环境变量
+  //      如果数据库中还保存着测试密钥，会导致生产环境使用测试密钥的问题
+  
+  // Stripe 配置：如果环境变量已设置，强制使用环境变量
+  if (process.env.STRIPE_ENABLED) {
+    configs.stripe_enabled = process.env.STRIPE_ENABLED;
+  }
+  if (process.env.STRIPE_PUBLISHABLE_KEY) {
+    const envValue = process.env.STRIPE_PUBLISHABLE_KEY;
+    if (dbConfigs.stripe_publishable_key && dbConfigs.stripe_publishable_key !== envValue) {
+      // 隐藏密钥内容，只显示前缀
+      const dbKeyPrefix = dbConfigs.stripe_publishable_key.substring(0, 10);
+      const envKeyPrefix = envValue.substring(0, 10);
+      console.warn(
+        `[配置警告] stripe_publishable_key 环境变量 (${envKeyPrefix}...) 覆盖了数据库配置 (${dbKeyPrefix}...)`
+      );
+    }
+    configs.stripe_publishable_key = envValue;
+  }
+  if (process.env.STRIPE_SECRET_KEY) {
+    const envValue = process.env.STRIPE_SECRET_KEY;
+    if (dbConfigs.stripe_secret_key && dbConfigs.stripe_secret_key !== envValue) {
+      // 隐藏密钥内容，只显示前缀
+      const dbKeyPrefix = dbConfigs.stripe_secret_key.substring(0, 10);
+      const envKeyPrefix = envValue.substring(0, 10);
+      console.warn(
+        `[配置警告] stripe_secret_key 环境变量 (${envKeyPrefix}...) 覆盖了数据库配置 (${dbKeyPrefix}...)`
+      );
+    }
+    configs.stripe_secret_key = envValue;
+  }
+  if (process.env.STRIPE_SIGNING_SECRET) {
+    const envValue = process.env.STRIPE_SIGNING_SECRET;
+    if (dbConfigs.stripe_signing_secret && dbConfigs.stripe_signing_secret !== envValue) {
+      const dbKeyPrefix = dbConfigs.stripe_signing_secret.substring(0, 10);
+      const envKeyPrefix = envValue.substring(0, 10);
+      console.warn(
+        `[配置警告] stripe_signing_secret 环境变量 (${envKeyPrefix}...) 覆盖了数据库配置 (${dbKeyPrefix}...)`
+      );
+    }
+    configs.stripe_signing_secret = envValue;
+  }
+  if (process.env.STRIPE_PAYMENT_METHODS) {
+    configs.stripe_payment_methods = process.env.STRIPE_PAYMENT_METHODS;
+  }
+
+  // PayPal 配置：如果环境变量已设置，强制使用环境变量
+  if (process.env.PAYPAL_ENABLED) {
+    configs.paypal_enabled = process.env.PAYPAL_ENABLED;
+  }
+  if (process.env.PAYPAL_CLIENT_ID) {
+    configs.paypal_client_id = process.env.PAYPAL_CLIENT_ID;
+  }
+  if (process.env.PAYPAL_CLIENT_SECRET) {
+    configs.paypal_client_secret = process.env.PAYPAL_CLIENT_SECRET;
+  }
+  if (process.env.PAYPAL_ENVIRONMENT) {
+    configs.paypal_environment = process.env.PAYPAL_ENVIRONMENT;
+  }
+
+  // Creem 配置：如果环境变量已设置，强制使用环境变量
+  if (process.env.CREEM_ENABLED) {
+    configs.creem_enabled = process.env.CREEM_ENABLED;
+  }
+  if (process.env.CREEM_API_KEY) {
+    configs.creem_api_key = process.env.CREEM_API_KEY;
+  }
+  if (process.env.CREEM_ENVIRONMENT) {
+    configs.creem_environment = process.env.CREEM_ENVIRONMENT;
+  }
+  if (process.env.CREEM_SIGNING_SECRET) {
+    configs.creem_signing_secret = process.env.CREEM_SIGNING_SECRET;
+  }
+
   return configs;
 }
 

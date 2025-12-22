@@ -61,6 +61,14 @@ export default async function CreditsPage({
     },
   ];
 
+  const actions = [
+    {
+      title: t('list.buttons.create'),
+      url: '/admin/credits/create',
+      icon: 'Plus',
+    },
+  ];
+
   const total = await getCreditsCount({
     transactionType: type as CreditTransactionType,
     status: CreditStatus.ACTIVE,
@@ -129,7 +137,7 @@ export default async function CreditsPage({
     <>
       <Header crumbs={crumbs} />
       <Main>
-        <MainHeader title={t('list.title')} tabs={tabs} />
+        <MainHeader title={t('list.title')} tabs={tabs} actions={actions} />
         <TableCard table={table} />
       </Main>
     </>

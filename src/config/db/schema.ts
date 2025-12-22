@@ -5,6 +5,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable(
@@ -118,6 +119,7 @@ export const emailVerification = pgTable(
       .notNull(),
     lastSentAt: timestamp('last_sent_at'),
     verifiedAt: timestamp('verified_at'),
+    inviteCode: text('invite_code'),
   },
   (table) => [
     // Find verification by email
@@ -541,6 +543,43 @@ export const chat = pgTable(
   (table) => [index('idx_chat_user_status').on(table.userId, table.status)]
 );
 
+export const invitation = pgTable(
+  'invitation',
+  {
+    id: text('id').primaryKey(),
+    inviterId: text('inviter_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    inviterEmail: text('inviter_email'),
+    inviteeId: text('invitee_id').references(() => user.id, { onDelete: 'set null' }),
+    inviteeEmail: text('invitee_email'),
+    code: text('code').notNull(), // 移除 .unique()，允许同一个邀请码被多人使用
+    status: text('status').notNull().default('pending'), // pending, accepted, expired
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+    acceptedAt: timestamp('accepted_at'),
+    expiresAt: timestamp('expires_at'),
+    inviterCreditId: text('inviter_credit_id'),
+    inviteeCreditId: text('invitee_credit_id'),
+    note: text('note'),
+  },
+  (table) => [
+    // Query invitations by inviter
+    index('idx_invitation_inviter_id').on(table.inviterId, table.status),
+    // Query invitation by code (for registration validation)
+    index('idx_invitation_code').on(table.code, table.status),
+    // Query invitations by invitee
+    index('idx_invitation_invitee_id').on(table.inviteeId),
+    // Order invitations by creation time
+    index('idx_invitation_created_at').on(table.createdAt),
+    // Ensure one user can only use the same invite code once
+    // 确保同一个用户不能重复使用同一个邀请码
+    uniqueIndex('idx_invitation_code_invitee').on(table.code, table.inviteeId),
+  ]
+);
+
 export const chatMessage = pgTable(
   'chat_message',
   {
@@ -565,5 +604,32 @@ export const chatMessage = pgTable(
   (table) => [
     index('idx_chat_message_chat_id').on(table.chatId, table.status),
     index('idx_chat_message_user_id').on(table.userId, table.status),
+  ]
+);
+
+// --- New Tables for Study Center ---
+
+export const presentation = pgTable(
+  'presentation',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    content: text('content'), // JSON string of slides (titles, content, image URLs)
+    status: text('status').notNull(), // generating, completed, failed
+    kieTaskId: text('kie_task_id'), // KIE generation task ID
+    styleId: text('style_id'), // Used style ID
+    thumbnailUrl: text('thumbnail_url'), // First slide or generated thumbnail
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .$onUpdate(() => new Date())
+      .notNull(),
+    deletedAt: timestamp('deleted_at'),
+  },
+  (table) => [
+    index('idx_presentation_user_status').on(table.userId, table.status),
+    index('idx_presentation_created_at').on(table.createdAt),
   ]
 );
